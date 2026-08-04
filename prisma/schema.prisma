@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Participant {
+  id           String    @id @default(cuid())
+  code         String    @unique // "P01", "PILOT", "ADMIN"
+  passwordHash String
+  role         Role      @default(PARTICIPANT)
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+enum Role {
+  PARTICIPANT
+  ADMIN
+}
+
+model Session {
+  id              String      @id @default(cuid())
+  participant     Participant @relation(fields: [participantId], references: [id])
+  participantId   String
+  consentAt       DateTime? // null = keine Einwilligung, keine Daten
+  taskDescription String? // "Was arbeitest du?"
+  startedAt       DateTime?
+  endedAt         DateTime?
+  initialWorkMin  Int         @default(25)
+  initialBreakMin Int         @default(5)
+  createdAt       DateTime    @default(now())
+
+  events  Event[]
+  surveys SurveyResponse[]
+  cycles  CycleFeedback[]
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  session   Session  @relation(fields: [sessionId], references: [id])
+  sessionId String
+  at        DateTime @default(now())
+  clientAt  DateTime // Zeit im Browser, siehe CLAUDE.md Regel 1
+  type      String // siehe Ereignisliste in der Spezifikation
+  cycle     Int? // Rundennummer, falls zutreffend
+  payload   Json?
+
+  @@index([sessionId, at])
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  session     Session  @relation(fields: [sessionId], references: [id])
+  sessionId   String
+  phase       Phase
+  answers     Json // { "V1": "60-120", "V4": 5, ... }
+  submittedAt DateTime @default(now())
+}
+
+enum Phase {
+  PRE
+  POST
+}
+
+model CycleFeedback {
+  id            String   @id @default(cuid())
+  session       Session  @relation(fields: [sessionId], references: [id])
+  sessionId     String
+  cycle         Int
+  timing        Timing
+  adjustmentMin Int      @default(0) // -10, -5, 0, +5, +10
+  newWorkMin    Int // Wert fuer die naechste Runde
+  activity      String? // "eyes" | "neck" | "move" | null
+  comment       String?
+  submittedAt   DateTime @default(now())
+}
+
+enum Timing {
+  TOO_EARLY
+  OK
+  TOO_LATE
+}

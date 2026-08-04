@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# vom Tooling automatisch erzeugte KI-Agent-Dateien, nicht versionieren
+AGENTS.md
+skills-lock.json
+.claude/
+.windsurf/
+.agents/
