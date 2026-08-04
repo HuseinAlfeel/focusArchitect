@@ -47,14 +47,19 @@ export default async function StudyPlaceholderPage() {
       )}
 
       {session?.startedAt && (
-        <p className="text-sm opacity-70">
-          Sitzung gestartet um {session.startedAt.toLocaleString("de-DE")}
-          {session.taskDescription ? ` — „${session.taskDescription}“` : ""}
-        </p>
+        <div className="space-y-1">
+          <p className="text-sm opacity-70">
+            Sitzung gestartet um {session.startedAt.toLocaleString("de-DE")}
+            {session.taskDescription ? ` — „${session.taskDescription}“` : ""}
+          </p>
+          <Link href="/study/session" className="text-sm underline">
+            Zur Sitzung
+          </Link>
+        </div>
       )}
 
       <p className="text-sm opacity-50">
-        Platzhalter — der Rest von Phase F (Timer, Pausenhinweis, …) folgt.
+        Platzhalter — der Rest von Phase F (Pausenhinweis, …) folgt.
       </p>
 
       <LogoutButton />
