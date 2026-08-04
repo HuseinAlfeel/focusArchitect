@@ -16,15 +16,6 @@ export default async function ConsentPage() {
         <p className="mt-2 text-sm opacity-80">{consentContent.intro}</p>
       </div>
 
-      <div className="space-y-4">
-        {consentContent.sections.map((section) => (
-          <section key={section.heading}>
-            <h2 className="text-sm font-medium">{section.heading}</h2>
-            <p className="mt-1 text-sm opacity-80">{section.body}</p>
-          </section>
-        ))}
-      </div>
-
       <ConsentForm />
     </main>
   );

@@ -1,7 +1,7 @@
-// PLATZHALTER — Wortlaut noch nicht mit Holly abgestimmt.
-// Siehe CLAUDE.md, Abschnitt "Offen, noch nicht entschieden".
-// Vor dem Probelauf (Phase J) muss dieser Text final freigegeben sein,
-// insbesondere die Abschnitte "Welche Daten" und "Speicherung" sowie die Kontaktadresse.
+// Vorlaeufiger Stand, von Husein am 04.08.2026 freigegeben, um weiterzubauen.
+// Holly hat den Studienaufbau noch nicht gegengelesen (CHECKLIST.md A1/A3) -
+// falls sie Aenderungen verlangt, wird dieser Text danach angepasst.
+// Einzig noch offen: Kontakt-E-Mail-Adresse unten eintragen.
 
 export const consentContent = {
   title: "Einwilligung zur Teilnahme",
@@ -17,12 +17,12 @@ export const consentContent = {
       body: "Untersucht wird, wie Software zu gesunden Bildschirmpausen anregen kann, ohne die Arbeit dabei zu stören. Du arbeitest in dieser Sitzung an deiner eigenen, echten Tätigkeit.",
     },
     {
-      heading: "Welche Daten werden erhoben? [PLATZHALTER — mit Holly abstimmen]",
-      body: "Erhoben werden: deine Antworten aus Vor- und Nachbefragung, Zeitstempel und Ereignisse während der Sitzung (z. B. wann ein Pausenhinweis erschien und wie du reagiert hast, ob der Browser-Tab aktiv war), sowie eine kurze Freitext-Beschreibung deiner geplanten Tätigkeit. Der Inhalt deiner eigentlichen Arbeit wird nicht erfasst.",
+      heading: "Welche Daten werden erhoben?",
+      body: "Erhoben werden: deine Antworten aus Vor- und Nachbefragung, Zeitstempel und Ereignisse während der Sitzung (z. B. wann ein Pausenhinweis erschien und wie du reagiert hast, ob der Browser-Tab aktiv war), sowie eine kurze Freitext-Beschreibung deiner geplanten Tätigkeit. Der Inhalt deiner eigentlichen Arbeit wird nicht erfasst. Du wirst ausschließlich über deinen Teilnahme-Code (z. B. „P01“) identifiziert, nicht über deinen Namen.",
     },
     {
-      heading: "Wo und wie lange werden die Daten gespeichert? [PLATZHALTER]",
-      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet.",
+      heading: "Wo und wie lange werden die Daten gespeichert?",
+      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum 11.11.2026 aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
     },
     {
       heading: "Freiwilligkeit",
@@ -30,7 +30,7 @@ export const consentContent = {
     },
     {
       heading: "Löschung deiner Daten",
-      body: "Du kannst jederzeit, auch nach der Sitzung, die Löschung deiner Daten verlangen. Wende dich dazu an die unten stehende Kontaktadresse.",
+      body: "Du kannst jederzeit, auch nach der Sitzung, die Löschung deiner Daten verlangen. Wende dich dazu formlos an die unten stehende Kontaktadresse und nenne deinen Teilnahme-Code.",
     },
     {
       heading: "Kontakt",
