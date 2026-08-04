@@ -13,5 +13,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)"],
+  // API-Routen prüfen ihre Anmeldung selbst und antworten mit 401 statt
+  // Redirect, damit fetch()-Aufrufe kein HTML statt JSON zurückbekommen.
+  matcher: ["/((?!login|api|_next/static|_next/image|favicon.ico).*)"],
 };
