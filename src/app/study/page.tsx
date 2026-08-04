@@ -46,7 +46,7 @@ export default async function StudyPlaceholderPage() {
         </Link>
       )}
 
-      {session?.startedAt && (
+      {session?.startedAt && !session.endedAt && (
         <div className="space-y-1">
           <p className="text-sm opacity-70">
             Sitzung gestartet um {session.startedAt.toLocaleString("de-DE")}
@@ -56,6 +56,12 @@ export default async function StudyPlaceholderPage() {
             Zur Sitzung
           </Link>
         </div>
+      )}
+
+      {session?.endedAt && (
+        <p className="text-sm opacity-70">
+          Sitzung beendet um {session.endedAt.toLocaleString("de-DE")}.
+        </p>
       )}
 
       <p className="text-sm opacity-50">

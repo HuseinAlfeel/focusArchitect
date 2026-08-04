@@ -29,6 +29,10 @@ export default async function WorkSessionPage() {
     redirect("/study/start");
   }
 
+  if (session.endedAt) {
+    redirect("/study");
+  }
+
   // Zielzeitpunkt fuer Runde 1 ist startedAt + initialWorkMin, NICHT
   // "jetzt + initialWorkMin". Das WORK_STARTED-Ereignis wurde bereits bei
   // startedAt protokolliert (F3) - wuerde man den Zielzeitpunkt hier neu ab
