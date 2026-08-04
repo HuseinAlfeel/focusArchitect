@@ -23,7 +23,7 @@ Alles andere wird nicht gebaut. Kein Dashboard mit hübschen Statistiken, keine 
 
 | Ebene | Wahl | Warum |
 |---|---|---|
-| Framework | **Next.js 15 (App Router)** | React, das du kennst. Frontend und Backend in einem Projekt, keine getrennte API. |
+| Framework | **Next.js 16 (App Router)** | React, das du kennst. Frontend und Backend in einem Projekt, keine getrennte API. |
 | Sprache | **TypeScript** | Verhindert genau die Fehler, die dich sonst am Studientag treffen. |
 | Styling | **Tailwind CSS** | Schnell, und du brauchst subtile Farbübergänge für den abgestuften Hinweis. |
 | Datenbank | **PostgreSQL** | Robust, kostenlos, überall hostbar. |

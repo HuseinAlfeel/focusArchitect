@@ -3,7 +3,7 @@
 Prototyp zur Bachelorarbeit von Husin Alfil am Hasso-Plattner-Institut (Fachgebiet Digital Health, Betreuung Holly Ambrozic McKee und Dr. Orhan Konak).
 
 **Vollständige Spezifikation: `docs/SPEZIFIKATION.md`**
-**Bau-Reihenfolge: `docs/CHECKLISTE.md`**
+**Bau-Reihenfolge: `docs/CHECKLIST.md`**
 
 Beide vor größeren Änderungen lesen.
 
@@ -23,7 +23,7 @@ Wenn eine vorgeschlagene Funktion nichts misst und nicht Teil der Intervention i
 
 ## Tech-Stack
 
-- Next.js 15, App Router, TypeScript
+- Next.js 16, App Router, TypeScript
 - Tailwind CSS
 - PostgreSQL mit Prisma
 - Auth: eigene Credentials-Lösung mit signiertem httpOnly-Cookie (`jose`, `bcryptjs`). Kein NextAuth, es gibt nur acht feste Accounts ohne Registrierung.
