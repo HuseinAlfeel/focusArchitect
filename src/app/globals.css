@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Stufe 0 des Pausenhinweises: Hintergrund wandert minimal ins Waermere. */
+  --background-nudge: #fdf3e6;
 }
 
 @theme inline {
@@ -16,6 +18,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --background-nudge: #1c150e;
   }
 }
 
@@ -23,4 +26,20 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Sehr langsames, sanftes Pulsieren fuer Stufe 2 des Pausenhinweises -
+   bewusst dezent (kleine Skalierung), nicht per JS-Animation. */
+@keyframes nudge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.animate-nudge-pulse {
+  animation: nudge-pulse 4s ease-in-out infinite;
 }

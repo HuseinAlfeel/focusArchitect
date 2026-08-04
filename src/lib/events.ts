@@ -28,6 +28,7 @@ export const EVENT_TYPES = [
   "TAB_HIDDEN",
   "TAB_VISIBLE",
   "SESSION_ENDED",
+  "SESSION_REOPENED",
   "SURVEY_POST_SUBMITTED",
 ] as const;
 
