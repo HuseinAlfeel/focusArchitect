@@ -11,10 +11,16 @@ export default async function StudyPlaceholderPage() {
     redirect("/login");
   }
 
-  const latestSession = await prisma.session.findFirst({
+  const session = await prisma.session.findFirst({
     where: { participantId: participant.sub },
     orderBy: { createdAt: "desc" },
   });
+
+  const preSurvey = session
+    ? await prisma.surveyResponse.findFirst({
+        where: { sessionId: session.id, phase: "PRE" },
+      })
+    : null;
 
   return (
     <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
@@ -22,20 +28,24 @@ export default async function StudyPlaceholderPage() {
         Eingeloggt als <strong>{participant.code}</strong>
       </p>
 
-      {latestSession?.consentAt ? (
-        <p className="text-sm opacity-70">
-          Einwilligung erteilt am{" "}
-          {latestSession.consentAt.toLocaleString("de-DE")}
-        </p>
-      ) : (
+      {!session?.consentAt && (
         <Link href="/study/consent" className="text-sm underline">
           Zur Einwilligung
         </Link>
       )}
 
+      {session?.consentAt && !preSurvey && (
+        <Link href="/study/pre" className="text-sm underline">
+          Zur Vorbefragung
+        </Link>
+      )}
+
+      {session?.consentAt && preSurvey && (
+        <p className="text-sm opacity-70">Vorbefragung abgeschlossen.</p>
+      )}
+
       <p className="text-sm opacity-50">
-        Platzhalter — der Rest von Phase F (Vorbefragung, Timer,
-        Pausenhinweis, …) folgt.
+        Platzhalter — der Rest von Phase F (Timer, Pausenhinweis, …) folgt.
       </p>
 
       <LogoutButton />
