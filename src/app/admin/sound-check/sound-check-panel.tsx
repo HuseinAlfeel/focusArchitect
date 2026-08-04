@@ -19,15 +19,18 @@ const STRONG_CANDIDATES: { id: NudgeSoundCharacter; label: string; hint: string 
   { id: "rising-sweep", label: "Aufsteigender Sweep", hint: "Tonhöhe gleitet nach oben" },
 ];
 
-const GENTLE_DEFAULT_INTENSITY = 0.25;
-const STRONG_DEFAULT_INTENSITY = 0.65;
+const ALL_CANDIDATES = [...GENTLE_CANDIDATES, ...STRONG_CANDIDATES];
 
 export function SoundCheckPanel() {
   const [selected, setSelected] = useState<NudgeSoundCharacter>("soft-bell");
-  const [sliderIntensity, setSliderIntensity] = useState(0.3);
+  const [intensity, setIntensity] = useState(0.35);
   const [lastPlayed, setLastPlayed] = useState<string | null>(null);
 
-  function playCandidate(id: NudgeSoundCharacter, label: string, intensity: number) {
+  // Ein einziger Regler fuer alles: sowohl die Kandidaten-Knoepfe unten als
+  // auch der explizite "Abspielen"-Knopf benutzen genau diesen Wert. Vorher
+  // hatten die Kandidaten-Knoepfe eigene feste Lautstaerken, unabhaengig vom
+  // Regler - das hat fuer Verwirrung gesorgt.
+  function play(id: NudgeSoundCharacter, label: string) {
     setSelected(id);
     playNudgeSound(intensity, id);
     setLastPlayed(`${label} (${Math.round(intensity * 100)}%)`);
@@ -35,27 +38,14 @@ export function SoundCheckPanel() {
 
   return (
     <div className="space-y-6">
-      <CandidateGroup
-        title="Angenehme Kandidaten"
-        subtitle="für leise, frühe Stufen"
-        items={GENTLE_CANDIDATES}
-        defaultIntensity={GENTLE_DEFAULT_INTENSITY}
-        selected={selected}
-        onPlay={playCandidate}
-      />
+      <p className="rounded border border-amber-600/40 bg-amber-500/10 px-3 py-2 text-sm">
+        🔊 Stell deine Lautstärke auf mindestens 80%, bevor du testest — die
+        Töne sind absichtlich leise.
+      </p>
 
-      <CandidateGroup
-        title="Starke Varianten"
-        subtitle="für spätere, auffälligere Stufen"
-        items={STRONG_CANDIDATES}
-        defaultIntensity={STRONG_DEFAULT_INTENSITY}
-        selected={selected}
-        onPlay={playCandidate}
-      />
-
-      <div className="space-y-2 border-t border-black/10 pt-4 dark:border-white/15">
+      <div className="space-y-2 rounded border border-black/10 p-4 dark:border-white/15">
         <p className="text-xs uppercase tracking-wide opacity-50">
-          Ausgewählt: {[...GENTLE_CANDIDATES, ...STRONG_CANDIDATES].find((c) => c.id === selected)?.label} — Intensität frei einstellen
+          Lautstärke — gilt für alle Knöpfe unten
         </p>
         <div className="flex items-center gap-3">
           <input
@@ -63,25 +53,40 @@ export function SoundCheckPanel() {
             min={0}
             max={1}
             step={0.01}
-            value={sliderIntensity}
-            onChange={(event) => setSliderIntensity(Number(event.target.value))}
+            value={intensity}
+            onChange={(event) => setIntensity(Number(event.target.value))}
             className="flex-1"
           />
-          <span className="w-10 text-right text-xs opacity-60">
-            {Math.round(sliderIntensity * 100)}%
+          <span className="w-10 text-right text-sm">
+            {Math.round(intensity * 100)}%
           </span>
         </div>
         <button
           type="button"
-          onClick={() => {
-            playNudgeSound(sliderIntensity, selected);
-            setLastPlayed(`frei: ${Math.round(sliderIntensity * 100)}%`);
-          }}
+          onClick={() =>
+            play(selected, ALL_CANDIDATES.find((c) => c.id === selected)?.label ?? selected)
+          }
           className="w-full rounded bg-neutral-800 px-3 py-2 text-sm text-white dark:bg-neutral-100 dark:text-neutral-900"
         >
-          Abspielen
+          Ausgewählten Ton nochmal abspielen
         </button>
       </div>
+
+      <CandidateGroup
+        title="Angenehme Kandidaten"
+        subtitle="für leise, frühe Stufen"
+        items={GENTLE_CANDIDATES}
+        selected={selected}
+        onPlay={play}
+      />
+
+      <CandidateGroup
+        title="Starke Varianten"
+        subtitle="für spätere, auffälligere Stufen"
+        items={STRONG_CANDIDATES}
+        selected={selected}
+        onPlay={play}
+      />
 
       {lastPlayed && (
         <p className="text-xs opacity-50">Zuletzt abgespielt: {lastPlayed}</p>
@@ -94,16 +99,14 @@ function CandidateGroup({
   title,
   subtitle,
   items,
-  defaultIntensity,
   selected,
   onPlay,
 }: {
   title: string;
   subtitle: string;
   items: { id: NudgeSoundCharacter; label: string; hint: string }[];
-  defaultIntensity: number;
   selected: NudgeSoundCharacter;
-  onPlay: (id: NudgeSoundCharacter, label: string, intensity: number) => void;
+  onPlay: (id: NudgeSoundCharacter, label: string) => void;
 }) {
   return (
     <div className="space-y-2">
@@ -114,7 +117,7 @@ function CandidateGroup({
         <button
           key={item.id}
           type="button"
-          onClick={() => onPlay(item.id, item.label, defaultIntensity)}
+          onClick={() => onPlay(item.id, item.label)}
           className={`w-full rounded border px-4 py-2.5 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 ${
             selected === item.id
               ? "border-neutral-800 dark:border-neutral-100"
