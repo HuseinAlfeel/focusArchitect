@@ -190,7 +190,7 @@ npm install -D @types/bcryptjs
 
 - [ ] `POST /api/auth/login`: Code und Passwort prüfen, bei Erfolg signiertes Token als **httpOnly, secure, sameSite=lax** Cookie setzen
 - [ ] `POST /api/auth/logout`: Cookie löschen
-- [ ] `src/middleware.ts`: alle Routen außer `/login` und `/api/auth/*` schützen
+- [ ] `src/proxy.ts` (in Next.js 16 die Nachfolge-Konvention von `middleware.ts`, gleiche Funktion): alle Routen außer `/login` und `/api/auth/*` schützen
 - [ ] Login-Seite: zwei Felder, ein Knopf, Fehlermeldung bei falschen Daten
 - [ ] Helfer `getCurrentParticipant()` für Server Components
 - [ ] Admin-Prüfung für die späteren Export-Routen
