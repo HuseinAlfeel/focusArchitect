@@ -1,7 +1,6 @@
 // Vorlaeufiger Stand, von Husein am 04.08.2026 freigegeben, um weiterzubauen.
 // Holly hat den Studienaufbau noch nicht gegengelesen (CHECKLIST.md A1/A3) -
 // falls sie Aenderungen verlangt, wird dieser Text danach angepasst.
-// Einzig noch offen: Kontakt-E-Mail-Adresse unten eintragen.
 
 export const consentContent = {
   title: "Einwilligung zur Teilnahme",
@@ -34,7 +33,7 @@ export const consentContent = {
     },
     {
       heading: "Kontakt",
-      body: "[PLATZHALTER: Kontakt-E-Mail-Adresse einsetzen]",
+      body: "Bei Fragen oder für eine Löschanfrage: husin.alfil@student.hpi.uni-potsdam.de",
     },
   ],
   checkboxLabel:
