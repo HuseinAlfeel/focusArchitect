@@ -1,4 +1,4 @@
-// Vorlaeufiger Stand, von Husein am 04.08.2026 freigegeben, um weiterzubauen.
+// Vorlaeufiger Stand, von Husin am 04.08.2026 freigegeben, um weiterzubauen.
 // Holly hat den Studienaufbau noch nicht gegengelesen (CHECKLIST.md A1/A3) -
 // falls sie Aenderungen verlangt, wird dieser Text danach angepasst.
 
@@ -9,7 +9,7 @@ export const consentContent = {
   sections: [
     {
       heading: "Wer führt die Studie durch?",
-      body: "Diese Studie wird im Rahmen der Bachelorarbeit von Husein Alfil am Hasso-Plattner-Institut, Fachgebiet Digital Health, durchgeführt (Betreuung: Holly Ambrozic McKee, Dr. Orhan Konak).",
+      body: "Diese Studie wird im Rahmen der Bachelorarbeit von Husin Alfil am Hasso-Plattner-Institut, Fachgebiet Digital Health, durchgeführt (Betreuung: Holly Ambrozic McKee, Dr. Orhan Konak).",
     },
     {
       heading: "Worum geht es?",
