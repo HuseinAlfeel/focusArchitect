@@ -40,8 +40,17 @@ export default async function StudyPlaceholderPage() {
         </Link>
       )}
 
-      {session?.consentAt && preSurvey && (
-        <p className="text-sm opacity-70">Vorbefragung abgeschlossen.</p>
+      {session?.consentAt && preSurvey && !session.startedAt && (
+        <Link href="/study/start" className="text-sm underline">
+          Sitzung starten
+        </Link>
+      )}
+
+      {session?.startedAt && (
+        <p className="text-sm opacity-70">
+          Sitzung gestartet um {session.startedAt.toLocaleString("de-DE")}
+          {session.taskDescription ? ` — „${session.taskDescription}“` : ""}
+        </p>
       )}
 
       <p className="text-sm opacity-50">
