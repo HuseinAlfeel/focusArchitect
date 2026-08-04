@@ -36,7 +36,9 @@ export const consentContent = {
       body: "Bei Fragen oder für eine Löschanfrage: husin.alfil@student.hpi.uni-potsdam.de",
     },
   ],
-  checkboxLabel:
+  checkboxLabels: [
     "Ich habe die Informationen gelesen und nehme freiwillig teil.",
+    "Ich weiß, dass ich die Teilnahme jederzeit ohne Angabe von Gründen abbrechen kann.",
+  ],
   submitLabel: "Einwilligen und fortfahren",
 } as const;
