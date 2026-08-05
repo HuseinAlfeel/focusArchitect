@@ -34,6 +34,7 @@ model Session {
   taskDescription String? // "Was arbeitest du?"
   startedAt       DateTime?
   endedAt         DateTime?
+  finalizedAt     DateTime? // endgueltig abgegeben, danach kein Reopen mehr
   initialWorkMin  Int         @default(25)
   initialBreakMin Int         @default(5)
   createdAt       DateTime    @default(now())

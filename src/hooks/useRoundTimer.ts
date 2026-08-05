@@ -8,6 +8,7 @@ type PersistedRound = {
   cycle: number;
   state: RoundState;
   endsAt: number;
+  activityId: string | null;
 };
 
 function storageKey(sessionId: string) {
@@ -25,7 +26,13 @@ function readPersistedRound(sessionId: string): PersistedRound | null {
       typeof parsed.endsAt === "number" &&
       typeof parsed.state === "string"
     ) {
-      return parsed as PersistedRound;
+      return {
+        cycle: parsed.cycle,
+        state: parsed.state as RoundState,
+        endsAt: parsed.endsAt,
+        activityId:
+          typeof parsed.activityId === "string" ? parsed.activityId : null,
+      };
     }
     return null;
   } catch {
@@ -39,12 +46,12 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
 }
 
 /**
- * Haelt Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK) und
- * Zielzeitpunkt fest, gespiegelt in sessionStorage. Ein Reload mitten in
- * der Runde verliert damit nichts: beim naechsten Laden wird aus
- * sessionStorage wiederhergestellt, sofern der gespeicherte Eintrag zur
- * aktuellen Runde (cycle, vom Server vorgegeben) passt. Gehoert der
- * gespeicherte Eintrag zu einer aelteren Runde, wird er verworfen und
+ * Haelt Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK), Zielzeit-
+ * punkt und gewaehlte Aktivitaet fest, gespiegelt in sessionStorage. Ein
+ * Reload mitten in der Runde verliert damit nichts: beim naechsten Laden
+ * wird aus sessionStorage wiederhergestellt, sofern der gespeicherte
+ * Eintrag zur aktuellen Runde (cycle, vom Server vorgegeben) passt. Gehoert
+ * der gespeicherte Eintrag zu einer aelteren Runde, wird er verworfen und
  * durch den vom Server vorgegebenen Startwert ersetzt.
  */
 export function useRoundTimer(
@@ -58,16 +65,30 @@ export function useRoundTimer(
     if (persisted && persisted.cycle === serverCycle) {
       return persisted;
     }
-    return { cycle: serverCycle, state: fallbackState, endsAt: fallbackEndsAt };
+    return {
+      cycle: serverCycle,
+      state: fallbackState,
+      endsAt: fallbackEndsAt,
+      activityId: null,
+    };
   });
 
   useEffect(() => {
     writePersistedRound(sessionId, round);
   }, [sessionId, round]);
 
-  function setRound(state: RoundState, endsAt: number) {
-    setRoundState({ cycle: serverCycle, state, endsAt });
+  function setRound(
+    state: RoundState,
+    endsAt: number,
+    activityId: string | null = round.activityId
+  ) {
+    setRoundState({ cycle: serverCycle, state, endsAt, activityId });
   }
 
-  return { state: round.state, endsAt: round.endsAt, setRound };
+  return {
+    state: round.state,
+    endsAt: round.endsAt,
+    activityId: round.activityId,
+    setRound,
+  };
 }

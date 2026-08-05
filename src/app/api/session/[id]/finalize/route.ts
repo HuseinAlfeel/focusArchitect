@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// Schutz gegen versehentliches "Sitzung beenden": macht endedAt rueckgaengig,
-// damit man dort weitermachen kann, wo man war (sessionStorage-Rundenzustand
-// bleibt unberuehrt, da nur der DB-Zeitstempel geloescht wird).
+// Endgueltige Gegenstueck zu /reopen: nach dem Beenden entweder fortsetzen
+// (aus Versehen beendet) oder final abgeben (wirklich fertig). Danach ist
+// kein Reopen mehr moeglich.
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,26 +34,26 @@ export async function PATCH(
 
   if (!session.endedAt) {
     return NextResponse.json(
-      { error: "Sitzung ist gar nicht beendet." },
+      { error: "Sitzung wurde noch nicht beendet." },
       { status: 400 }
     );
   }
 
   if (session.finalizedAt) {
     return NextResponse.json(
-      { error: "Sitzung wurde final abgegeben, kein Reopen mehr möglich." },
+      { error: "Sitzung wurde bereits final abgegeben." },
       { status: 400 }
     );
   }
 
   const updated = await prisma.session.update({
     where: { id },
-    data: { endedAt: null },
+    data: { finalizedAt: new Date() },
   });
 
   await prisma.event.create({
-    data: { sessionId: id, type: "SESSION_REOPENED", clientAt },
+    data: { sessionId: id, type: "SESSION_FINALIZED", clientAt },
   });
 
-  return NextResponse.json({ id: updated.id });
+  return NextResponse.json({ id: updated.id, finalizedAt: updated.finalizedAt });
 }

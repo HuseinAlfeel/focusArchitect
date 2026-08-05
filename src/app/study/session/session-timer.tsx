@@ -8,22 +8,28 @@ import { useTabVisibilityLogging } from "@/hooks/useTabVisibilityLogging";
 import { useNudgeSoundSchedule } from "@/hooks/useNudgeSoundSchedule";
 import { useNudgeStage } from "@/hooks/useNudgeStage";
 import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
+import { useActivitySteps } from "@/hooks/useActivitySteps";
+import { activities, type ActivityId } from "@/content/activities";
 
 const SNOOZE_MS = 5 * 60_000;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
-// Stufen laufen rein zeitbasiert (Regel 1: Zielzeitpunkt, nie hochzaehlen)
-// und parallel zur Ton-Eskalation aus useNudgeSoundSchedule.
+// Nudge-Stufen laufen rein zeitbasiert (Regel 1) und parallel zur
+// Ton-Eskalation. Nach "Pause starten" folgt Aktivitaetsauswahl (F7) und
+// der Pausenbildschirm.
 export function SessionTimer({
   sessionId,
   cycle,
   initialEndsAt,
+  initialBreakMin,
 }: {
   sessionId: string;
   cycle: number;
   initialEndsAt: number;
+  initialBreakMin: number;
 }) {
-  const { state, endsAt, setRound } = useRoundTimer(
+  const router = useRouter();
+  const { state, endsAt, activityId, setRound } = useRoundTimer(
     sessionId,
     cycle,
     "WORK",
@@ -39,11 +45,10 @@ export function SessionTimer({
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
 
-  function logNudgeEvent(
-    type: "BREAK_ACCEPTED" | "BREAK_SNOOZED" | "BREAK_SKIPPED",
+  function logEvent(
+    type: string,
     extraPayload?: Record<string, unknown>
   ) {
-    const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
     void fetch("/api/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -54,27 +59,53 @@ export function SessionTimer({
             type,
             clientAt: new Date().toISOString(),
             cycle,
-            payload: { stage: nudgeStage, secondsAfterEnd, ...extraPayload },
+            payload: extraPayload,
           },
         ],
       }),
+      keepalive: true,
     });
   }
 
+  function logNudgeReaction(
+    type: "BREAK_ACCEPTED" | "BREAK_SNOOZED" | "BREAK_SKIPPED",
+    extraPayload?: Record<string, unknown>
+  ) {
+    const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
+    logEvent(type, { stage: nudgeStage, secondsAfterEnd, ...extraPayload });
+  }
+
   function handleAccept() {
-    logNudgeEvent("BREAK_ACCEPTED");
+    logNudgeReaction("BREAK_ACCEPTED");
     setHasReacted(true);
-    setRound("BREAK", Date.now());
+    setRound("ACTIVITY_CHOICE", Date.now());
   }
 
   function handleSnooze() {
-    logNudgeEvent("BREAK_SNOOZED", { extendedByMs: SNOOZE_MS });
+    logNudgeReaction("BREAK_SNOOZED", { extendedByMs: SNOOZE_MS });
     setRound("WORK", endsAt + SNOOZE_MS);
   }
 
   function handleSkip() {
-    logNudgeEvent("BREAK_SKIPPED", { extendedByMs: SNOOZE_MS });
+    logNudgeReaction("BREAK_SKIPPED", { extendedByMs: SNOOZE_MS });
     setRound("WORK", endsAt + SNOOZE_MS);
+  }
+
+  function handleActivityChosen(chosenId: ActivityId | "none") {
+    if (chosenId === "none") {
+      logEvent("ACTIVITY_SKIPPED");
+    } else {
+      logEvent("ACTIVITY_SELECTED", { activity: chosenId });
+    }
+    logEvent("BREAK_STARTED");
+    const breakEndsAt = Date.now() + initialBreakMin * 60_000;
+    setRound("BREAK", breakEndsAt, chosenId === "none" ? null : chosenId);
+  }
+
+  function handleReadyToContinue() {
+    logEvent("BREAK_ENDED");
+    router.push("/study");
+    router.refresh();
   }
 
   return (
@@ -91,12 +122,6 @@ export function SessionTimer({
         </p>
       )}
 
-      {hasReacted && (
-        <p className="text-sm text-neutral-400 dark:text-neutral-600">
-          Pause beginnt … (echter Pausenbildschirm folgt in F7)
-        </p>
-      )}
-
       {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
         <NudgeCard
           big={nudgeStage === 2}
@@ -108,6 +133,20 @@ export function SessionTimer({
 
       {!hasReacted && nudgeStage === 3 && (
         <NudgeModal onAccept={handleAccept} onSnooze={handleSnooze} />
+      )}
+
+      {state === "ACTIVITY_CHOICE" && (
+        <ActivityChoiceScreen onChoose={handleActivityChosen} />
+      )}
+
+      {state === "BREAK" && (
+        <BreakScreen
+          sessionId={sessionId}
+          cycle={cycle}
+          breakEndsAt={endsAt}
+          activityId={activityId as ActivityId | null}
+          onReady={handleReadyToContinue}
+        />
       )}
 
       <EndSessionButton sessionId={sessionId} />
@@ -188,6 +227,95 @@ function NudgeModal({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Vier gleichwertig aussehende Optionen - "keine Aktivitaet" darf nicht wie
+// die schlechte Wahl aussehen, sonst verzerrt das die Daten (SPEZIFIKATION.md [7]).
+function ActivityChoiceScreen({
+  onChoose,
+}: {
+  onChoose: (id: ActivityId | "none") => void;
+}) {
+  return (
+    <div className="w-full max-w-sm space-y-3 text-center">
+      <p className="text-sm">Möchtest du etwas in der Pause machen?</p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {activities.map((activity) => (
+          <button
+            key={activity.id}
+            type="button"
+            onClick={() => onChoose(activity.id)}
+            className="rounded border border-black/15 px-4 py-3 text-sm dark:border-white/20"
+          >
+            {activity.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => onChoose("none")}
+          className="rounded border border-black/15 px-4 py-3 text-sm dark:border-white/20"
+        >
+          Keine Aktivität
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BreakScreen({
+  sessionId,
+  cycle,
+  breakEndsAt,
+  activityId,
+  onReady,
+}: {
+  sessionId: string;
+  cycle: number;
+  breakEndsAt: number;
+  activityId: ActivityId | null;
+  onReady: () => void;
+}) {
+  const { remainingMs, isDone: breakDone } = useCountdown(breakEndsAt);
+  const activity = activityId
+    ? activities.find((a) => a.id === activityId) ?? null
+    : null;
+  const stepDurations = activity ? activity.steps.map((s) => s.durationSeconds) : [];
+  const { currentStepIndex, remainingMs: stepRemainingMs, allStepsDone } =
+    useActivitySteps(sessionId, cycle, stepDurations);
+
+  const readyToContinue = breakDone && (!activity || allStepsDone);
+
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      {remainingMs !== null && (
+        <p className="text-sm text-neutral-400 dark:text-neutral-600">
+          Pause: {formatRemaining(remainingMs)}
+        </p>
+      )}
+
+      {activity && !allStepsDone && (
+        <div className="max-w-xs space-y-1">
+          <p className="text-sm">{activity.steps[currentStepIndex]?.instruction}</p>
+          {stepRemainingMs !== null && (
+            <p className="text-xs opacity-50">{formatRemaining(stepRemainingMs)}</p>
+          )}
+        </div>
+      )}
+
+      {readyToContinue && (
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm">Bereit weiterzuarbeiten?</p>
+          <button
+            type="button"
+            onClick={onReady}
+            className="rounded border border-black/15 px-4 py-2 text-sm dark:border-white/20"
+          >
+            Weiter
+          </button>
+        </div>
+      )}
     </div>
   );
 }

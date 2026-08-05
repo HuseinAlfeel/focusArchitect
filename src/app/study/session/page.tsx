@@ -46,6 +46,7 @@ export default async function WorkSessionPage() {
       sessionId={session.id}
       cycle={1}
       initialEndsAt={initialEndsAt}
+      initialBreakMin={session.initialBreakMin}
     />
   );
 }

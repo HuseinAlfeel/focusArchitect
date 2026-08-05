@@ -4,6 +4,7 @@ import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "./logout-button";
 import { ReopenSessionButton } from "./reopen-session-button";
+import { FinalizeSessionButton } from "./finalize-session-button";
 
 export default async function StudyPlaceholderPage() {
   const participant = await getCurrentParticipant();
@@ -59,13 +60,22 @@ export default async function StudyPlaceholderPage() {
         </div>
       )}
 
-      {session?.endedAt && (
+      {session?.endedAt && !session.finalizedAt && (
         <div className="space-y-1">
           <p className="text-sm opacity-70">
             Sitzung beendet um {session.endedAt.toLocaleString("de-DE")}.
           </p>
-          <ReopenSessionButton sessionId={session.id} />
+          <div className="flex justify-center gap-4">
+            <ReopenSessionButton sessionId={session.id} />
+            <FinalizeSessionButton sessionId={session.id} />
+          </div>
         </div>
+      )}
+
+      {session?.finalizedAt && (
+        <p className="text-sm opacity-70">
+          Final abgegeben am {session.finalizedAt.toLocaleString("de-DE")}.
+        </p>
       )}
 
       <p className="text-sm opacity-50">
