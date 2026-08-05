@@ -33,19 +33,35 @@ export default async function WorkSessionPage() {
     redirect("/study");
   }
 
-  // Zielzeitpunkt fuer Runde 1 ist startedAt + initialWorkMin, NICHT
-  // "jetzt + initialWorkMin". Das WORK_STARTED-Ereignis wurde bereits bei
-  // startedAt protokolliert (F3) - wuerde man den Zielzeitpunkt hier neu ab
-  // "jetzt" berechnen, bekaeme jemand, der die Seite erst spaeter oeffnet,
-  // unbeabsichtigt mehr Arbeitszeit, als das Ereignis-Log eigentlich zeigt.
-  const initialEndsAt =
-    session.startedAt.getTime() + session.initialWorkMin * 60_000;
+  // Ab Runde 2 (F8) gibt es keinen eigenen Session-Zeitstempel fuer den
+  // Rundenstart wie initialWorkMin/startedAt bei Runde 1 - die Wahrheit
+  // steht im Ereignis-Log: das juengste WORK_STARTED-Ereignis sagt, welche
+  // Runde gerade laeuft und wann sie begann. Damit ueberlebt auch ein
+  // kompletter Seiten-Reload in Runde 2+ (nicht nur ein sessionStorage-
+  // Wiederherstellen), konsistent mit Regel 1 (Zielzeitpunkt, nicht
+  // hochgezaehlt).
+  const [latestFeedback, latestWorkStarted] = await Promise.all([
+    prisma.cycleFeedback.findFirst({
+      where: { sessionId: session.id },
+      orderBy: { cycle: "desc" },
+    }),
+    prisma.event.findFirst({
+      where: { sessionId: session.id, type: "WORK_STARTED" },
+      orderBy: { at: "desc" },
+    }),
+  ]);
+
+  const currentCycle = latestWorkStarted?.cycle ?? 1;
+  const currentWorkMin = latestFeedback?.newWorkMin ?? session.initialWorkMin;
+  const cycleStartedAt = latestWorkStarted?.at ?? session.startedAt;
+  const initialEndsAt = cycleStartedAt.getTime() + currentWorkMin * 60_000;
 
   return (
     <SessionTimer
       sessionId={session.id}
-      cycle={1}
+      cycle={currentCycle}
       initialEndsAt={initialEndsAt}
+      initialWorkMin={currentWorkMin}
       initialBreakMin={session.initialBreakMin}
     />
   );

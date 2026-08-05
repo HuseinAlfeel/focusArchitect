@@ -46,13 +46,18 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
 }
 
 /**
- * Haelt Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK), Zielzeit-
- * punkt und gewaehlte Aktivitaet fest, gespiegelt in sessionStorage. Ein
- * Reload mitten in der Runde verliert damit nichts: beim naechsten Laden
- * wird aus sessionStorage wiederhergestellt, sofern der gespeicherte
- * Eintrag zur aktuellen Runde (cycle, vom Server vorgegeben) passt. Gehoert
- * der gespeicherte Eintrag zu einer aelteren Runde, wird er verworfen und
- * durch den vom Server vorgegebenen Startwert ersetzt.
+ * Haelt Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK), Runden-
+ * nummer, Zielzeitpunkt und gewaehlte Aktivitaet fest, gespiegelt in
+ * sessionStorage. Ein Reload mitten in der Runde verliert damit nichts: beim
+ * naechsten Laden wird aus sessionStorage wiederhergestellt, sofern der
+ * gespeicherte Eintrag zur vom Server rekonstruierten Runde (serverCycle)
+ * passt. Gehoert der gespeicherte Eintrag zu einer aelteren Runde, wird er
+ * verworfen und durch den vom Server vorgegebenen Startwert ersetzt.
+ *
+ * Die Rundennummer selbst lebt danach im Hook-Zustand (nicht mehr nur als
+ * externe Prop): `setRound(..., { cycle })` zaehlt sie weiter, wenn eine
+ * neue Runde beginnt (siehe F8, Kurzfeedback -> naechste Runde startet
+ * automatisch).
  */
 export function useRoundTimer(
   sessionId: string,
@@ -80,12 +85,19 @@ export function useRoundTimer(
   function setRound(
     state: RoundState,
     endsAt: number,
-    activityId: string | null = round.activityId
+    options?: { activityId?: string | null; cycle?: number }
   ) {
-    setRoundState({ cycle: serverCycle, state, endsAt, activityId });
+    setRoundState((prev) => ({
+      cycle: options?.cycle ?? prev.cycle,
+      state,
+      endsAt,
+      activityId:
+        options?.activityId !== undefined ? options.activityId : prev.activityId,
+    }));
   }
 
   return {
+    cycle: round.cycle,
     state: round.state,
     endsAt: round.endsAt,
     activityId: round.activityId,

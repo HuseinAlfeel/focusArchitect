@@ -12,32 +12,37 @@ import { useActivitySteps } from "@/hooks/useActivitySteps";
 import { activities, type ActivityId } from "@/content/activities";
 
 const SNOOZE_MS = 5 * 60_000;
+const MIN_WORK_MIN = 5;
+const ADJUSTMENT_OPTIONS = [-10, -5, 5, 10] as const;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
 // Nudge-Stufen laufen rein zeitbasiert (Regel 1) und parallel zur
-// Ton-Eskalation. Nach "Pause starten" folgt Aktivitaetsauswahl (F7) und
-// der Pausenbildschirm.
+// Ton-Eskalation. Nach "Pause starten" folgt Aktivitaetsauswahl (F7), der
+// Pausenbildschirm, Kurzfeedback (F8) und danach automatisch die naechste
+// Runde.
 export function SessionTimer({
   sessionId,
-  cycle,
+  cycle: initialCycle,
   initialEndsAt,
+  initialWorkMin,
   initialBreakMin,
 }: {
   sessionId: string;
   cycle: number;
   initialEndsAt: number;
+  initialWorkMin: number;
   initialBreakMin: number;
 }) {
-  const router = useRouter();
-  const { state, endsAt, activityId, setRound } = useRoundTimer(
+  const { cycle, state, endsAt, activityId, setRound } = useRoundTimer(
     sessionId,
-    cycle,
+    initialCycle,
     "WORK",
     initialEndsAt
   );
   const { remainingMs } = useCountdown(endsAt);
   const nudgeStage = useNudgeStage(endsAt);
   const [hasReacted, setHasReacted] = useState(false);
+  const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
 
   useTabVisibilityLogging(sessionId, cycle);
   useNudgeSoundSchedule(endsAt, sessionId, state === "WORK" && !hasReacted);
@@ -47,7 +52,8 @@ export function SessionTimer({
 
   function logEvent(
     type: string,
-    extraPayload?: Record<string, unknown>
+    extraPayload?: Record<string, unknown>,
+    cycleOverride?: number
   ) {
     void fetch("/api/events", {
       method: "POST",
@@ -58,7 +64,7 @@ export function SessionTimer({
           {
             type,
             clientAt: new Date().toISOString(),
-            cycle,
+            cycle: cycleOverride ?? cycle,
             payload: extraPayload,
           },
         ],
@@ -99,13 +105,28 @@ export function SessionTimer({
     }
     logEvent("BREAK_STARTED");
     const breakEndsAt = Date.now() + initialBreakMin * 60_000;
-    setRound("BREAK", breakEndsAt, chosenId === "none" ? null : chosenId);
+    setRound("BREAK", breakEndsAt, { activityId: chosenId === "none" ? null : chosenId });
   }
 
   function handleReadyToContinue() {
     logEvent("BREAK_ENDED");
-    router.push("/study");
-    router.refresh();
+    setRound("FEEDBACK", Date.now());
+  }
+
+  function handleFeedbackSubmitted(newWorkMin: number) {
+    const nextCycle = cycle + 1;
+    const nextEndsAt = Date.now() + newWorkMin * 60_000;
+
+    // Wichtig: explizit nextCycle uebergeben, nicht das cycle-Closure - React
+    // hat den State an dieser Stelle noch nicht auf die neue Runde
+    // aktualisiert, sonst wuerden diese Ereignisse faelschlich der alten
+    // Runde zugeordnet.
+    logEvent("CYCLE_STARTED", undefined, nextCycle);
+    logEvent("WORK_STARTED", undefined, nextCycle);
+
+    setCurrentWorkMin(newWorkMin);
+    setHasReacted(false);
+    setRound("WORK", nextEndsAt, { cycle: nextCycle, activityId: null });
   }
 
   return (
@@ -146,6 +167,15 @@ export function SessionTimer({
           breakEndsAt={endsAt}
           activityId={activityId as ActivityId | null}
           onReady={handleReadyToContinue}
+        />
+      )}
+
+      {state === "FEEDBACK" && (
+        <FeedbackScreen
+          cycle={cycle}
+          activityId={activityId as ActivityId | null}
+          currentWorkMin={currentWorkMin}
+          onSubmitted={handleFeedbackSubmitted}
         />
       )}
 
@@ -316,6 +346,140 @@ function BreakScreen({
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function FeedbackScreen({
+  cycle,
+  activityId,
+  currentWorkMin,
+  onSubmitted,
+}: {
+  cycle: number;
+  activityId: ActivityId | null;
+  currentWorkMin: number;
+  onSubmitted: (newWorkMin: number) => void;
+}) {
+  const [timing, setTiming] = useState<"TOO_EARLY" | "OK" | "TOO_LATE" | null>(null);
+  const [adjustmentMin, setAdjustmentMin] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const needsAdjustment = timing === "TOO_EARLY" || timing === "TOO_LATE";
+  const canSubmit = timing !== null && (!needsAdjustment || adjustmentMin !== 0);
+  const previewWorkMin = Math.max(
+    MIN_WORK_MIN,
+    currentWorkMin + (needsAdjustment ? adjustmentMin : 0)
+  );
+
+  async function handleSubmit() {
+    if (!timing) return;
+    setSubmitting(true);
+    setError(null);
+
+    const response = await fetch("/api/cycle-feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cycle,
+        timing,
+        adjustmentMin: needsAdjustment ? adjustmentMin : 0,
+        activity: activityId,
+        comment: comment.trim() || null,
+        clientAt: new Date().toISOString(),
+      }),
+    });
+
+    if (!response.ok) {
+      setError("Konnte das Feedback nicht speichern. Bitte versuch es erneut.");
+      setSubmitting(false);
+      return;
+    }
+
+    const data = (await response.json()) as { newWorkMin: number };
+    onSubmitted(data.newWorkMin);
+  }
+
+  return (
+    <div className="w-full max-w-sm space-y-4 text-center">
+      <p className="text-sm">War der Zeitpunkt der Pause passend?</p>
+
+      <div className="flex justify-center gap-2">
+        {(
+          [
+            ["TOO_EARLY", "Zu früh"],
+            ["OK", "Passend"],
+            ["TOO_LATE", "Zu spät"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => {
+              setTiming(value);
+              setAdjustmentMin(0);
+            }}
+            className={`rounded border px-3 py-1.5 text-sm ${
+              timing === value
+                ? "border-neutral-800 bg-neutral-800 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
+                : "border-black/15 dark:border-white/20"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {needsAdjustment && (
+        <div className="space-y-2">
+          <p className="text-sm">Um wie viele Minuten?</p>
+          <div className="flex justify-center gap-2">
+            {ADJUSTMENT_OPTIONS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setAdjustmentMin(option)}
+                className={`rounded border px-3 py-1.5 text-sm ${
+                  adjustmentMin === option
+                    ? "border-neutral-800 bg-neutral-800 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
+                    : "border-black/15 dark:border-white/20"
+                }`}
+              >
+                {option > 0 ? `+${option}` : option}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {timing && (
+        <p className="text-xs opacity-60">Nächste Runde: {previewWorkMin} Minuten</p>
+      )}
+
+      <textarea
+        value={comment}
+        onChange={(event) => setComment(event.target.value)}
+        placeholder="Kurz in eigenen Worten? (optional)"
+        rows={2}
+        className="w-full rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+      />
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={!canSubmit || submitting}
+        className="w-full rounded bg-neutral-800 px-3 py-2 text-sm text-white transition-opacity disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
+      >
+        {submitting ? "Speichern …" : "Weiter"}
+      </button>
     </div>
   );
 }
