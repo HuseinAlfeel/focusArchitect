@@ -45,6 +45,7 @@ export function SessionTimer({
   const { remainingMs, overtimeMs } = useCountdown(endsAt);
   const nudgeStage = useNudgeStage(endsAt);
   const [hasReacted, setHasReacted] = useState(false);
+  const [wasSkipped, setWasSkipped] = useState(false);
   const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
 
   useTabVisibilityLogging(sessionId, cycle);
@@ -80,12 +81,46 @@ export function SessionTimer({
     const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
     logEvent(type, { stage: nudgeStage, secondsAfterEnd });
     setHasReacted(true);
+    setWasSkipped(type === "BREAK_SKIPPED");
     setRound("FEEDBACK", Date.now());
   }
 
+  // Gemeinsamer Startpunkt fuer die naechste Arbeitsrunde - genutzt sowohl
+  // wenn eine echte Pause zu Ende geht (fromBreak: true, "Sitzung starten"
+  // in BreakScreen) als auch wenn die Pause ganz uebersprungen wurde
+  // (fromBreak: false, direkt nach dem Kurzfeedback).
+  function startNextRound(newWorkMin: number, fromBreak: boolean) {
+    if (fromBreak) {
+      logEvent("BREAK_ENDED");
+    }
+
+    const nextCycle = cycle + 1;
+    const nextEndsAt = Date.now() + newWorkMin * 60_000;
+
+    // Explizit nextCycle uebergeben, nicht das cycle-Closure - React hat den
+    // State an dieser Stelle noch nicht auf die neue Runde aktualisiert.
+    logEvent("CYCLE_STARTED", undefined, nextCycle);
+    logEvent("WORK_STARTED", undefined, nextCycle);
+
+    setCurrentWorkMin(newWorkMin);
+    setHasReacted(false);
+    setWasSkipped(false);
+    setRound("WORK", nextEndsAt, {
+      cycle: nextCycle,
+      activityId: null,
+      pendingWorkMin: null,
+    });
+  }
+
   function handleFeedbackSubmitted(newWorkMin: number) {
-    // Die neue Arbeitszeit wird jetzt nur gemerkt, nicht sofort gestartet -
-    // sie kommt erst nach der Pause zum Einsatz (siehe handleStartNextRound).
+    if (wasSkipped) {
+      // Ueberspringen soll auch wirklich ueberspringen: keine
+      // Aktivitaetsauswahl, keine Pause, direkt in die naechste Runde.
+      startNextRound(newWorkMin, false);
+      return;
+    }
+    // Die neue Arbeitszeit wird nur gemerkt, nicht sofort gestartet - sie
+    // kommt erst nach der Pause zum Einsatz (siehe handleStartNextRound).
     setRound("ACTIVITY_CHOICE", Date.now(), { pendingWorkMin: newWorkMin });
   }
 
@@ -101,24 +136,7 @@ export function SessionTimer({
   }
 
   function handleStartNextRound() {
-    logEvent("BREAK_ENDED");
-
-    const nextCycle = cycle + 1;
-    const newWorkMin = pendingWorkMin ?? currentWorkMin;
-    const nextEndsAt = Date.now() + newWorkMin * 60_000;
-
-    // Explizit nextCycle uebergeben, nicht das cycle-Closure - React hat den
-    // State an dieser Stelle noch nicht auf die neue Runde aktualisiert.
-    logEvent("CYCLE_STARTED", undefined, nextCycle);
-    logEvent("WORK_STARTED", undefined, nextCycle);
-
-    setCurrentWorkMin(newWorkMin);
-    setHasReacted(false);
-    setRound("WORK", nextEndsAt, {
-      cycle: nextCycle,
-      activityId: null,
-      pendingWorkMin: null,
-    });
+    startNextRound(pendingWorkMin ?? currentWorkMin, true);
   }
 
   return (
