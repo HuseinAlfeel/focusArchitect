@@ -10,6 +10,11 @@ type PersistedRound = {
   endsAt: number;
   activityId: string | null;
   pendingWorkMin: number | null;
+  // Der Server-Fallback-Zielzeitpunkt, mit dem diese Runde urspruenglich
+  // initialisiert wurde. Dient nur dazu, spaeter zu erkennen, ob sich die
+  // zugrunde liegenden Daten (z.B. initialWorkMin, direkt in Prisma Studio
+  // bearbeitet) seitdem geaendert haben - siehe unten.
+  initialFallbackEndsAt: number;
 };
 
 function storageKey(sessionId: string) {
@@ -35,6 +40,13 @@ function readPersistedRound(sessionId: string): PersistedRound | null {
           typeof parsed.activityId === "string" ? parsed.activityId : null,
         pendingWorkMin:
           typeof parsed.pendingWorkMin === "number" ? parsed.pendingWorkMin : null,
+        // Aeltere gespeicherte Eintraege (vor dieser Aenderung) haben dieses
+        // Feld nicht - NaN sorgt dafuer, dass der Abgleich unten dann sicher
+        // fehlschlaegt, statt sich auf einen falschen Wert zu verlassen.
+        initialFallbackEndsAt:
+          typeof parsed.initialFallbackEndsAt === "number"
+            ? parsed.initialFallbackEndsAt
+            : NaN,
       };
     }
     return null;
@@ -55,12 +67,16 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
  * sessionStorage. Ein Reload mitten in der Runde verliert damit nichts: beim
  * naechsten Laden wird aus sessionStorage wiederhergestellt, sofern der
  * gespeicherte Eintrag zur vom Server rekonstruierten Runde (serverCycle)
- * passt. Gehoert der gespeicherte Eintrag zu einer aelteren Runde, wird er
- * verworfen und durch den vom Server vorgegebenen Startwert ersetzt.
+ * passt.
  *
- * Die Rundennummer selbst lebt danach im Hook-Zustand (nicht mehr nur als
- * externe Prop): `setRound(..., { cycle })` zaehlt sie weiter, wenn eine
- * neue Runde beginnt.
+ * Ausnahme, wichtig fuers Testen: Wurde die Runde noch NICHT ueber die App
+ * selbst veraendert (Zustand ist noch exakt der allererste Fallback-Wert)
+ * UND weicht der frisch vom Server berechnete Fallback jetzt davon ab, wird
+ * der Cache verworfen. Das erkennt zuverlaessig den Fall "initialWorkMin
+ * direkt in Prisma Studio bearbeitet, danach die Seite neu geladen" - ohne
+ * das Reload-Verhalten mitten in einer echten, bereits fortgeschrittenen
+ * Runde zu beeintraechtigen (dort weicht der aktuelle Zustand laengst vom
+ * urspruenglichen Fallback ab, also greift diese Ausnahme dort nicht).
  */
 export function useRoundTimer(
   sessionId: string,
@@ -70,15 +86,26 @@ export function useRoundTimer(
 ) {
   const [round, setRoundState] = useState<PersistedRound>(() => {
     const persisted = readPersistedRound(sessionId);
+
     if (persisted && persisted.cycle === serverCycle) {
-      return persisted;
+      const stillAtFreshStart =
+        persisted.state === fallbackState &&
+        persisted.endsAt === persisted.initialFallbackEndsAt;
+      const dbChangedSinceThen =
+        stillAtFreshStart && persisted.initialFallbackEndsAt !== fallbackEndsAt;
+
+      if (!dbChangedSinceThen) {
+        return persisted;
+      }
     }
+
     return {
       cycle: serverCycle,
       state: fallbackState,
       endsAt: fallbackEndsAt,
       activityId: null,
       pendingWorkMin: null,
+      initialFallbackEndsAt: fallbackEndsAt,
     };
   });
 
@@ -105,6 +132,7 @@ export function useRoundTimer(
         options?.pendingWorkMin !== undefined
           ? options.pendingWorkMin
           : prev.pendingWorkMin,
+      initialFallbackEndsAt: prev.initialFallbackEndsAt,
     }));
   }
 
