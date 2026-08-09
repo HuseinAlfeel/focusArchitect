@@ -62,11 +62,11 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
    │        ↓                          │
    │  [6] Abgestufter Pausenhinweis   │
    │        ↓                          │
-   │  [7] Aktivitätsauswahl            │
+   │  [7] Kurzfeedback + Anpassung     │
    │        ↓                          │
-   │  [8] Pause (5 Min)                │
+   │  [8] Aktivitätsauswahl            │
    │        ↓                          │
-   │  [9] Kurzfeedback + Anpassung     │
+   │  [9] Pause (5 Min)                │
    └──────────────┬───────────────────┘
                   │  ca. 4 Runden / 120 Min
                   ↓
@@ -74,6 +74,12 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
       ↓
 [11] Abschluss + Dank
 ```
+
+> **Reihenfolge am 09.08. geändert:** Kurzfeedback (ehemals [9]) kommt jetzt direkt nach der Reaktion auf den
+> Pausenhinweis, noch vor Aktivitätsauswahl und Pause — nicht danach. Begründung: Die Frage "war der Zeitpunkt
+> passend" bewertet die gerade beendete Arbeitsphase; das lässt sich direkt im Anschluss zuverlässiger beantworten
+> als erst nach einer mehrminütigen Pause. Die dort entschiedene neue Arbeitszeit wird erst beim Sitzungsstart
+> nach der Pause angewendet.
 
 ### [1] Login
 
@@ -142,15 +148,31 @@ Das ist deine Umsetzung der Auto-Analogie und **das Herzstück der Arbeit**. Vie
 | **0** | 2 Min vor Ende | Hintergrundfarbe wandert sehr langsam um wenige Prozent ins Wärmere. Bewusst kaum bewusst wahrnehmbar. |
 | **1** | bei 0:00 | Farbe vollendet, dazu eine kleine ruhige Karte unten rechts: „Zeit für eine Pause". Optional ein sehr leiser einzelner Ton. Kein Modal, Arbeit bleibt möglich. |
 | **2** | +2 Min ohne Reaktion | Karte wird etwas größer, sanftes langsames Pulsieren. Immer noch am Rand. |
-| **3** | +5 Min ohne Reaktion | Ruhiges zentriertes Fenster mit zwei Optionen: „Pause starten" oder „Noch 5 Minuten". Kein Rot, keine Ausrufezeichen, kein Ton. |
+| **3** | +5 Min ohne Reaktion | Ruhiges zentriertes Fenster mit zwei Optionen: „Pause starten" oder „Überspringen". Kein Rot, keine Ausrufezeichen. |
 
 **Jede erreichte Stufe wird protokolliert, ebenso die Stufe, bei der reagiert wurde.** Das ist eines deiner wertvollsten Ergebnisse: Bei welcher Stufe reagieren Menschen tatsächlich? Reicht Stufe 1? Braucht es Stufe 3? Das ist ein echter Befund, den du in der Diskussion auswerten kannst.
 
-Optionen für Nutzende bei jeder Stufe: Pause starten, verschieben (5 Min), oder überspringen.
+Optionen für Nutzende bei jeder Stufe: Pause starten oder überspringen. **Kein "5 Minuten verschieben" mehr** (Änderung 09.08.) — ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, ist durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt.
 
-> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (30–60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger.
+Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist) — sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
 
-### [7] Aktivitätsauswahl
+> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (30–60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen: eine eigene, mit Husin abgestimmte Ton-Eskalation (−30s/0s/+1min/+2min sanfter Sinuston, ab +3min pulsierender Ton jede weitere Minute), protokolliert als `NUDGE_SOUND_PLAYED`.
+
+### [7] Kurzfeedback und Anpassung
+
+> **Wichtig (Änderung 09.08.):** Dieser Schritt kommt jetzt direkt nach der Reaktion auf den Pausenhinweis, **noch vor** Aktivitätsauswahl und Pause. Die Frage bewertet die gerade beendete Arbeitsphase — das lässt sich direkt danach zuverlässiger beantworten als erst nach einer mehrminütigen Pause. Die neue Arbeitszeit wird erst beim „Sitzung starten"-Knopf nach der Pause tatsächlich angewendet.
+
+Maximal 20 Sekunden Aufwand:
+
+1. „War der Zeitpunkt der Pause passend?" → **zu früh / passend / zu spät**
+2. Bei „zu früh" oder „zu spät": „Um wie viele Minuten?" → −10 / −5 / +5 / +10
+3. Optional, ein Feld: „Kurz in eigenen Worten?" (darf leer bleiben)
+
+Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
+
+**Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle sechs Personen von 25 auf 35 gehen, hast du einen Befund.
+
+### [8] Aktivitätsauswahl
 
 Drei bis vier kurze Vorschläge plus die Option „keine Aktivität":
 
@@ -161,23 +183,13 @@ Drei bis vier kurze Vorschläge plus die Option „keine Aktivität":
 
 Auswahl wird protokolliert. Die Option „keine" muss gleichwertig aussehen, nicht wie die schlechte Wahl, sonst verzerrst du deine Daten.
 
-### [8] Pause
+### [9] Pause
 
 Ruhiger Bildschirm mit Restzeit. Falls eine Aktivität gewählt wurde: schrittweise Anleitung, ein Schritt pro Bildschirm, automatisch weiter.
 
-Am Ende: sanfter Hinweis „Bereit weiterzuarbeiten?" mit Knopf. **Nicht automatisch zurückspringen**, das wäre selbst eine Störung.
+In den letzten 10 Sekunden ein leiser Klopf-Countdown, bei 0 ein klares akustisches Signal — sonst endet die Pause komplett unbemerkt, wenn man nicht gerade auf den Bildschirm schaut (Änderung 09.08.).
 
-### [9] Kurzfeedback und Anpassung
-
-Nach jeder Pause, maximal 20 Sekunden Aufwand:
-
-1. „War der Zeitpunkt der Pause passend?" → **zu früh / passend / zu spät**
-2. Bei „zu früh" oder „zu spät": „Um wie viele Minuten?" → −10 / −5 / +5 / +10
-3. Optional, ein Feld: „Kurz in eigenen Worten?" (darf leer bleiben)
-
-Die Anpassung wirkt direkt auf die nächste Runde. Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
-
-**Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle sechs Personen von 25 auf 35 gehen, hast du einen Befund.
+Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, das wäre selbst eine Störung. Die im Kurzfeedback [7] entschiedene Arbeitszeit wird jetzt angewendet, die nächste Runde beginnt.
 
 ### [10] Nachbefragung
 
@@ -304,17 +316,19 @@ enum Timing { TOO_EARLY OK TOO_LATE }
 SESSION_CREATED        CONSENT_GIVEN         SURVEY_PRE_SUBMITTED
 SESSION_STARTED        CYCLE_STARTED         WORK_STARTED
 NUDGE_STAGE_0          NUDGE_STAGE_1         NUDGE_STAGE_2         NUDGE_STAGE_3
-BREAK_ACCEPTED         BREAK_SNOOZED         BREAK_SKIPPED
+NUDGE_SOUND_PLAYED
+BREAK_ACCEPTED         BREAK_SKIPPED
 ACTIVITY_SELECTED      ACTIVITY_SKIPPED      ACTIVITY_STEP_DONE
 BREAK_STARTED          BREAK_ENDED
 INTERVAL_ADJUSTED      CYCLE_FEEDBACK_SUBMITTED
 TAB_HIDDEN             TAB_VISIBLE
-SESSION_ENDED          SURVEY_POST_SUBMITTED
+SESSION_ENDED          SESSION_REOPENED      SESSION_FINALIZED
+SURVEY_POST_SUBMITTED
 ```
 
 **`TAB_HIDDEN` und `TAB_VISIBLE`** über die Page Visibility API. Das ist ein kleiner, aber wertvoller Trick: Es zeigt dir, ob während der Arbeitsphase der Tab im Vordergrund war. Damit kannst du in der Diskussion die Limitation „ortsunabhängige Durchführung, keine Kontrolle" wenigstens teilweise entkräften, weil du zumindest ein objektives Signal hast.
 
-**`BREAK_ACCEPTED` speichert im payload die Stufe**, bei der reagiert wurde: `{ "reactedAtStage": 2, "secondsAfterStage1": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht.
+**`BREAK_ACCEPTED`/`BREAK_SKIPPED` speichern im payload die Stufe**, bei der reagiert wurde: `{ "stage": 2, "secondsAfterEnd": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht. `BREAK_SNOOZED` gibt es nicht mehr (Änderung 09.08.) — Anpassungen laufen ausschließlich über das explizite Kurzfeedback direkt danach, nicht über ein blindes Verlängern der laufenden Runde. `SESSION_REOPENED`/`SESSION_FINALIZED` gehören zum Unfall-Schutz: eine versehentlich beendete Sitzung lässt sich fortsetzen, oder man gibt sie endgültig final ab.
 
 ---
 

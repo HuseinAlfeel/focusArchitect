@@ -40,11 +40,16 @@ export function useCountdown(endsAt: number) {
   }, [endsAt]);
 
   if (now === null) {
-    return { remainingMs: null, isDone: false };
+    return { remainingMs: null, isDone: false, overtimeMs: null };
   }
 
+  // overtimeMs wird genauso frisch aus dem Zielzeitpunkt berechnet wie
+  // remainingMs (`now - endsAt`, nicht hochgezaehlt) - zeigt nur zusaetzlich,
+  // wie lange der Zielzeitpunkt schon ueberschritten ist, statt die Anzeige
+  // nach Ablauf komplett verschwinden zu lassen.
   const remainingMs = Math.max(0, endsAt - now);
-  return { remainingMs, isDone: remainingMs <= 0 };
+  const overtimeMs = Math.max(0, now - endsAt);
+  return { remainingMs, isDone: remainingMs <= 0, overtimeMs };
 }
 
 export function formatRemaining(ms: number) {

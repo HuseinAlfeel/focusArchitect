@@ -260,10 +260,29 @@ npm install -D @types/bcryptjs
 - [ ] **Stufe 3** bei plus 5 Min: ruhiges zentriertes Fenster, zwei Optionen. Kein Rot, kein Ausrufezeichen
 - [ ] Jede erreichte Stufe protokollieren: `NUDGE_STAGE_0` bis `NUDGE_STAGE_3`
 - [ ] Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden:
-      `BREAK_ACCEPTED` mit `payload: { reactedAtStage, secondsAfterStage1 }`
-- [ ] Optionen: Pause starten / 5 Min verschieben (`BREAK_SNOOZED`) / überspringen (`BREAK_SKIPPED`)
+      `BREAK_ACCEPTED`/`BREAK_SKIPPED` mit `payload: { stage, secondsAfterEnd }`
+- [ ] Optionen: Pause starten / überspringen — **kein** "5 Min verschieben" mehr (Husin, 09.08.: blindes
+      Verlängern der laufenden Runde entfernt; Anpassungen laufen ausschließlich über das Kurzfeedback F8)
+- [ ] Zusätzlich zur Ton-Eskalation: solange nicht reagiert wurde, zeigt der Bildschirm eine **Überzeit**-Anzeige
+      (`+MM:SS`, seit wann der Zielzeitpunkt überschritten ist), damit die Anzeige nach Ablauf nicht einfach leer bleibt
+- [ ] Eigene Ton-Eskalation (mit Husin abgestimmt, Zeitplan siehe `useNudgeSoundSchedule.ts`): −30s/0s/+1min/+2min
+      sanfter Sinuston steigender Lautstärke, ab +3min pulsierender Ton jede weitere Minute — protokolliert als
+      `NUDGE_SOUND_PLAYED`
 
 > Das ist die Funktion, aus der dein wichtigstes Ergebnis kommt. Nimm dir hier Zeit und teste alle vier Stufen mit verkürzten Zeiten (z. B. 1 Min statt 25).
+
+### F8. Kurzfeedback und Anpassung (halber Tag)
+
+> **Reihenfolge korrigiert (Husin, 09.08.):** Das Kurzfeedback kommt jetzt **direkt nach der Reaktion auf den
+> Pausenhinweis**, noch vor Aktivitätsauswahl und Pause — nicht danach. Die Frage "war der Zeitpunkt passend"
+> bewertet die gerade zu Ende gegangene Arbeitsphase, das lässt sich direkt danach am zuverlässigsten beantworten.
+> Die hier entschiedene neue Arbeitszeit wird erst nach der Pause tatsächlich angewendet (F7 folgt danach).
+
+- [ ] Drei Knöpfe: zu früh / passend / zu spät
+- [ ] Bei zu früh oder zu spät: minus 10 / minus 5 / plus 5 / plus 10
+- [ ] Optionales Freitextfeld
+- [ ] `POST /api/cycle-feedback`, Ereignisse `INTERVAL_ADJUSTED`, `CYCLE_FEEDBACK_SUBMITTED`
+- [ ] Neuer Wert wirkt auf die nächste Runde und wird angezeigt ("Nächste Runde: X Minuten")
 
 ### F7. Aktivitätsauswahl und Pause (1 Tag)
 
@@ -271,17 +290,12 @@ npm install -D @types/bcryptjs
 - [ ] `ACTIVITY_SELECTED` oder `ACTIVITY_SKIPPED` protokollieren
 - [ ] Pausenbildschirm mit Restzeit, ruhig gestaltet
 - [ ] Bei gewählter Aktivität: Schritt-für-Schritt-Anleitung, ein Schritt je Bildschirm, `ACTIVITY_STEP_DONE`
-- [ ] Am Ende **kein** automatischer Rücksprung, sondern Knopf „Bereit weiterzuarbeiten"
+- [ ] Letzte 10 Sekunden der Pause: leiser Klopf-Countdown, bei 0 ein klares Signal ("Pause vorbei") — vorher
+      endete die Pause komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (Husin, 09.08.)
+- [ ] Am Ende **kein** automatischer Rücksprung, sondern Knopf „Sitzung starten" (die im F8-Kurzfeedback
+      entschiedene Arbeitszeit für die nächste Runde wird hier angewendet)
 - [ ] `BREAK_STARTED`, `BREAK_ENDED`
-
-### F8. Kurzfeedback und Anpassung (halber Tag)
-
-- [ ] Drei Knöpfe: zu früh / passend / zu spät
-- [ ] Bei zu früh oder zu spät: minus 10 / minus 5 / plus 5 / plus 10
-- [ ] Optionales Freitextfeld
-- [ ] `POST /api/cycle-feedback`, Ereignisse `INTERVAL_ADJUSTED`, `CYCLE_FEEDBACK_SUBMITTED`
-- [ ] Neuer Wert wirkt auf die nächste Runde und wird angezeigt
-- [ ] Danach automatisch nächste Runde starten
+- [ ] Danach automatisch nächste Runde starten (`CYCLE_STARTED`, `WORK_STARTED`)
 
 ### F9. Nachbefragung und Abschluss (halber Tag)
 

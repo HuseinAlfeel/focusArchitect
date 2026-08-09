@@ -9,17 +9,20 @@ import { useNudgeSoundSchedule } from "@/hooks/useNudgeSoundSchedule";
 import { useNudgeStage } from "@/hooks/useNudgeStage";
 import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
+import { useBreakEndSound } from "@/hooks/useBreakEndSound";
 import { activities, type ActivityId } from "@/content/activities";
 
-const SNOOZE_MS = 5 * 60_000;
 const MIN_WORK_MIN = 5;
 const ADJUSTMENT_OPTIONS = [-10, -5, 5, 10] as const;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
 // Nudge-Stufen laufen rein zeitbasiert (Regel 1) und parallel zur
-// Ton-Eskalation. Nach "Pause starten" folgt Aktivitaetsauswahl (F7), der
-// Pausenbildschirm, Kurzfeedback (F8) und danach automatisch die naechste
-// Runde.
+// Ton-Eskalation. Reihenfolge (mit Husin am 09.08. korrigiert): auf die
+// Nudge-Reaktion folgt SOFORT das Kurzfeedback (F8) - die Frage "war der
+// Zeitpunkt passend" bezieht sich auf die gerade zu Ende gegangene
+// Arbeitsphase, nicht auf die noch bevorstehende Pause. Die dort
+// entschiedene naechste Arbeitszeit (pendingWorkMin) wird erst nach der
+// Pause tatsaechlich angewendet, wenn "Sitzung starten" geklickt wird.
 export function SessionTimer({
   sessionId,
   cycle: initialCycle,
@@ -33,13 +36,13 @@ export function SessionTimer({
   initialWorkMin: number;
   initialBreakMin: number;
 }) {
-  const { cycle, state, endsAt, activityId, setRound } = useRoundTimer(
+  const { cycle, state, endsAt, activityId, pendingWorkMin, setRound } = useRoundTimer(
     sessionId,
     initialCycle,
     "WORK",
     initialEndsAt
   );
-  const { remainingMs } = useCountdown(endsAt);
+  const { remainingMs, overtimeMs } = useCountdown(endsAt);
   const nudgeStage = useNudgeStage(endsAt);
   const [hasReacted, setHasReacted] = useState(false);
   const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
@@ -73,28 +76,17 @@ export function SessionTimer({
     });
   }
 
-  function logNudgeReaction(
-    type: "BREAK_ACCEPTED" | "BREAK_SNOOZED" | "BREAK_SKIPPED",
-    extraPayload?: Record<string, unknown>
-  ) {
+  function reactToNudge(type: "BREAK_ACCEPTED" | "BREAK_SKIPPED") {
     const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
-    logEvent(type, { stage: nudgeStage, secondsAfterEnd, ...extraPayload });
-  }
-
-  function handleAccept() {
-    logNudgeReaction("BREAK_ACCEPTED");
+    logEvent(type, { stage: nudgeStage, secondsAfterEnd });
     setHasReacted(true);
-    setRound("ACTIVITY_CHOICE", Date.now());
+    setRound("FEEDBACK", Date.now());
   }
 
-  function handleSnooze() {
-    logNudgeReaction("BREAK_SNOOZED", { extendedByMs: SNOOZE_MS });
-    setRound("WORK", endsAt + SNOOZE_MS);
-  }
-
-  function handleSkip() {
-    logNudgeReaction("BREAK_SKIPPED", { extendedByMs: SNOOZE_MS });
-    setRound("WORK", endsAt + SNOOZE_MS);
+  function handleFeedbackSubmitted(newWorkMin: number) {
+    // Die neue Arbeitszeit wird jetzt nur gemerkt, nicht sofort gestartet -
+    // sie kommt erst nach der Pause zum Einsatz (siehe handleStartNextRound).
+    setRound("ACTIVITY_CHOICE", Date.now(), { pendingWorkMin: newWorkMin });
   }
 
   function handleActivityChosen(chosenId: ActivityId | "none") {
@@ -108,25 +100,25 @@ export function SessionTimer({
     setRound("BREAK", breakEndsAt, { activityId: chosenId === "none" ? null : chosenId });
   }
 
-  function handleReadyToContinue() {
+  function handleStartNextRound() {
     logEvent("BREAK_ENDED");
-    setRound("FEEDBACK", Date.now());
-  }
 
-  function handleFeedbackSubmitted(newWorkMin: number) {
     const nextCycle = cycle + 1;
+    const newWorkMin = pendingWorkMin ?? currentWorkMin;
     const nextEndsAt = Date.now() + newWorkMin * 60_000;
 
-    // Wichtig: explizit nextCycle uebergeben, nicht das cycle-Closure - React
-    // hat den State an dieser Stelle noch nicht auf die neue Runde
-    // aktualisiert, sonst wuerden diese Ereignisse faelschlich der alten
-    // Runde zugeordnet.
+    // Explizit nextCycle uebergeben, nicht das cycle-Closure - React hat den
+    // State an dieser Stelle noch nicht auf die neue Runde aktualisiert.
     logEvent("CYCLE_STARTED", undefined, nextCycle);
     logEvent("WORK_STARTED", undefined, nextCycle);
 
     setCurrentWorkMin(newWorkMin);
     setHasReacted(false);
-    setRound("WORK", nextEndsAt, { cycle: nextCycle, activityId: null });
+    setRound("WORK", nextEndsAt, {
+      cycle: nextCycle,
+      activityId: null,
+      pendingWorkMin: null,
+    });
   }
 
   return (
@@ -143,17 +135,37 @@ export function SessionTimer({
         </p>
       )}
 
+      {overtimeMs !== null &&
+        state === "WORK" &&
+        !hasReacted &&
+        nudgeStage !== null &&
+        nudgeStage > 0 && (
+          <p className="text-xs text-neutral-400 dark:text-neutral-600">
+            +{formatRemaining(overtimeMs)}
+          </p>
+        )}
+
       {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
         <NudgeCard
           big={nudgeStage === 2}
-          onAccept={handleAccept}
-          onSnooze={handleSnooze}
-          onSkip={handleSkip}
+          onAccept={() => reactToNudge("BREAK_ACCEPTED")}
+          onSkip={() => reactToNudge("BREAK_SKIPPED")}
         />
       )}
 
       {!hasReacted && nudgeStage === 3 && (
-        <NudgeModal onAccept={handleAccept} onSnooze={handleSnooze} />
+        <NudgeModal
+          onAccept={() => reactToNudge("BREAK_ACCEPTED")}
+          onSkip={() => reactToNudge("BREAK_SKIPPED")}
+        />
+      )}
+
+      {state === "FEEDBACK" && (
+        <FeedbackScreen
+          cycle={cycle}
+          currentWorkMin={currentWorkMin}
+          onSubmitted={handleFeedbackSubmitted}
+        />
       )}
 
       {state === "ACTIVITY_CHOICE" && (
@@ -166,16 +178,7 @@ export function SessionTimer({
           cycle={cycle}
           breakEndsAt={endsAt}
           activityId={activityId as ActivityId | null}
-          onReady={handleReadyToContinue}
-        />
-      )}
-
-      {state === "FEEDBACK" && (
-        <FeedbackScreen
-          cycle={cycle}
-          activityId={activityId as ActivityId | null}
-          currentWorkMin={currentWorkMin}
-          onSubmitted={handleFeedbackSubmitted}
+          onStartNextRound={handleStartNextRound}
         />
       )}
 
@@ -187,12 +190,10 @@ export function SessionTimer({
 function NudgeCard({
   big,
   onAccept,
-  onSnooze,
   onSkip,
 }: {
   big: boolean;
   onAccept: () => void;
-  onSnooze: () => void;
   onSkip: () => void;
 }) {
   return (
@@ -212,13 +213,6 @@ function NudgeCard({
         </button>
         <button
           type="button"
-          onClick={onSnooze}
-          className="rounded border border-black/15 px-3 py-1.5 text-xs dark:border-white/20"
-        >
-          5 Min später
-        </button>
-        <button
-          type="button"
           onClick={onSkip}
           className="rounded px-3 py-1.5 text-xs opacity-60"
         >
@@ -231,10 +225,10 @@ function NudgeCard({
 
 function NudgeModal({
   onAccept,
-  onSnooze,
+  onSkip,
 }: {
   onAccept: () => void;
-  onSnooze: () => void;
+  onSkip: () => void;
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/10 dark:bg-black/30">
@@ -250,114 +244,23 @@ function NudgeModal({
           </button>
           <button
             type="button"
-            onClick={onSnooze}
+            onClick={onSkip}
             className="rounded border border-black/15 px-3 py-2 text-sm dark:border-white/20"
           >
-            Noch 5 Minuten
+            Überspringen
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-// Vier gleichwertig aussehende Optionen - "keine Aktivitaet" darf nicht wie
-// die schlechte Wahl aussehen, sonst verzerrt das die Daten (SPEZIFIKATION.md [7]).
-function ActivityChoiceScreen({
-  onChoose,
-}: {
-  onChoose: (id: ActivityId | "none") => void;
-}) {
-  return (
-    <div className="w-full max-w-sm space-y-3 text-center">
-      <p className="text-sm">Möchtest du etwas in der Pause machen?</p>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {activities.map((activity) => (
-          <button
-            key={activity.id}
-            type="button"
-            onClick={() => onChoose(activity.id)}
-            className="rounded border border-black/15 px-4 py-3 text-sm dark:border-white/20"
-          >
-            {activity.label}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => onChoose("none")}
-          className="rounded border border-black/15 px-4 py-3 text-sm dark:border-white/20"
-        >
-          Keine Aktivität
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function BreakScreen({
-  sessionId,
-  cycle,
-  breakEndsAt,
-  activityId,
-  onReady,
-}: {
-  sessionId: string;
-  cycle: number;
-  breakEndsAt: number;
-  activityId: ActivityId | null;
-  onReady: () => void;
-}) {
-  const { remainingMs, isDone: breakDone } = useCountdown(breakEndsAt);
-  const activity = activityId
-    ? activities.find((a) => a.id === activityId) ?? null
-    : null;
-  const stepDurations = activity ? activity.steps.map((s) => s.durationSeconds) : [];
-  const { currentStepIndex, remainingMs: stepRemainingMs, allStepsDone } =
-    useActivitySteps(sessionId, cycle, stepDurations);
-
-  const readyToContinue = breakDone && (!activity || allStepsDone);
-
-  return (
-    <div className="flex flex-col items-center gap-4 text-center">
-      {remainingMs !== null && (
-        <p className="text-sm text-neutral-400 dark:text-neutral-600">
-          Pause: {formatRemaining(remainingMs)}
-        </p>
-      )}
-
-      {activity && !allStepsDone && (
-        <div className="max-w-xs space-y-1">
-          <p className="text-sm">{activity.steps[currentStepIndex]?.instruction}</p>
-          {stepRemainingMs !== null && (
-            <p className="text-xs opacity-50">{formatRemaining(stepRemainingMs)}</p>
-          )}
-        </div>
-      )}
-
-      {readyToContinue && (
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm">Bereit weiterzuarbeiten?</p>
-          <button
-            type="button"
-            onClick={onReady}
-            className="rounded border border-black/15 px-4 py-2 text-sm dark:border-white/20"
-          >
-            Weiter
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
 function FeedbackScreen({
   cycle,
-  activityId,
   currentWorkMin,
   onSubmitted,
 }: {
   cycle: number;
-  activityId: ActivityId | null;
   currentWorkMin: number;
   onSubmitted: (newWorkMin: number) => void;
 }) {
@@ -386,7 +289,7 @@ function FeedbackScreen({
         cycle,
         timing,
         adjustmentMin: needsAdjustment ? adjustmentMin : 0,
-        activity: activityId,
+        activity: null,
         comment: comment.trim() || null,
         clientAt: new Date().toISOString(),
       }),
@@ -480,6 +383,97 @@ function FeedbackScreen({
       >
         {submitting ? "Speichern …" : "Weiter"}
       </button>
+    </div>
+  );
+}
+
+// Vier gleichwertig aussehende Optionen - "keine Aktivitaet" darf nicht wie
+// die schlechte Wahl aussehen, sonst verzerrt das die Daten (SPEZIFIKATION.md [7]).
+function ActivityChoiceScreen({
+  onChoose,
+}: {
+  onChoose: (id: ActivityId | "none") => void;
+}) {
+  return (
+    <div className="w-full max-w-sm space-y-3 text-center">
+      <p className="text-sm">Möchtest du etwas in der Pause machen?</p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {activities.map((activity) => (
+          <button
+            key={activity.id}
+            type="button"
+            onClick={() => onChoose(activity.id)}
+            className="rounded border border-black/15 px-4 py-3 text-sm dark:border-white/20"
+          >
+            {activity.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => onChoose("none")}
+          className="rounded border border-black/15 px-4 py-3 text-sm dark:border-white/20"
+        >
+          Keine Aktivität
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BreakScreen({
+  sessionId,
+  cycle,
+  breakEndsAt,
+  activityId,
+  onStartNextRound,
+}: {
+  sessionId: string;
+  cycle: number;
+  breakEndsAt: number;
+  activityId: ActivityId | null;
+  onStartNextRound: () => void;
+}) {
+  const { remainingMs, isDone: breakDone } = useCountdown(breakEndsAt);
+  const activity = activityId
+    ? activities.find((a) => a.id === activityId) ?? null
+    : null;
+  const stepDurations = activity ? activity.steps.map((s) => s.durationSeconds) : [];
+  const { currentStepIndex, remainingMs: stepRemainingMs, allStepsDone } =
+    useActivitySteps(sessionId, cycle, stepDurations);
+
+  const readyToContinue = breakDone && (!activity || allStepsDone);
+
+  useBreakEndSound(breakEndsAt, !readyToContinue);
+
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      {remainingMs !== null && (
+        <p className="text-sm text-neutral-400 dark:text-neutral-600">
+          Pause: {formatRemaining(remainingMs)}
+        </p>
+      )}
+
+      {activity && !allStepsDone && (
+        <div className="max-w-xs space-y-1">
+          <p className="text-sm">{activity.steps[currentStepIndex]?.instruction}</p>
+          {stepRemainingMs !== null && (
+            <p className="text-xs opacity-50">{formatRemaining(stepRemainingMs)}</p>
+          )}
+        </div>
+      )}
+
+      {readyToContinue && (
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm">Pause vorbei.</p>
+          <button
+            type="button"
+            onClick={onStartNextRound}
+            className="rounded border border-black/15 px-4 py-2 text-sm dark:border-white/20"
+          >
+            Sitzung starten
+          </button>
+        </div>
+      )}
     </div>
   );
 }

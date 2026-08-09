@@ -9,6 +9,7 @@ type PersistedRound = {
   state: RoundState;
   endsAt: number;
   activityId: string | null;
+  pendingWorkMin: number | null;
 };
 
 function storageKey(sessionId: string) {
@@ -32,6 +33,8 @@ function readPersistedRound(sessionId: string): PersistedRound | null {
         endsAt: parsed.endsAt,
         activityId:
           typeof parsed.activityId === "string" ? parsed.activityId : null,
+        pendingWorkMin:
+          typeof parsed.pendingWorkMin === "number" ? parsed.pendingWorkMin : null,
       };
     }
     return null;
@@ -47,7 +50,8 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
 
 /**
  * Haelt Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK), Runden-
- * nummer, Zielzeitpunkt und gewaehlte Aktivitaet fest, gespiegelt in
+ * nummer, Zielzeitpunkt, gewaehlte Aktivitaet und die im Kurzfeedback
+ * entschiedene naechste Arbeitszeit (pendingWorkMin) fest, gespiegelt in
  * sessionStorage. Ein Reload mitten in der Runde verliert damit nichts: beim
  * naechsten Laden wird aus sessionStorage wiederhergestellt, sofern der
  * gespeicherte Eintrag zur vom Server rekonstruierten Runde (serverCycle)
@@ -56,8 +60,7 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
  *
  * Die Rundennummer selbst lebt danach im Hook-Zustand (nicht mehr nur als
  * externe Prop): `setRound(..., { cycle })` zaehlt sie weiter, wenn eine
- * neue Runde beginnt (siehe F8, Kurzfeedback -> naechste Runde startet
- * automatisch).
+ * neue Runde beginnt.
  */
 export function useRoundTimer(
   sessionId: string,
@@ -75,6 +78,7 @@ export function useRoundTimer(
       state: fallbackState,
       endsAt: fallbackEndsAt,
       activityId: null,
+      pendingWorkMin: null,
     };
   });
 
@@ -85,7 +89,11 @@ export function useRoundTimer(
   function setRound(
     state: RoundState,
     endsAt: number,
-    options?: { activityId?: string | null; cycle?: number }
+    options?: {
+      activityId?: string | null;
+      cycle?: number;
+      pendingWorkMin?: number | null;
+    }
   ) {
     setRoundState((prev) => ({
       cycle: options?.cycle ?? prev.cycle,
@@ -93,6 +101,10 @@ export function useRoundTimer(
       endsAt,
       activityId:
         options?.activityId !== undefined ? options.activityId : prev.activityId,
+      pendingWorkMin:
+        options?.pendingWorkMin !== undefined
+          ? options.pendingWorkMin
+          : prev.pendingWorkMin,
     }));
   }
 
@@ -101,6 +113,7 @@ export function useRoundTimer(
     state: round.state,
     endsAt: round.endsAt,
     activityId: round.activityId,
+    pendingWorkMin: round.pendingWorkMin,
     setRound,
   };
 }
