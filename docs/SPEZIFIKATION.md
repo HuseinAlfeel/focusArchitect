@@ -152,7 +152,7 @@ Das ist deine Umsetzung der Auto-Analogie und **das Herzstück der Arbeit**. Vie
 
 **Jede erreichte Stufe wird protokolliert, ebenso die Stufe, bei der reagiert wurde.** Das ist eines deiner wertvollsten Ergebnisse: Bei welcher Stufe reagieren Menschen tatsächlich? Reicht Stufe 1? Braucht es Stufe 3? Das ist ein echter Befund, den du in der Diskussion auswerten kannst.
 
-Optionen für Nutzende bei jeder Stufe: Pause starten oder überspringen. **Kein "5 Minuten verschieben" mehr** (Änderung 09.08.) — ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, ist durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt.
+Optionen für Nutzende bei jeder Stufe: Pause starten oder überspringen. **Kein "5 Minuten verschieben" mehr** (Änderung 09.08.) — ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, ist durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt. „Überspringen" umgeht dabei wirklich Aktivitätsauswahl [8] und Pause [9] — nach dem Kurzfeedback geht es direkt in die nächste Arbeitsrunde, nicht nur mit anderem Ereignisnamen durch denselben Ablauf wie „Pause starten".
 
 Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist) — sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
 

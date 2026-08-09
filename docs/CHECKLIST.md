@@ -263,6 +263,8 @@ npm install -D @types/bcryptjs
       `BREAK_ACCEPTED`/`BREAK_SKIPPED` mit `payload: { stage, secondsAfterEnd }`
 - [ ] Optionen: Pause starten / überspringen — **kein** "5 Min verschieben" mehr (Husin, 09.08.: blindes
       Verlängern der laufenden Runde entfernt; Anpassungen laufen ausschließlich über das Kurzfeedback F8)
+- [ ] "Überspringen" umgeht wirklich Aktivitätsauswahl und Pause (direkt weiter zur nächsten Arbeitsrunde nach
+      dem Kurzfeedback) — nicht nur ein anderer Ereignisname bei sonst gleichem Ablauf wie "Pause starten"
 - [ ] Zusätzlich zur Ton-Eskalation: solange nicht reagiert wurde, zeigt der Bildschirm eine **Überzeit**-Anzeige
       (`+MM:SS`, seit wann der Zielzeitpunkt überschritten ist), damit die Anzeige nach Ablauf nicht einfach leer bleibt
 - [ ] Eigene Ton-Eskalation (mit Husin abgestimmt, Zeitplan siehe `useNudgeSoundSchedule.ts`): −30s/0s/+1min/+2min
