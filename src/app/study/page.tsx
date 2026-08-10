@@ -61,10 +61,13 @@ export default async function StudyPlaceholderPage() {
       )}
 
       {session?.endedAt && !session.finalizedAt && (
-        <div className="space-y-1">
+        <div className="space-y-2">
           <p className="text-sm opacity-70">
             Sitzung beendet um {session.endedAt.toLocaleString("de-DE")}.
           </p>
+          <Link href="/study/post" className="text-sm underline">
+            Zur Nachbefragung
+          </Link>
           <div className="flex justify-center gap-4">
             <ReopenSessionButton sessionId={session.id} />
             <FinalizeSessionButton sessionId={session.id} />
@@ -74,13 +77,9 @@ export default async function StudyPlaceholderPage() {
 
       {session?.finalizedAt && (
         <p className="text-sm opacity-70">
-          Final abgegeben am {session.finalizedAt.toLocaleString("de-DE")}.
+          Studie abgeschlossen am {session.finalizedAt.toLocaleString("de-DE")}.
         </p>
       )}
-
-      <p className="text-sm opacity-50">
-        Platzhalter — der Rest von Phase F (Pausenhinweis, …) folgt.
-      </p>
 
       <LogoutButton />
     </main>

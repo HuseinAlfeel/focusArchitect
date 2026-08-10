@@ -3,6 +3,7 @@ import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Phase } from "@/generated/prisma/enums";
 import { preSurveyItems } from "@/content/pre-survey";
+import { requiredPostSurveyIds } from "@/content/post-survey";
 
 export async function POST(request: NextRequest) {
   const participant = await getCurrentParticipant();
@@ -29,6 +30,17 @@ export async function POST(request: NextRequest) {
     if (missing.length > 0) {
       return NextResponse.json(
         { error: `Fehlende Antworten: ${missing.map((item) => item.id).join(", ")}` },
+        { status: 400 }
+      );
+    }
+  }
+
+  if (phase === Phase.POST) {
+    const answered = answers as Record<string, unknown>;
+    const missing = requiredPostSurveyIds.filter((id) => !(id in answered));
+    if (missing.length > 0) {
+      return NextResponse.json(
+        { error: `Fehlende Antworten: ${missing.join(", ")}` },
         { status: 400 }
       );
     }

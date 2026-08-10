@@ -502,7 +502,7 @@ function EndSessionButton({ sessionId }: { sessionId: string }) {
 
   async function handleEnd() {
     const confirmed = window.confirm(
-      "Sitzung wirklich beenden? Das lässt sich nicht rückgängig machen."
+      "Sitzung wirklich beenden? Danach geht es weiter zur Nachbefragung."
     );
     if (!confirmed) return;
 
