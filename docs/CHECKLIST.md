@@ -323,7 +323,9 @@ npm install -D @types/bcryptjs
 - [x] Jedes Ereignis bekommt `clientAt` (Browserzeit) **und** `at` (Serverzeit)
 
 **Testen:**
-- [ ] Netzwerk in den DevTools auf offline stellen, weiterklicken, wieder online: Daten kommen an
+- [x] Netzwerk in den DevTools auf offline stellen, weiterklicken, wieder online: Daten kommen an
+      (dabei einen echten Bug gefunden und behoben, Husin 10.08.: Reload waehrend die Queue noch
+      unterwegs war, konnte die Runde auf den letzten dem Server bekannten Stand zuruecksetzen)
 - [ ] Browser mitten in der Sitzung schließen, wieder öffnen: nichts verloren
 
 > **Fertig, wenn:** Du hast bewusst versucht, Daten zu verlieren, und es ist dir nicht gelungen.
