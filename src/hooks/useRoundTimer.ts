@@ -77,6 +77,15 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
  * das Reload-Verhalten mitten in einer echten, bereits fortgeschrittenen
  * Runde zu beeintraechtigen (dort weicht der aktuelle Zustand laengst vom
  * urspruenglichen Fallback ab, also greift diese Ausnahme dort nicht).
+ *
+ * Zweite Ausnahme: Ist die im Browser gespeicherte Runde WEITER als das, was
+ * der Server gerade rekonstruiert (persisted.cycle > serverCycle), wird die
+ * gespeicherte Runde trotzdem benutzt statt verworfen. Der Server erfaehrt
+ * von einer neuen Runde erst, wenn CYCLE_STARTED/WORK_STARTED tatsaechlich
+ * angekommen sind - die Ereignis-Queue (Phase G) verschickt die aber bewusst
+ * leicht verzoegert, nicht synchron. Ohne diese Ausnahme wuerde ein Reload
+ * genau in diesem kurzen Fenster den Browser auf den (dann veralteten)
+ * Serverstand zuruecksetzen, obwohl die neue Runde laengst begonnen hatte.
  */
 export function useRoundTimer(
   sessionId: string,
@@ -86,6 +95,10 @@ export function useRoundTimer(
 ) {
   const [round, setRoundState] = useState<PersistedRound>(() => {
     const persisted = readPersistedRound(sessionId);
+
+    if (persisted && persisted.cycle > serverCycle) {
+      return persisted;
+    }
 
     if (persisted && persisted.cycle === serverCycle) {
       const stillAtFreshStart =

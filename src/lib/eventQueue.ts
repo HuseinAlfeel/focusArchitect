@@ -53,26 +53,39 @@ function toWireEvents(events: QueuedEvent[]) {
 }
 
 async function flush() {
-  if (flushing || queue.length === 0) return;
+  if (flushing) return;
   flushing = true;
 
-  const batch = queue.slice();
-  const sessionId = batch[0].sessionId;
-
   try {
-    const response = await fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId, events: toWireEvents(batch) }),
-      keepalive: true,
-    });
+    // Schleife statt einmaligem Versuch: Wenn waehrend eines laufenden
+    // Sendevorgangs noch ein weiteres Ereignis dazukommt (z.B. CYCLE_STARTED
+    // gefolgt von WORK_STARTED, beides mit flushNow), soll dieselbe flush()-
+    // Ausfuehrung es gleich mitnehmen, statt bis zum naechsten 10s-Takt zu
+    // warten - sonst kann der Server kurzzeitig einen aelteren Rundenstand
+    // sehen als der Browser, was useRoundTimer beim naechsten Reload zum
+    // Zurueckfallen auf den (dann veralteten) Serverstand verleiten kann.
+    while (queue.length > 0) {
+      const batch = queue.slice();
+      const sessionId = batch[0].sessionId;
 
-    if (response.ok) {
+      let ok: boolean;
+      try {
+        const response = await fetch("/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId, events: toWireEvents(batch) }),
+          keepalive: true,
+        });
+        ok = response.ok;
+      } catch {
+        ok = false;
+      }
+
+      if (!ok) break; // naechster Versuch beim naechsten Tick
+
       queue = queue.slice(batch.length);
       writeStorage();
     }
-  } catch {
-    // bleibt in der Queue, naechster Versuch beim naechsten Tick
   } finally {
     flushing = false;
   }
