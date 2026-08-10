@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCountdown, formatRemaining } from "@/hooks/useCountdown";
 import { useRoundTimer } from "@/hooks/useRoundTimer";
@@ -11,6 +11,8 @@ import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
 import { useBreakEndSound } from "@/hooks/useBreakEndSound";
 import { activities, type ActivityId } from "@/content/activities";
+import { enqueueEvent, startEventQueue } from "@/lib/eventQueue";
+import type { EventType } from "@/lib/events";
 
 const MIN_WORK_MIN = 5;
 const ADJUSTMENT_OPTIONS = [-10, -5, 5, 10] as const;
@@ -48,32 +50,27 @@ export function SessionTimer({
   const [wasSkipped, setWasSkipped] = useState(false);
   const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
 
+  useEffect(() => {
+    startEventQueue();
+  }, []);
+
   useTabVisibilityLogging(sessionId, cycle);
   useNudgeSoundSchedule(endsAt, sessionId, state === "WORK" && !hasReacted);
   useNudgeStageLogging(sessionId, cycle, endsAt, nudgeStage, state === "WORK" && !hasReacted);
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
 
+  // Jeder Aufruf hier ist ein Phasenwechsel (Reaktion auf den Hinweis, neue
+  // Runde, Aktivitaet/Pause) - deshalb immer flushNow, nicht nur der 10s-Takt.
   function logEvent(
-    type: string,
+    type: EventType,
     extraPayload?: Record<string, unknown>,
     cycleOverride?: number
   ) {
-    void fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId,
-        events: [
-          {
-            type,
-            clientAt: new Date().toISOString(),
-            cycle: cycleOverride ?? cycle,
-            payload: extraPayload,
-          },
-        ],
-      }),
-      keepalive: true,
+    enqueueEvent(sessionId, type, {
+      cycle: cycleOverride ?? cycle,
+      payload: extraPayload,
+      flushNow: true,
     });
   }
 

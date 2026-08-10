@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useCountdown } from "@/hooks/useCountdown";
+import { enqueueEvent } from "@/lib/eventQueue";
 
 /**
  * Fuehrt automatisch durch eine Liste von Aktivitaets-Schritten: ein Schritt
@@ -27,21 +28,9 @@ export function useActivitySteps(
     if (loggedRef.current.has(index)) return;
     loggedRef.current.add(index);
 
-    void fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId,
-        events: [
-          {
-            type: "ACTIVITY_STEP_DONE",
-            clientAt: new Date().toISOString(),
-            cycle,
-            payload: { stepIndex: index },
-          },
-        ],
-      }),
-      keepalive: true,
+    enqueueEvent(sessionId, "ACTIVITY_STEP_DONE", {
+      cycle,
+      payload: { stepIndex: index },
     });
 
     // Deferred statt direkt im Effekt aufgerufen (gleicher Grund wie in

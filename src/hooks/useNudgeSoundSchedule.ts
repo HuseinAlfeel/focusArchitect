@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { playNudgeSound, type NudgeSoundCharacter } from "@/lib/nudgeSound";
+import { enqueueEvent } from "@/lib/eventQueue";
 
 type ScheduleEntry = {
   id: string;
@@ -47,20 +48,8 @@ function logSoundEvent(
   intensity: number,
   character: NudgeSoundCharacter
 ) {
-  void fetch("/api/events", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      sessionId,
-      events: [
-        {
-          type: "NUDGE_SOUND_PLAYED",
-          clientAt: new Date().toISOString(),
-          payload: { offsetMs, intensity, character },
-        },
-      ],
-    }),
-    keepalive: true,
+  enqueueEvent(sessionId, "NUDGE_SOUND_PLAYED", {
+    payload: { offsetMs, intensity, character },
   });
 }
 

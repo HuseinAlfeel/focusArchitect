@@ -315,12 +315,12 @@ npm install -D @types/bcryptjs
 
 *Aufwand: 1 Tag. Der langweiligste Teil, der deine Studie rettet.*
 
-- [ ] Ereignis-Queue im Client: Ereignisse sammeln statt einzeln senden
-- [ ] Alle 10 Sekunden und bei jedem Phasenwechsel senden (`POST /api/events` im Batch)
-- [ ] Queue zusätzlich in `localStorage` spiegeln
-- [ ] Beim Laden der Seite: unversendete Ereignisse aus `localStorage` nachsenden
-- [ ] Beim Verlassen der Seite: `navigator.sendBeacon`
-- [ ] Jedes Ereignis bekommt `clientAt` (Browserzeit) **und** `at` (Serverzeit)
+- [x] Ereignis-Queue im Client: Ereignisse sammeln statt einzeln senden (`src/lib/eventQueue.ts`)
+- [x] Alle 10 Sekunden und bei jedem Phasenwechsel senden (`POST /api/events` im Batch)
+- [x] Queue zusätzlich in `localStorage` spiegeln
+- [x] Beim Laden der Seite: unversendete Ereignisse aus `localStorage` nachsenden
+- [x] Beim Verlassen der Seite: `navigator.sendBeacon`
+- [x] Jedes Ereignis bekommt `clientAt` (Browserzeit) **und** `at` (Serverzeit)
 
 **Testen:**
 - [ ] Netzwerk in den DevTools auf offline stellen, weiterklicken, wieder online: Daten kommen an

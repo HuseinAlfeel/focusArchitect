@@ -1,32 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
+import { enqueueEvent } from "@/lib/eventQueue";
 
 /**
  * Protokolliert TAB_HIDDEN / TAB_VISIBLE ueber die Page Visibility API.
  * Liefert ein kleines, aber wertvolles Signal: ob der Tab waehrend der
  * Arbeitsphase ueberhaupt im Vordergrund war (siehe SPEZIFIKATION.md 4).
  *
- * `keepalive: true` gibt dem Request eine Chance, auch dann noch anzukommen,
- * wenn die Seite genau in diesem Moment in den Hintergrund geht - die volle
- * Absicherung per sendBeacon fuer das komplette Verlassen der Seite ist
- * Phase G.
+ * Geht ueber die Ereignis-Queue (src/lib/eventQueue.ts, Phase G): landet erst
+ * in der Queue, wird im 10s-Takt gesendet und beim Verlassen der Seite per
+ * sendBeacon nachgereicht, statt bei einer kurzen Netzwerkluecke verloren zu gehen.
  */
 export function useTabVisibilityLogging(sessionId: string, cycle: number) {
   useEffect(() => {
     function handleVisibilityChange() {
       const type =
         document.visibilityState === "hidden" ? "TAB_HIDDEN" : "TAB_VISIBLE";
-
-      void fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          events: [{ type, clientAt: new Date().toISOString(), cycle }],
-        }),
-        keepalive: true,
-      });
+      enqueueEvent(sessionId, type, { cycle });
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange);

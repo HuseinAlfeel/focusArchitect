@@ -3,10 +3,11 @@ import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isEventType } from "@/lib/events";
 
-// Minimale, direkte Fassung: ein Request, sofort geschrieben. Die robuste
-// Absicherung (Client-Queue, localStorage-Spiegel, Batch alle 10s,
-// sendBeacon beim Verlassen der Seite) ist Phase G - dieser Endpunkt bleibt
-// dabei die gleiche Schnittstelle, nur der Client drumherum wird staerker.
+// Nimmt einen Batch von Ereignissen entgegen - der Client (src/lib/eventQueue.ts,
+// Phase G) sammelt, spiegelt in localStorage, sendet alle 10s oder sofort bei
+// Phasenwechseln, und reicht beim Verlassen der Seite per sendBeacon nach.
+// Dieser Endpunkt bleibt dabei die gleiche Schnittstelle, egal ob normaler
+// fetch oder Beacon dahintersteckt.
 export async function POST(request: NextRequest) {
   const participant = await getCurrentParticipant();
   if (!participant) {

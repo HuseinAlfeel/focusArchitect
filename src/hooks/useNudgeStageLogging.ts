@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { NudgeStage } from "@/hooks/useNudgeStage";
+import { enqueueEvent } from "@/lib/eventQueue";
 
 /**
  * Protokolliert NUDGE_STAGE_0 bis NUDGE_STAGE_3 genau einmal pro Zielzeitpunkt,
@@ -27,20 +28,6 @@ export function useNudgeStageLogging(
     if (!enabled || stage === null || loggedRef.current.has(stage)) return;
     loggedRef.current.add(stage);
 
-    void fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId,
-        events: [
-          {
-            type: `NUDGE_STAGE_${stage}`,
-            clientAt: new Date().toISOString(),
-            cycle,
-          },
-        ],
-      }),
-      keepalive: true,
-    });
+    enqueueEvent(sessionId, `NUDGE_STAGE_${stage}`, { cycle });
   }, [enabled, stage, sessionId, cycle]);
 }
