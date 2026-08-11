@@ -96,11 +96,16 @@ export function useNudgeSoundSchedule(
         const currentIndex = Math.floor(
           (offsetMs - REPEAT_START_MS) / REPEAT_INTERVAL_MS
         );
-        for (let i = 0; i <= currentIndex; i++) {
-          const entry = repeatEntry(i);
-          if (!firedRef.current.has(entry.id)) {
-            fireEntry(entry, offsetMs);
-          }
+        // Nur den gerade faelligen Ton abspielen. Nach einer langen Pause
+        // (Tab tagelang offen, Laptop im Standby...) waeren sonst ploetzlich
+        // alle in der Zwischenzeit verpassten Minuten-Toene auf einmal faellig -
+        // das ergab genau das Geraeusch-Chaos, das Husin am 10.08. gemeldet hat.
+        for (let i = 0; i < currentIndex; i++) {
+          firedRef.current.add(repeatEntry(i).id);
+        }
+        const entry = repeatEntry(currentIndex);
+        if (!firedRef.current.has(entry.id)) {
+          fireEntry(entry, offsetMs);
         }
       }
     }

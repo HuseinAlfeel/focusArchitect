@@ -21,6 +21,11 @@ type QueuedEvent = {
 
 const STORAGE_KEY = "focusarchitect:event-queue";
 const FLUSH_INTERVAL_MS = 10_000;
+// Requests mit keepalive:true (und sendBeacon) sind im Browser auf ca. 64KB
+// begrenzt. Ohne Deckel wuerde ein einzelner riesiger Batch (z.B. nach einer
+// langen Pause mit vielen aufgelaufenen Ereignissen) als Ganzes fehlschlagen
+// und alles dahinter in der Queue mit sich blockieren.
+const MAX_BATCH_SIZE = 50;
 
 let queue: QueuedEvent[] = [];
 let started = false;
@@ -65,7 +70,7 @@ async function flush() {
     // sehen als der Browser, was useRoundTimer beim naechsten Reload zum
     // Zurueckfallen auf den (dann veralteten) Serverstand verleiten kann.
     while (queue.length > 0) {
-      const batch = queue.slice();
+      const batch = queue.slice(0, MAX_BATCH_SIZE);
       const sessionId = batch[0].sessionId;
 
       let ok: boolean;
@@ -95,15 +100,22 @@ function flushWithBeacon() {
   if (queue.length === 0 || typeof navigator.sendBeacon !== "function") return;
 
   const sessionId = queue[0].sessionId;
-  const blob = new Blob(
-    [JSON.stringify({ sessionId, events: toWireEvents(queue) })],
-    { type: "application/json" }
-  );
 
-  if (navigator.sendBeacon("/api/events", blob)) {
-    queue = [];
-    writeStorage();
+  // sendBeacon ist synchron/fire-and-forget, deshalb hier eine einfache
+  // Schleife statt async - genauso in Batches von MAX_BATCH_SIZE, aus dem
+  // gleichen Grund wie in flush().
+  while (queue.length > 0) {
+    const batch = queue.slice(0, MAX_BATCH_SIZE);
+    const blob = new Blob(
+      [JSON.stringify({ sessionId, events: toWireEvents(batch) })],
+      { type: "application/json" }
+    );
+
+    if (!navigator.sendBeacon("/api/events", blob)) break;
+    queue = queue.slice(batch.length);
   }
+
+  writeStorage();
 }
 
 /**
