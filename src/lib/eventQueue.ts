@@ -159,3 +159,48 @@ export function enqueueEvent(
     void flush();
   }
 }
+
+/**
+ * Fuer Ereignisse, die eine neue Runde definieren (CYCLE_STARTED,
+ * WORK_STARTED, ...): der Aufrufer wartet auf das Ergebnis, bevor er den
+ * naechsten Zustand setzt. Grund: schliesst man den Tab komplett (nicht nur
+ * Reload) sehr kurz nach einem Rundenwechsel, geht die im Browser gemerkte
+ * Rundennummer verloren (sessionStorage ueberlebt das nicht) - ohne diese
+ * Bestaetigung kann der Server dann noch die alte Runde kennen, und die App
+ * faellt beim naechsten Aufruf faelschlich auf den alten Stand zurueck.
+ * Schlaegt der Versuch fehl (z.B. wirklich offline), wird trotzdem in die
+ * normale Queue eingereiht statt das Ereignis zu verlieren - der Aufrufer
+ * geht dann einfach mit dem Risiko einer kurzen Inkonsistenz weiter, anstatt
+ * die Bedienung zu blockieren.
+ */
+export async function sendEventNow(
+  sessionId: string,
+  type: EventType,
+  options?: { cycle?: number | null; payload?: Record<string, unknown> }
+): Promise<boolean> {
+  startEventQueue();
+
+  const event: QueuedEvent = {
+    sessionId,
+    type,
+    clientAt: new Date().toISOString(),
+    cycle: options?.cycle,
+    payload: options?.payload,
+  };
+
+  try {
+    const response = await fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, events: toWireEvents([event]) }),
+      keepalive: true,
+    });
+    if (response.ok) return true;
+  } catch {
+    // faellt unten in die Queue
+  }
+
+  queue.push(event);
+  writeStorage();
+  return false;
+}

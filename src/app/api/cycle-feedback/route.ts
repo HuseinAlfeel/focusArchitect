@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Timing } from "@/generated/prisma/enums";
 
 const MIN_WORK_MIN = 5;
-const VALID_ADJUSTMENTS = new Set([-10, -5, 0, 5, 10]);
+const ADJUSTMENT_STEP_MIN = 5;
 
 export async function POST(request: NextRequest) {
   const participant = await getCurrentParticipant();
@@ -30,8 +30,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Ungültige Anfrage." }, { status: 400 });
   }
 
+  // Der Zaehler im Kurzfeedback bewegt sich frei in 5-Minuten-Schritten
+  // (Aenderung 11.08.), keine feste Liste erlaubter Werte mehr - nur noch
+  // pruefen, dass es tatsaechlich ein Vielfaches von 5 ist.
   const adjustmentMin =
-    typeof adjustmentMinRaw === "number" && VALID_ADJUSTMENTS.has(adjustmentMinRaw)
+    typeof adjustmentMinRaw === "number" &&
+    Number.isInteger(adjustmentMinRaw) &&
+    adjustmentMinRaw % ADJUSTMENT_STEP_MIN === 0
       ? adjustmentMinRaw
       : 0;
 

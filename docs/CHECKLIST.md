@@ -281,7 +281,8 @@ npm install -D @types/bcryptjs
 > Die hier entschiedene neue Arbeitszeit wird erst nach der Pause tatsächlich angewendet (F7 folgt danach).
 
 - [ ] Drei Knöpfe: zu früh / passend / zu spät
-- [ ] Bei zu früh oder zu spät: minus 10 / minus 5 / plus 5 / plus 10
+- [ ] Bei zu früh oder zu spät: Zähler in 5-Minuten-Schritten, frei nach oben oder unten
+      (Änderung 11.08.: statt vier fester Knöpfe -10/-5/+5/+10, die Sprünge waren zu grob)
 - [ ] Optionales Freitextfeld
 - [ ] `POST /api/cycle-feedback`, Ereignisse `INTERVAL_ADJUSTED`, `CYCLE_FEEDBACK_SUBMITTED`
 - [ ] Neuer Wert wirkt auf die nächste Runde und wird angezeigt ("Nächste Runde: X Minuten")

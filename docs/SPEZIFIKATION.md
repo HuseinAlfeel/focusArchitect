@@ -165,7 +165,8 @@ Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anze
 Maximal 20 Sekunden Aufwand:
 
 1. „War der Zeitpunkt der Pause passend?" → **zu früh / passend / zu spät**
-2. Bei „zu früh" oder „zu spät": „Um wie viele Minuten?" → −10 / −5 / +5 / +10
+2. Bei „zu früh" oder „zu spät": „Um wie viele Minuten?" → Zähler in 5-Minuten-Schritten,
+   frei nach oben oder unten (Änderung 11.08.: statt vier fester Knöpfe −10/−5/+5/+10)
 3. Optional, ein Feld: „Kurz in eigenen Worten?" (darf leer bleiben)
 
 Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".

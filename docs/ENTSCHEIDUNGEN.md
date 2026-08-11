@@ -95,3 +95,11 @@
 **Entscheidung:** Nachbefragung nur erreichbar, wenn die Sitzung beendet ist, danach automatisch final.
 **Begründung:** Die Fragen bewerten die ganze Sitzung im Rückblick, vorher ergibt das keinen Sinn.
 **Alternative:** Jederzeit zugänglich machen. Verworfen.
+
+## 11.08.2026 Minuten-Zähler statt fester Knöpfe beim Kurzfeedback
+
+**Entscheidung:** Bei der Anpassung der Arbeitszeit gibt es jetzt einen Zähler in 5-Minuten-Schritten
+(minus/plus), frei nach oben oder unten, statt der vier festen Knöpfe -10/-5/+5/+10.
+**Begründung:** Die festen Sprünge waren zu grob, jemand der z.B. 15 Minuten mehr wollte, kam damit nicht
+direkt hin.
+**Alternative:** Bei den vier festen Knöpfen bleiben. Verworfen.

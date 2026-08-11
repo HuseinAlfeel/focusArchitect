@@ -11,11 +11,11 @@ import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
 import { useBreakEndSound } from "@/hooks/useBreakEndSound";
 import { activities, type ActivityId } from "@/content/activities";
-import { enqueueEvent, startEventQueue } from "@/lib/eventQueue";
+import { sendEventNow, startEventQueue } from "@/lib/eventQueue";
 import type { EventType } from "@/lib/events";
 
 const MIN_WORK_MIN = 5;
-const ADJUSTMENT_OPTIONS = [-10, -5, 5, 10] as const;
+const ADJUSTMENT_STEP_MIN = 5;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
 // Nudge-Stufen laufen rein zeitbasiert (Regel 1) und parallel zur
@@ -49,6 +49,12 @@ export function SessionTimer({
   const [hasReacted, setHasReacted] = useState(false);
   const [wasSkipped, setWasSkipped] = useState(false);
   const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
+  // Waehrend eine Rundenwechsel-Funktion unten laeuft (siehe logEvent),
+  // blockiert dieser Schalter ein zweites, ueberlapptes Ausloesen durch
+  // Doppelklicks - die Funktionen warten jetzt auf die Serverbestaetigung,
+  // bevor der Zustand wechselt, und die Knoepfe bleiben in dieser kurzen
+  // Zeit anklickbar.
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     startEventQueue();
@@ -60,60 +66,76 @@ export function SessionTimer({
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
 
-  // Jeder Aufruf hier ist ein Phasenwechsel (Reaktion auf den Hinweis, neue
-  // Runde, Aktivitaet/Pause) - deshalb immer flushNow, nicht nur der 10s-Takt.
-  function logEvent(
+  // Wartet auf die Serverbestaetigung, statt nur "abzufeuern": schliesst man
+  // den Tab (nicht nur Reload) sehr kurz nach einem Rundenwechsel, geht die
+  // im Browser gemerkte Rundennummer verloren (sessionStorage ueberlebt das
+  // nicht) - ohne diese Bestaetigung kennt der Server dann noch die alte
+  // Runde, und die Sitzung faellt beim naechsten Aufruf faelschlich darauf
+  // zurueck (Husin, 11.08.: genau das mit "Pause starten"/"Ueberspringen"
+  // sofort nach einem frischen Rundenstart beobachtet).
+  async function logEvent(
     type: EventType,
     extraPayload?: Record<string, unknown>,
     cycleOverride?: number
   ) {
-    enqueueEvent(sessionId, type, {
+    await sendEventNow(sessionId, type, {
       cycle: cycleOverride ?? cycle,
       payload: extraPayload,
-      flushNow: true,
     });
   }
 
-  function reactToNudge(type: "BREAK_ACCEPTED" | "BREAK_SKIPPED") {
-    const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
-    logEvent(type, { stage: nudgeStage, secondsAfterEnd });
-    setHasReacted(true);
-    setWasSkipped(type === "BREAK_SKIPPED");
-    setRound("FEEDBACK", Date.now());
+  async function reactToNudge(type: "BREAK_ACCEPTED" | "BREAK_SKIPPED") {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    try {
+      const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
+      await logEvent(type, { stage: nudgeStage, secondsAfterEnd });
+      setHasReacted(true);
+      setWasSkipped(type === "BREAK_SKIPPED");
+      setRound("FEEDBACK", Date.now());
+    } finally {
+      setIsTransitioning(false);
+    }
   }
 
   // Gemeinsamer Startpunkt fuer die naechste Arbeitsrunde - genutzt sowohl
   // wenn eine echte Pause zu Ende geht (fromBreak: true, "Sitzung starten"
   // in BreakScreen) als auch wenn die Pause ganz uebersprungen wurde
   // (fromBreak: false, direkt nach dem Kurzfeedback).
-  function startNextRound(newWorkMin: number, fromBreak: boolean) {
-    if (fromBreak) {
-      logEvent("BREAK_ENDED");
+  async function startNextRound(newWorkMin: number, fromBreak: boolean) {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    try {
+      if (fromBreak) {
+        await logEvent("BREAK_ENDED");
+      }
+
+      const nextCycle = cycle + 1;
+      const nextEndsAt = Date.now() + newWorkMin * 60_000;
+
+      // Explizit nextCycle uebergeben, nicht das cycle-Closure - React hat den
+      // State an dieser Stelle noch nicht auf die neue Runde aktualisiert.
+      await logEvent("CYCLE_STARTED", undefined, nextCycle);
+      await logEvent("WORK_STARTED", undefined, nextCycle);
+
+      setCurrentWorkMin(newWorkMin);
+      setHasReacted(false);
+      setWasSkipped(false);
+      setRound("WORK", nextEndsAt, {
+        cycle: nextCycle,
+        activityId: null,
+        pendingWorkMin: null,
+      });
+    } finally {
+      setIsTransitioning(false);
     }
-
-    const nextCycle = cycle + 1;
-    const nextEndsAt = Date.now() + newWorkMin * 60_000;
-
-    // Explizit nextCycle uebergeben, nicht das cycle-Closure - React hat den
-    // State an dieser Stelle noch nicht auf die neue Runde aktualisiert.
-    logEvent("CYCLE_STARTED", undefined, nextCycle);
-    logEvent("WORK_STARTED", undefined, nextCycle);
-
-    setCurrentWorkMin(newWorkMin);
-    setHasReacted(false);
-    setWasSkipped(false);
-    setRound("WORK", nextEndsAt, {
-      cycle: nextCycle,
-      activityId: null,
-      pendingWorkMin: null,
-    });
   }
 
-  function handleFeedbackSubmitted(newWorkMin: number) {
+  async function handleFeedbackSubmitted(newWorkMin: number) {
     if (wasSkipped) {
       // Ueberspringen soll auch wirklich ueberspringen: keine
       // Aktivitaetsauswahl, keine Pause, direkt in die naechste Runde.
-      startNextRound(newWorkMin, false);
+      await startNextRound(newWorkMin, false);
       return;
     }
     // Die neue Arbeitszeit wird nur gemerkt, nicht sofort gestartet - sie
@@ -121,19 +143,25 @@ export function SessionTimer({
     setRound("ACTIVITY_CHOICE", Date.now(), { pendingWorkMin: newWorkMin });
   }
 
-  function handleActivityChosen(chosenId: ActivityId | "none") {
-    if (chosenId === "none") {
-      logEvent("ACTIVITY_SKIPPED");
-    } else {
-      logEvent("ACTIVITY_SELECTED", { activity: chosenId });
+  async function handleActivityChosen(chosenId: ActivityId | "none") {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    try {
+      if (chosenId === "none") {
+        await logEvent("ACTIVITY_SKIPPED");
+      } else {
+        await logEvent("ACTIVITY_SELECTED", { activity: chosenId });
+      }
+      await logEvent("BREAK_STARTED");
+      const breakEndsAt = Date.now() + initialBreakMin * 60_000;
+      setRound("BREAK", breakEndsAt, { activityId: chosenId === "none" ? null : chosenId });
+    } finally {
+      setIsTransitioning(false);
     }
-    logEvent("BREAK_STARTED");
-    const breakEndsAt = Date.now() + initialBreakMin * 60_000;
-    setRound("BREAK", breakEndsAt, { activityId: chosenId === "none" ? null : chosenId });
   }
 
-  function handleStartNextRound() {
-    startNextRound(pendingWorkMin ?? currentWorkMin, true);
+  async function handleStartNextRound() {
+    await startNextRound(pendingWorkMin ?? currentWorkMin, true);
   }
 
   return (
@@ -353,21 +381,26 @@ function FeedbackScreen({
       {needsAdjustment && (
         <div className="space-y-2">
           <p className="text-sm">Um wie viele Minuten?</p>
-          <div className="flex justify-center gap-2">
-            {ADJUSTMENT_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setAdjustmentMin(option)}
-                className={`rounded border px-3 py-1.5 text-sm ${
-                  adjustmentMin === option
-                    ? "border-neutral-800 bg-neutral-800 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
-                    : "border-black/15 dark:border-white/20"
-                }`}
-              >
-                {option > 0 ? `+${option}` : option}
-              </button>
-            ))}
+          <div className="flex items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => setAdjustmentMin((prev) => prev - ADJUSTMENT_STEP_MIN)}
+              aria-label="5 Minuten weniger"
+              className="h-9 w-9 rounded border border-black/15 text-lg leading-none dark:border-white/20"
+            >
+              −
+            </button>
+            <span className="w-16 text-sm tabular-nums">
+              {adjustmentMin > 0 ? `+${adjustmentMin}` : adjustmentMin} Min
+            </span>
+            <button
+              type="button"
+              onClick={() => setAdjustmentMin((prev) => prev + ADJUSTMENT_STEP_MIN)}
+              aria-label="5 Minuten mehr"
+              className="h-9 w-9 rounded border border-black/15 text-lg leading-none dark:border-white/20"
+            >
+              +
+            </button>
           </div>
         </div>
       )}
