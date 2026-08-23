@@ -350,9 +350,12 @@ POST  /api/survey                   { phase, answers }
 POST  /api/cycle-feedback           { cycle, timing, adjustmentMin, activity, comment }
 POST  /api/events                   Ereignisse, im Batch (siehe unten)
 
-GET   /api/admin/export?format=csv  nur für ADMIN
-GET   /api/admin/sessions           Übersicht
+GET   /api/admin/export?file=participants|cycles|events   nur für ADMIN
 ```
+
+Kein eigener `/api/admin/sessions`-Endpunkt (Änderung 23.08.): die Übersicht auf `/admin`
+holt die Sessions direkt per Prisma in der Server Component, wie die anderen Seiten der App
+auch. Ein separater API-Endpunkt dafür würde nirgends gebraucht.
 
 **Ereignisse im Batch senden.** Nicht bei jedem Ereignis sofort ein Request. Sammle sie in einer Queue im Client und schicke sie alle 10 Sekunden sowie bei jedem Phasenwechsel. Bei Netzproblemen bleiben sie in der Queue. Beim Verlassen der Seite `navigator.sendBeacon` benutzen, damit nichts verloren geht.
 

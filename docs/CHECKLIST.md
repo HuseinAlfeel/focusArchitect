@@ -337,14 +337,15 @@ npm install -D @types/bcryptjs
 
 *Aufwand: halber Tag. Vor der Studie bauen, nicht danach!*
 
-- [ ] Seite `/admin`, nur für Rolle ADMIN
-- [ ] Übersicht: alle Sessions, Status, Anzahl Ereignisse
-- [ ] `GET /api/admin/export` erzeugt drei CSV-Dateien:
+- [x] Seite `/admin`, nur für Rolle ADMIN (`src/app/admin/page.tsx`)
+- [x] Übersicht: alle Sessions, Status, Anzahl Ereignisse
+- [x] `GET /api/admin/export?file=...` erzeugt drei CSV-Dateien:
       - `participants.csv`: eine Zeile je Person, Vor- und Nachwerte nebeneinander
       - `cycles.csv`: eine Zeile je Runde
       - `events.csv`: eine Zeile je Ereignis
-- [ ] Semikolon als Trennzeichen und UTF-8 mit BOM, sonst zerlegt Excel deine Umlaute
-- [ ] Export einmal mit Testdaten heruntergeladen und in Excel geöffnet
+- [x] Semikolon als Trennzeichen und UTF-8 mit BOM, sonst zerlegt Excel deine Umlaute
+- [x] Export einmal mit Testdaten heruntergeladen und geprüft (BOM-Bytes, Semikolon-Trennung,
+      Umlaute, Escaping bei Kommentaren mit Semikolon - per curl, siehe Commit)
 
 > **Fertig, wenn:** Du hast eine CSV vor dir, mit der du wirklich rechnen könntest.
 
