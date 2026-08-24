@@ -1,9 +1,53 @@
-// Items V1-V7 aus docs/SPEZIFIKATION.md, Abschnitt [3] Vorbefragung.
-// Diese sind dort bereits konkret vorgeschlagen (nicht als offen markiert),
-// liegen aber trotzdem in einer eigenen Datei, damit Holly sie bei Bedarf
-// leicht anpassen kann, ohne im JSX suchen zu muessen.
+// Items D1-D5 und V1-V7 aus docs/SPEZIFIKATION.md, Abschnitt [3] Vorbefragung.
+// D1-D5 sind demografische Angaben (24.08. mit Holly abgestimmt ergaenzt),
+// V1-V7 die urspruengliche Baseline-Erhebung. Liegen in einer eigenen Datei,
+// damit Holly sie bei Bedarf leicht anpassen kann, ohne im JSX suchen zu muessen.
 
 export const preSurveyItems = [
+  {
+    id: "D1",
+    type: "choice",
+    question: "Altersgruppe",
+    options: [
+      { value: "18-24", label: "18–24" },
+      { value: "25-34", label: "25–34" },
+      { value: "35-44", label: "35–44" },
+      { value: "45-54", label: "45–54" },
+      { value: "55+", label: "55 und älter" },
+    ],
+  },
+  {
+    id: "D2",
+    type: "choice",
+    question: "Geschlecht",
+    options: [
+      { value: "weiblich", label: "weiblich" },
+      { value: "maennlich", label: "männlich" },
+      { value: "divers", label: "divers" },
+      { value: "keine_angabe", label: "keine Angabe" },
+    ],
+  },
+  {
+    id: "D3",
+    type: "choice",
+    question: "Tätigkeit",
+    options: [
+      { value: "studium", label: "Studium" },
+      { value: "anstellung", label: "Anstellung" },
+      { value: "selbststaendig", label: "selbstständig" },
+      { value: "sonstiges", label: "sonstiges" },
+    ],
+  },
+  {
+    id: "D4",
+    type: "number",
+    question: "Wie viele Stunden arbeitest du an einem typischen Tag?",
+  },
+  {
+    id: "D5",
+    type: "number",
+    question: "Wie viele davon im Sitzen?",
+  },
   {
     id: "V1",
     type: "choice",

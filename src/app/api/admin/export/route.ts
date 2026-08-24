@@ -4,14 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { toCsv } from "@/lib/csv";
 import { preSurveyItems } from "@/content/pre-survey";
 import {
-  postSurveyScaleItems,
+  postSurveyStateItems,
+  postSurveyPersuasivenessItems,
+  postSurveyIntrusivenessItems,
   postSurveyComparisonItem,
   postSurveyTextItems,
 } from "@/content/post-survey";
 
 const PRE_IDS = preSurveyItems.map((item) => item.id);
 const POST_IDS = [
-  ...postSurveyScaleItems.map((item) => item.id),
+  ...postSurveyStateItems.map((item) => item.id),
+  ...postSurveyPersuasivenessItems.map((item) => item.id),
+  ...postSurveyIntrusivenessItems.map((item) => item.id),
   postSurveyComparisonItem.id,
   ...postSurveyTextItems.map((item) => item.id),
 ];

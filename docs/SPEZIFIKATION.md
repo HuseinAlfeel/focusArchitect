@@ -111,10 +111,15 @@ Unten: Checkbox „Ich habe die Informationen gelesen und nehme freiwillig teil"
 
 ### [3] Vorbefragung
 
-Erhebt die Baseline, also deinen Vergleichsmaßstab. Vorschlag für die Items (endgültige Fassung mit Holly abstimmen):
+Erhebt die Baseline, also deinen Vergleichsmaßstab. Beginnt mit einem kurzen demografischen Block (24.08. mit Holly abgestimmt ergänzt), danach folgen die ursprünglichen Items V1-V7:
 
 | # | Frage | Format |
 |---|---|---|
+| D1 | Altersgruppe | Auswahl: 18–24 / 25–34 / 35–44 / 45–54 / 55 und älter |
+| D2 | Geschlecht | Auswahl: weiblich / männlich / divers / keine Angabe |
+| D3 | Tätigkeit | Auswahl: Studium / Anstellung / selbstständig / sonstiges |
+| D4 | Wie viele Stunden arbeitest du an einem typischen Tag? | Freitext, Zahl |
+| D5 | Wie viele davon im Sitzen? | Freitext, Zahl |
 | V1 | Wie lange arbeitest du üblicherweise am Stück am Bildschirm, ohne Pause? | Auswahl: <30min / 30–60 / 60–120 / >120 |
 | V2 | Wie oft machst du bei solcher Arbeit bewusst Pausen? | Skala 1–7 (nie … sehr oft) |
 | V3 | Nutzt du bereits Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)? | Ja/Nein + Freitext |
@@ -194,24 +199,33 @@ Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, da
 
 ### [10] Nachbefragung
 
-Spiegelt die Vorbefragung und ergänzt die Bewertung der Intervention:
+**Finale Fassung vom 24.08., mit Holly abgestimmt** (ersetzt die vorherige N1-N10-Version vollständig). Vier Blöcke: Zustand nach der Sitzung, wahrgenommene Überzeugungskraft (etablierte Skala), wahrgenommene Aufdringlichkeit (etablierte Skala), Vergleich plus Freitext.
 
 | # | Frage | Format |
 |---|---|---|
-| N1 | Wie konzentriert warst du in dieser Sitzung? | Skala 1–7 |
-| N2 | Wie erschöpft fühlst du dich jetzt? | Skala 1–7 |
-| N3 | **Wie störend empfandest du die Pausenhinweise?** | Skala 1–7 |
-| N4 | Wie angemessen war der Zeitpunkt der Hinweise? | Skala 1–7 |
-| N5 | Wie angenehm war die Art der Hinweise (Farbe, Ton, Einblendung)? | Skala 1–7 |
-| N6 | **Würdest du diese Anwendung weiter nutzen?** | Skala 1–7 |
-| N7 | Im Vergleich zu deiner gewohnten Arbeitsweise war diese Sitzung … | besser / gleich / schlechter |
-| N8 | Warum? | Freitext |
-| N9 | Was hat dich am meisten gestört? | Freitext |
-| N10 | Was hat am besten funktioniert? | Freitext |
+| N1 | Wie konzentriert warst du in dieser Sitzung? | Skala 1–7 (gar nicht … sehr) |
+| N2 | Wie erschöpft fühlst du dich jetzt? | Skala 1–7 (gar nicht … sehr) |
+| N3 | Durch die Nutzung dieses Assistenzsystem werde ich meine Einstellung verändern. | Skala 1–7 Zustimmung* |
+| N4 | Ich glaube, dass Erinnerungen von diesem Assistenzsystems richtig sind. | Skala 1–7 Zustimmung* |
+| N5 | Dieses Assistenzsystem hat das Potential andere Nutzer*innen zu beeinflussen. | Skala 1–7 Zustimmung* |
+| N6 | Dieses Assistenzsystem bewirkt, dass ich einige Veränderungen an meinem Verhalten vornehme. | Skala 1–7 Zustimmung* |
+| N7 | Dieses Assistenzsystem hat das Potential das Verhalten anderer Nutzer*innen zu verändern. | Skala 1–7 Zustimmung* |
+| N8 | Dieses Assistenzsystem wird Veränderungen in meinem Verhalten herbei führen. | Skala 1–7 Zustimmung* |
+| N9 | Dieses Assistenzsystem hat das Potential andere Nutzer*innen zu inspirieren. | Skala 1–7 Zustimmung* |
+| N10 | Erinnerungen von diesem Assistenzsystem sind akkurat. | Skala 1–7 Zustimmung* |
+| N11 | Dieses Assistenzsystem ist vertrauenswürdig. | Skala 1–7 Zustimmung* |
+| N12 | Die Qualität meiner Arbeit hat sich in Anwesenheit des Assistenzsystems verschlechtert. | Skala 1–7 Zustimmung* |
+| N13 | Das Assistenzsystem stört meinen Arbeitsfluss. | Skala 1–7 Zustimmung* |
+| N14 | Ich fühle mich genervt von dem Assistenzsystem. | Skala 1–7 Zustimmung* |
+| N15 | Das Assistenzsystem lenkt mich ab. | Skala 1–7 Zustimmung* |
+| N16 | Im Vergleich zu deiner gewohnten Arbeitsweise war diese Sitzung … | besser / gleich / schlechter |
+| N17 | Warum? | Freitext, optional |
+| N18 | Was hat dich am meisten gestört? | Freitext, optional |
+| N19 | Was hat am besten funktioniert? | Freitext, optional |
 
-N3 und N6 sind deine Kernvariablen für UF3. N1/N2 vergleichst du gegen V4/V5.
+\* Zustimmungsskala 1–7: 1 = Stimme überhaupt nicht zu · 2 = Stimme nicht zu · 3 = Stimme eher nicht zu · 4 = Neutral · 5 = Stimme eher zu · 6 = Stimme zu · 7 = Stimme voll und ganz zu
 
-> **Ein Tipp, der deine Arbeit aufwertet:** Frag Holly, ob du zusätzlich ein etabliertes Instrument einsetzen sollst, etwa **NASA-TLX** für die empfundene Beanspruchung oder **UEQ-S** für die Nutzungserfahrung. Etablierte Skalen sind wissenschaftlich stärker als selbst gebaute Fragen, weil sie geprüft und vergleichbar sind. Beide sind kurz und frei verfügbar. Das ist ein guter Meeting-Punkt.
+N3-N11 sind die Skala "wahrgenommene Überzeugungskraft" (Persuasiveness), N12-N15 die Skala "wahrgenommene Aufdringlichkeit" (Intrusiveness) - beide wortgleich übernommen, inklusive Tippfehler in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem"). N1/N2 vergleichst du gegen V4/V5 aus der Vorbefragung. Pflichtfelder: N1-N16. N17-N19 dürfen leer bleiben.
 
 ### [11] Abschluss
 

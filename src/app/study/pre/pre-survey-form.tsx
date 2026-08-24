@@ -15,6 +15,9 @@ function isAnswered(item: PreSurveyItem, value: AnswerValue | undefined) {
   if (item.type === "yesno") {
     return typeof (value as YesNoValue).usesTool === "boolean";
   }
+  if (item.type === "number") {
+    return value !== "" && value !== null && !Number.isNaN(Number(value));
+  }
   return value !== "" && value !== null;
 }
 
@@ -126,9 +129,26 @@ export function PreSurveyForm() {
 
   return (
     <div className="space-y-8">
-      {preSurveyItems.map((item) => (
+      {preSurveyItems.map((item, index) => (
         <div key={item.id} className="space-y-2">
+          {index === 0 && (
+            <h2 className="text-base font-semibold">Demografische Angaben</h2>
+          )}
           <p className="text-sm font-medium">{item.question}</p>
+
+          {item.type === "number" && (
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={24}
+              step={0.5}
+              placeholder="z. B. 8"
+              value={(answers[item.id] as number | string) ?? ""}
+              onChange={(event) => setAnswer(item.id, event.target.value)}
+              className="w-24 rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+            />
+          )}
 
           {item.type === "scale" && (
             <div className="flex flex-wrap items-center gap-2">

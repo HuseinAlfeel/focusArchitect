@@ -221,7 +221,7 @@ npm install -D @types/bcryptjs
 
 ### F2. Vorbefragung (halber Tag)
 
-- [ ] Seite `/study/pre` mit den Items V1 bis V7
+- [ ] Seite `/study/pre` mit den Items D1 bis D5 (demografisch) und V1 bis V7
 - [ ] Skalen als anklickbare Buttons 1 bis 7, nicht als Slider (Slider verleiten zur Mitte)
 - [ ] Validierung: alle Pflichtfelder ausgefüllt
 - [ ] `POST /api/survey` mit `phase: "PRE"`
@@ -302,7 +302,7 @@ npm install -D @types/bcryptjs
 
 ### F9. Nachbefragung und Abschluss (halber Tag)
 
-- [ ] Seite `/study/post` mit N1 bis N10
+- [ ] Seite `/study/post` mit N1 bis N19
 - [ ] `POST /api/survey` mit `phase: "POST"`
 - [ ] `PATCH /api/session/:id/end`, Ereignisse `SESSION_ENDED`, `SURVEY_POST_SUBMITTED`
 - [ ] Abschlussseite: Dank, deine Kontaktadresse für Rückfragen und Löschwünsche

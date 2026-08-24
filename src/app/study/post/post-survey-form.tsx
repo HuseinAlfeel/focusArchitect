@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  postSurveyScaleItems,
+  likertScaleLabels,
+  postSurveyStateItems,
+  postSurveyLikertIntro,
+  postSurveyPersuasivenessItems,
+  postSurveyIntrusivenessItems,
   postSurveyComparisonItem,
   postSurveyTextItems,
   requiredPostSurveyIds,
@@ -34,6 +38,13 @@ function ChoiceButton({
     >
       {children}
     </button>
+  );
+}
+
+function MissingNotice({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <p className="text-xs text-red-600 dark:text-red-400">Bitte beantworten.</p>
   );
 }
 
@@ -91,7 +102,7 @@ export function PostSurveyForm({ sessionId }: { sessionId: string }) {
 
   return (
     <div className="space-y-8">
-      {postSurveyScaleItems.map((item) => (
+      {postSurveyStateItems.map((item) => (
         <div key={item.id} className="space-y-2">
           <p className="text-sm font-medium">{item.question}</p>
           <div className="flex flex-wrap items-center gap-2">
@@ -111,15 +122,65 @@ export function PostSurveyForm({ sessionId }: { sessionId: string }) {
               {item.highLabel}
             </span>
           </div>
-          {triedSubmit && answers[item.id] === undefined && (
-            <p className="text-xs text-red-600 dark:text-red-400">
-              Bitte beantworten.
-            </p>
-          )}
+          <MissingNotice show={triedSubmit && answers[item.id] === undefined} />
         </div>
       ))}
 
-      <div className="space-y-2">
+      <div className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-sm font-medium">{postSurveyLikertIntro}</p>
+          <p className="text-xs opacity-60">
+            {likertScaleLabels.map((label, i) => `${i + 1} = ${label}`).join(" · ")}
+          </p>
+        </div>
+
+        {postSurveyPersuasivenessItems.map((item) => (
+          <div key={item.id} className="space-y-2">
+            <p className="text-sm">{item.question}</p>
+            <div className="flex gap-1.5">
+              {SCALE_VALUES.map((n) => (
+                <ChoiceButton
+                  key={n}
+                  active={answers[item.id] === n}
+                  onClick={() => setAnswer(item.id, n)}
+                >
+                  {n}
+                </ChoiceButton>
+              ))}
+            </div>
+            <MissingNotice show={triedSubmit && answers[item.id] === undefined} />
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-sm font-medium">{postSurveyLikertIntro}</p>
+          <p className="text-xs opacity-60">
+            {likertScaleLabels.map((label, i) => `${i + 1} = ${label}`).join(" · ")}
+          </p>
+        </div>
+
+        {postSurveyIntrusivenessItems.map((item) => (
+          <div key={item.id} className="space-y-2">
+            <p className="text-sm">{item.question}</p>
+            <div className="flex gap-1.5">
+              {SCALE_VALUES.map((n) => (
+                <ChoiceButton
+                  key={n}
+                  active={answers[item.id] === n}
+                  onClick={() => setAnswer(item.id, n)}
+                >
+                  {n}
+                </ChoiceButton>
+              ))}
+            </div>
+            <MissingNotice show={triedSubmit && answers[item.id] === undefined} />
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-2 border-t border-black/10 pt-6 dark:border-white/10">
         <p className="text-sm font-medium">{postSurveyComparisonItem.question}</p>
         <div className="flex flex-wrap gap-2">
           {postSurveyComparisonItem.options.map((option) => (
@@ -132,11 +193,9 @@ export function PostSurveyForm({ sessionId }: { sessionId: string }) {
             </ChoiceButton>
           ))}
         </div>
-        {triedSubmit && answers[postSurveyComparisonItem.id] === undefined && (
-          <p className="text-xs text-red-600 dark:text-red-400">
-            Bitte beantworten.
-          </p>
-        )}
+        <MissingNotice
+          show={triedSubmit && answers[postSurveyComparisonItem.id] === undefined}
+        />
       </div>
 
       {postSurveyTextItems.map((item) => (
