@@ -114,3 +114,17 @@ danach Vergleichsfrage und Freitext.
 **Begründung:** Mit Holly abgestimmt. Die etablierten Skalen sind wissenschaftlich stärker als die alten
 selbst gebauten N3-N6-Fragen, weil sie geprüft und vergleichbar sind.
 **Alternative:** Bei den alten N1-N10 bleiben. Verworfen, da nicht mehr die abgestimmte Fassung.
+
+## 24.08.2026 Zwei Toene gleichzeitig bei +3 Min behoben
+
+**Entscheidung:** Zwei Aenderungen an `useNudgeSoundSchedule.ts`: (1) Der Klang bei +3 Min ist jetzt derselbe
+sanfte Sinuston wie bei 0:00, statt des abweichenden "pulsing-tone". (2) Der Tick-Loop spielt jetzt nur noch
+die zuletzt faellige feste Stufe wirklich ab, falls durch einen verzoegerten Tick (gedrosselter Hintergrund-Tab)
+mehrere Schwellen im selben Tick ueberschritten werden - genau dieselbe Absicherung, die es fuer die minuetlichen
+Wiederholungstoene ab +4 Min schon seit dem 10.08. gibt, war fuer die festen Stufen (-30s bis +3 Min) nie gebaut.
+**Begruendung:** Husin meldete zwei gleichzeitig laufende, gegeneinander klingende Toene bei Minute 3. Ursache:
+wenn der Tick durch Tab-Drosselung verzoegert wird, koennen zwei Schwellen (z.B. +2 Min und +3 Min) im selben
+Tick faellig werden und dann nahezu gleichzeitig abspielen. Mit gleichem Klangcharakter klingt ein solcher
+seltener Doppel-Treffer wie ein einzelner, etwas voller Ton statt wie zwei widerspruechliche Klaenge.
+**Alternative:** Nur den Klangcharakter angleichen, den Tick-Loop unangetastet lassen. Verworfen, weil das nur
+das Symptom fuer genau diese eine Minuten-Kombination kaschiert haette, nicht die Ursache.

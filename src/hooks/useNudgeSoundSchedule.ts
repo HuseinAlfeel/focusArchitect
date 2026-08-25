@@ -13,19 +13,20 @@ type ScheduleEntry = {
   character: NudgeSoundCharacter;
 };
 
-// Mit Husin abgestimmter Zeitplan (2026-08-04):
+// Mit Husin abgestimmter Zeitplan (2026-08-04, +3-Min-Klang am 24.08. auf
+// soft-sine vereinheitlicht statt pulsing-tone - siehe ENTSCHEIDUNGEN.md):
 //  -30s        sanfter Sinuston  1x               50%
 //    0s        sanfter Sinuston  1x               75%
 //  +1 Min      sanfter Sinuston  2x (0.5s Abstand) 75%
 //  +2 Min      sanfter Sinuston  2x (0.5s Abstand) 100%
-//  +3 Min      pulsierender Ton  1x                75%
+//  +3 Min      sanfter Sinuston  1x                75%
 //  +4 Min, ... pulsierender Ton  1x                100%  (jede weitere Minute)
 const FIXED_ENTRIES: ScheduleEntry[] = [
   { id: "pre-30s", offsetMs: -30_000, repeats: 1, gapMs: 0, intensity: 0.5, character: "soft-sine" },
   { id: "at-0s", offsetMs: 0, repeats: 1, gapMs: 0, intensity: 0.75, character: "soft-sine" },
   { id: "plus-1min", offsetMs: 60_000, repeats: 2, gapMs: 500, intensity: 0.75, character: "soft-sine" },
   { id: "plus-2min", offsetMs: 120_000, repeats: 2, gapMs: 500, intensity: 1, character: "soft-sine" },
-  { id: "plus-3min", offsetMs: 180_000, repeats: 1, gapMs: 0, intensity: 0.75, character: "pulsing-tone" },
+  { id: "plus-3min", offsetMs: 180_000, repeats: 1, gapMs: 0, intensity: 0.75, character: "soft-sine" },
 ];
 
 const REPEAT_START_MS = 240_000; // +4 Min
@@ -86,10 +87,21 @@ export function useNudgeSoundSchedule(
     function tick() {
       const offsetMs = Date.now() - endsAt;
 
-      for (const entry of FIXED_ENTRIES) {
-        if (!firedRef.current.has(entry.id) && offsetMs >= entry.offsetMs) {
-          fireEntry(entry, offsetMs);
+      // Nur die zuletzt faellige Stufe wirklich abspielen. Wenn der Tick
+      // durch einen gedrosselten Hintergrund-Tab verzoegert wurde und dabei
+      // mehrere Schwellen gleichzeitig ueberschritten werden (z.B. +2 Min und
+      // +3 Min im selben Tick), wuerden sonst zwei Toene direkt hintereinander
+      // bzw. ueberlappend abgespielt - das "zwei Toene gleichzeitig"-Problem,
+      // das Husin am 24.08. gemeldet hat. Gleiche Absicherung wie unten schon
+      // fuer die minuetlichen Wiederholungstoene (Fix vom 10.08.).
+      const dueFixedEntries = FIXED_ENTRIES.filter(
+        (entry) => !firedRef.current.has(entry.id) && offsetMs >= entry.offsetMs
+      );
+      if (dueFixedEntries.length > 0) {
+        for (const entry of dueFixedEntries.slice(0, -1)) {
+          firedRef.current.add(entry.id);
         }
+        fireEntry(dueFixedEntries[dueFixedEntries.length - 1], offsetMs);
       }
 
       if (offsetMs >= REPEAT_START_MS) {
