@@ -200,7 +200,9 @@ Auswahl wird protokolliert. Die Option „keine" muss gleichwertig aussehen, nic
 
 Ruhiger Bildschirm mit Restzeit. Falls eine Aktivität gewählt wurde: schrittweise Anleitung, ein Schritt pro Bildschirm, automatisch weiter.
 
-In den letzten 10 Sekunden ein leiser Klopf-Countdown, bei 0 ein klares akustisches Signal — sonst endet die Pause komplett unbemerkt, wenn man nicht gerade auf den Bildschirm schaut (Änderung 09.08.).
+**Die Pausenzeit hat Vorrang vor der Aktivität** (Änderung 26.08.): dauert die gewählte Aktivität länger als die Pause (z. B. beim Testen mit kurzen Pausenzeiten, oder wenn das Kurzfeedback die Pause selbst nicht betrifft, aber die Aktivität-Presets fix sind), blockiert das nicht den Weiterknopf — die Aktivitätsanzeige wird einfach ausgeblendet, sobald die Pausenzeit abgelaufen ist, die Aktivität endet quasi mit der Pause. Vorher musste die Aktivität immer erst zu Ende laufen, auch wenn die Pause selbst schon lange vorbei war.
+
+In den letzten 10 Sekunden ein leiser Klopf-Countdown, bei 0 ein klares akustisches Signal — sonst endet die Pause komplett unbemerkt, wenn man nicht gerade auf den Bildschirm schaut (Änderung 09.08.). Der Countdown prüft zusätzlich bei jedem `visibilitychange` sofort nach (Änderung 26.08.), statt nur auf den nächsten 200ms-Tick zu warten — sonst kann ein gedrosselter Hintergrund-Tab das enge Ein-Sekunden-Fenster einzelner Klopftöne verpassen, während das robustere Endsignal trotzdem ankommt (genau das hat Husin an einer Pause beobachtet: nur das Endsignal gehört, keinen Countdown).
 
 Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, das wäre selbst eine Störung. Die im Kurzfeedback [7] entschiedene Arbeitszeit wird jetzt angewendet, die nächste Runde beginnt.
 

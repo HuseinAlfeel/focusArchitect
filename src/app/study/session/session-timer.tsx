@@ -552,7 +552,12 @@ function BreakScreen({
   const { currentStepIndex, remainingMs: stepRemainingMs, allStepsDone } =
     useActivitySteps(sessionId, cycle, stepDurations);
 
-  const readyToContinue = breakDone && (!activity || allStepsDone);
+  // Die Pausenzeit bestimmt allein, wann "Sitzung starten" erscheint - eine
+  // Aktivitaet, die laenger dauert als die (ggf. per Kurzfeedback verkuerzte)
+  // Pause, darf den Weiterknopf nicht blockieren. Endet die Pause waehrend
+  // eine Aktivitaet noch laeuft, wird deren Anzeige einfach ausgeblendet,
+  // die Aktivitaet endet quasi mit der Pause (Husin, 26.08.).
+  const readyToContinue = breakDone;
 
   useBreakEndSound(breakEndsAt, !readyToContinue);
 
@@ -564,7 +569,7 @@ function BreakScreen({
         </p>
       )}
 
-      {activity && !allStepsDone && (
+      {activity && !allStepsDone && !breakDone && (
         <div className="max-w-xs space-y-1">
           <p className="text-sm">{activity.steps[currentStepIndex]?.instruction}</p>
           {stepRemainingMs !== null && (

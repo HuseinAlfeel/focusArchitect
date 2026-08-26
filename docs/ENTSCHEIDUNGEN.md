@@ -207,3 +207,27 @@ vergleichbar. Keine Obergrenze, weil das der zitierten Nutzerautonomie (De Russi
 widersprechen wuerde - haeufiges Snoozen ist selbst ein Befund, kein Fehlverhalten, das verhindert werden muss.
 **Alternative:** Waehlbare Dauer. Verworfen wegen der UI-Komplexitaet an der falschen Stelle und schlechterer
 Vergleichbarkeit der Daten.
+
+## 26.08.2026 Pausenzeit hat Vorrang vor Aktivitaetsdauer
+
+**Entscheidung:** `readyToContinue` in `BreakScreen` haengt nur noch von `breakDone` ab, nicht mehr zusaetzlich
+von `allStepsDone`. Die Aktivitaetsanzeige wird ausgeblendet, sobald die Pause vorbei ist, auch wenn die
+Aktivitaet selbst noch laufen wuerde.
+**Begruendung:** Husin testete mit einer 2-Minuten-Pause und einer laenger dauernden Aktivitaet - "Sitzung
+starten" erschien erst, wenn die Aktivitaet zu Ende war, nicht wenn die Pause endete. Aktivitaeten haben feste
+Presets (2/3/5 Min), die Pause ist aber frei einstellbar (initialBreakMin, zusaetzlich per Kurzfeedback
+anpassbar) - eine kuerzere Pause als das gewaehlte Aktivitaets-Preset ist ein realistischer Fall, nicht nur ein
+Testartefakt.
+**Alternative:** Aktivitaet immer zu Ende laufen lassen, auch ueber die Pausenzeit hinaus. Verworfen, das war
+genau der gemeldete Bug.
+
+## 26.08.2026 Pausenende-Countdown reagiert jetzt auf Tab-Ruecksprung
+
+**Entscheidung:** `useBreakEndSound.ts` prueft jetzt zusaetzlich sofort bei jedem `visibilitychange`, nicht nur
+im 200ms-Takt.
+**Begruendung:** Husin hoerte bei einer Pause nur das Endsignal, keinen der zehn Klopftoene davor. Ursache:
+jeder Klopfton hat nur eine einzige Sekunde Zeitfenster, in dem der Tick ihn treffen muss - bei gedrosseltem
+Hintergrund-Tab (realistisch, da man waehrend der Pause meist nicht auf den Bildschirm schaut) reicht das
+leicht zum Verpassen. Das Endsignal dagegen trifft bei jedem Tick nach 0:00 erneut zu, deshalb kam nur das an.
+**Alternative:** Taktrate weiter erhoehen. Verworfen, das hilft nicht gegen Browser-Drosselung selbst, nur die
+Rueckkehr zum Tab kann das zuverlaessig ausloesen.
