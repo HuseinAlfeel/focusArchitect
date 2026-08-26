@@ -158,6 +158,8 @@ async function cyclesCsv() {
             )
           : null;
 
+      const snoozeCount = cycleEvents.filter((e) => e.type === "BREAK_SNOOZED").length;
+
       rows.push({
         code: session.participant.code,
         sessionId: session.id,
@@ -171,6 +173,7 @@ async function cyclesCsv() {
         nudgeStage1At: nudgeStage1?.at ?? null,
         firstTabVisibleAfterNudge: firstTabVisibleAfterNudge?.at ?? null,
         latencyToTabReturnSeconds,
+        snoozeCount,
         activity: activitySelected
           ? activityPayload?.activity ?? null
           : activitySkipped
@@ -197,6 +200,7 @@ async function cyclesCsv() {
     "nudgeStage1At",
     "firstTabVisibleAfterNudge",
     "latencyToTabReturnSeconds",
+    "snoozeCount",
     "activity",
     "timing",
     "adjustmentMin",

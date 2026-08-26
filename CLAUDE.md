@@ -61,7 +61,7 @@ Wenn eine vorgeschlagene Funktion nichts misst und nicht Teil der Intervention i
 | 0 | T minus 2 Min | Hintergrund wandert über CSS-Transition (60s) minimal ins Wärmere |
 | 1 | 0:00 | Farbe vollendet, kleine ruhige Karte unten rechts, optional ein leiser Ton |
 | 2 | +2 Min | Karte etwas größer, sehr langsames Pulsieren |
-| 3 | +5 Min | Ruhiges zentriertes Fenster, zwei Optionen |
+| 3 | +5 Min | Ruhiges zentriertes Fenster, drei Optionen (Pause starten / Noch 5 Minuten / Überspringen) |
 
 Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden. Das ist das wichtigste Ergebnis der Arbeit.
 

@@ -251,25 +251,33 @@ npm install -D @types/bcryptjs
 - [ ] Nur Restzeit, klein, geringer Kontrast
 - [ ] Knopf „Sitzung beenden" klein am Rand
 - [ ] Page Visibility API: `TAB_HIDDEN` und `TAB_VISIBLE` protokollieren
+- [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
+      sichtbarem Tab, keine Inhalte. Einschränkung dokumentieren: misst Interaktion mit der App, nicht die
+      echte Arbeitsaktivität außerhalb des Tabs (siehe SPEZIFIKATION.md 4)
 
 ### F6. Der abgestufte Hinweis (1 Tag, das Herzstück)
 
 - [ ] **Stufe 0** bei T minus 2 Min: Hintergrund wandert über CSS-Transition (Dauer 60s) minimal ins Wärmere
 - [ ] **Stufe 1** bei 0:00: Farbe vollendet, kleine ruhige Karte unten rechts, optional ein einzelner leiser Ton
 - [ ] **Stufe 2** bei plus 2 Min: Karte etwas größer, sehr langsames Pulsieren
-- [ ] **Stufe 3** bei plus 5 Min: ruhiges zentriertes Fenster, zwei Optionen. Kein Rot, kein Ausrufezeichen
-- [ ] Jede erreichte Stufe protokollieren: `NUDGE_STAGE_0` bis `NUDGE_STAGE_3`
+- [ ] **Stufe 3** bei plus 5 Min: ruhiges zentriertes Fenster, drei Optionen. Kein Rot, kein Ausrufezeichen
+- [ ] Jede erreichte Stufe protokollieren: `NUDGE_STAGE_0` bis `NUDGE_STAGE_3`, jeweils mit
+      `payload: { tabVisibleAtNudge }` (Änderung 25.08., ergibt zusammen mit `TAB_VISIBLE` die Reaktionslatenz
+      im Export)
 - [ ] Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden:
       `BREAK_ACCEPTED`/`BREAK_SKIPPED` mit `payload: { stage, secondsAfterEnd }`
-- [ ] Optionen: Pause starten / überspringen — **kein** "5 Min verschieben" mehr (Husin, 09.08.: blindes
-      Verlängern der laufenden Runde entfernt; Anpassungen laufen ausschließlich über das Kurzfeedback F8)
+- [ ] Optionen: Pause starten / Noch 5 Minuten / überspringen. Das Snoozen ("Noch 5 Minuten", Änderung 26.08.,
+      Ereignis `BREAK_SNOOZED`) verschiebt nur die Eskalation, nicht die Rundenlänge — kein Rückfall in das am
+      09.08. entfernte blinde Verlängern der laufenden Runde (das änderte die Rundenlänge ohne Minutenangabe,
+      das übernimmt weiterhin ausschließlich das Kurzfeedback F8)
 - [ ] "Überspringen" umgeht wirklich Aktivitätsauswahl und Pause (direkt weiter zur nächsten Arbeitsrunde nach
       dem Kurzfeedback) — nicht nur ein anderer Ereignisname bei sonst gleichem Ablauf wie "Pause starten"
-- [ ] Zusätzlich zur Ton-Eskalation: solange nicht reagiert wurde, zeigt der Bildschirm eine **Überzeit**-Anzeige
-      (`+MM:SS`, seit wann der Zielzeitpunkt überschritten ist), damit die Anzeige nach Ablauf nicht einfach leer bleibt
-- [ ] Eigene Ton-Eskalation (mit Husin abgestimmt, Zeitplan siehe `useNudgeSoundSchedule.ts`): −30s/0s/+1min/+2min
-      sanfter Sinuston steigender Lautstärke, ab +3min pulsierender Ton jede weitere Minute — protokolliert als
-      `NUDGE_SOUND_PLAYED`
+- [ ] Zusätzlich zur Ton-Eskalation: solange nicht reagiert wurde, zeigt die Hinweis-Karte/das Modal eine
+      **Überzeit**-Anzeige (`+MM:SS`, seit wann der Zielzeitpunkt überschritten ist), damit die Anzeige nach
+      Ablauf nicht einfach leer bleibt (steht seit 25.08. direkt in der Karte, vorher separat und vom Modal verdeckt)
+- [ ] Eigene Ton-Eskalation (mit Husin abgestimmt, Zeitplan siehe `useNudgeSoundSchedule.ts`): −30s/0s/+1min/
+      +2min/+3min sanfter Sinuston steigender Lautstärke, ab +4min pulsierender Ton jede weitere Minute —
+      protokolliert als `NUDGE_SOUND_PLAYED`
 
 > Das ist die Funktion, aus der dein wichtigstes Ergebnis kommt. Nimm dir hier Zeit und teste alle vier Stufen mit verkürzten Zeiten (z. B. 1 Min statt 25).
 

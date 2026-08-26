@@ -9,6 +9,7 @@ import { useNudgeSoundSchedule } from "@/hooks/useNudgeSoundSchedule";
 import { useNudgeStage } from "@/hooks/useNudgeStage";
 import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
+import { useActivityTicks } from "@/hooks/useActivityTicks";
 import { useBreakEndSound } from "@/hooks/useBreakEndSound";
 import { activities, type ActivityId } from "@/content/activities";
 import { sendEventNow, startEventQueue } from "@/lib/eventQueue";
@@ -16,6 +17,7 @@ import type { EventType } from "@/lib/events";
 
 const MIN_WORK_MIN = 5;
 const ADJUSTMENT_STEP_MIN = 5;
+const SNOOZE_MS = 5 * 60_000;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
 // Nudge-Stufen laufen rein zeitbasiert (Regel 1) und parallel zur
@@ -45,7 +47,22 @@ export function SessionTimer({
     initialEndsAt
   );
   const { remainingMs, overtimeMs } = useCountdown(endsAt);
-  const nudgeStage = useNudgeStage(endsAt);
+  // Eigener Bezugspunkt fuer die Eskalation (Stufen + Ton), getrennt von der
+  // echten Rundenendzeit `endsAt`: "Noch 5 Minuten" (reactToSnooze) verschiebt
+  // nur diesen, nicht die Runde selbst - die Anzeige "Seit Rundenende" oben
+  // bleibt dadurch ehrlich (echte Gesamtverspaetung), waehrend die Eskalation
+  // nach dem Snooze wirklich bei Stufe 1 neu beginnt (Husin, 25.08.).
+  const [nudgeEndsAt, setNudgeEndsAt] = useState(endsAt);
+  // Setstate direkt im Render statt in einem Effect - offiziell empfohlenes
+  // Muster fuers Zuruecksetzen von State bei einer geaenderten Prop (neue
+  // Runde), ohne einen zusaetzlichen Render-Umweg ueber einen Effect.
+  const [prevEndsAtForNudge, setPrevEndsAtForNudge] = useState(endsAt);
+  if (endsAt !== prevEndsAtForNudge) {
+    setPrevEndsAtForNudge(endsAt);
+    setNudgeEndsAt(endsAt);
+  }
+  const isSnoozeActive = nudgeEndsAt !== endsAt;
+  const nudgeStage = useNudgeStage(nudgeEndsAt);
   const [hasReacted, setHasReacted] = useState(false);
   const [wasSkipped, setWasSkipped] = useState(false);
   const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
@@ -61,8 +78,9 @@ export function SessionTimer({
   }, []);
 
   useTabVisibilityLogging(sessionId, cycle);
-  useNudgeSoundSchedule(endsAt, sessionId, state === "WORK" && !hasReacted);
-  useNudgeStageLogging(sessionId, cycle, endsAt, nudgeStage, state === "WORK" && !hasReacted);
+  useActivityTicks(sessionId, cycle);
+  useNudgeSoundSchedule(nudgeEndsAt, sessionId, state === "WORK" && !hasReacted);
+  useNudgeStageLogging(sessionId, cycle, nudgeEndsAt, nudgeStage, state === "WORK" && !hasReacted);
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
 
@@ -93,6 +111,22 @@ export function SessionTimer({
       setHasReacted(true);
       setWasSkipped(type === "BREAK_SKIPPED");
       setRound("FEEDBACK", Date.now());
+    } finally {
+      setIsTransitioning(false);
+    }
+  }
+
+  // Verschiebt nur die Eskalation um 5 Minuten (siehe nudgeEndsAt oben), nicht
+  // die Runde selbst - kein "Reagieren" im Sinne von BREAK_ACCEPTED/SKIPPED,
+  // die Runde laeuft unveraendert weiter. Eigener Ereignistyp, damit die
+  // Kernkennzahl (bei welcher Stufe wird echt reagiert) davon unberuehrt bleibt.
+  async function reactToSnooze() {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    try {
+      const secondsAfterEnd = Math.round((Date.now() - endsAt) / 1000);
+      await logEvent("BREAK_SNOOZED", { stage: nudgeStage, secondsAfterEnd });
+      setNudgeEndsAt(Date.now() + SNOOZE_MS);
     } finally {
       setIsTransitioning(false);
     }
@@ -172,11 +206,14 @@ export function SessionTimer({
         transition: "background-color 60s ease",
       }}
     >
-      {remainingMs !== null && state === "WORK" && (nudgeStage === null || nudgeStage === 0) && (
-        <p className="text-sm text-neutral-400 dark:text-neutral-600">
-          {formatRemaining(remainingMs)}
-        </p>
-      )}
+      {remainingMs !== null &&
+        state === "WORK" &&
+        !isSnoozeActive &&
+        (nudgeStage === null || nudgeStage === 0) && (
+          <p className="text-sm text-neutral-400 dark:text-neutral-600">
+            {formatRemaining(remainingMs)}
+          </p>
+        )}
 
       {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
         <NudgeCard
@@ -184,6 +221,7 @@ export function SessionTimer({
           overtimeMs={overtimeMs}
           onAccept={() => reactToNudge("BREAK_ACCEPTED")}
           onSkip={() => reactToNudge("BREAK_SKIPPED")}
+          onSnooze={reactToSnooze}
         />
       )}
 
@@ -192,6 +230,7 @@ export function SessionTimer({
           overtimeMs={overtimeMs}
           onAccept={() => reactToNudge("BREAK_ACCEPTED")}
           onSkip={() => reactToNudge("BREAK_SKIPPED")}
+          onSnooze={reactToSnooze}
         />
       )}
 
@@ -227,11 +266,13 @@ function NudgeCard({
   overtimeMs,
   onAccept,
   onSkip,
+  onSnooze,
 }: {
   big: boolean;
   overtimeMs: number | null;
   onAccept: () => void;
   onSkip: () => void;
+  onSnooze: () => void;
 }) {
   return (
     <div
@@ -255,6 +296,13 @@ function NudgeCard({
         </button>
         <button
           type="button"
+          onClick={onSnooze}
+          className="rounded border border-black/15 px-3 py-1.5 text-xs dark:border-white/20"
+        >
+          Noch 5 Minuten
+        </button>
+        <button
+          type="button"
           onClick={onSkip}
           className="rounded px-3 py-1.5 text-xs opacity-60"
         >
@@ -269,10 +317,12 @@ function NudgeModal({
   overtimeMs,
   onAccept,
   onSkip,
+  onSnooze,
 }: {
   overtimeMs: number | null;
   onAccept: () => void;
   onSkip: () => void;
+  onSnooze: () => void;
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/10 dark:bg-black/30">
@@ -290,6 +340,13 @@ function NudgeModal({
             className="rounded bg-neutral-800 px-3 py-2 text-sm text-white dark:bg-neutral-100 dark:text-neutral-900"
           >
             Pause starten
+          </button>
+          <button
+            type="button"
+            onClick={onSnooze}
+            className="rounded border border-black/15 px-3 py-2 text-sm dark:border-white/20"
+          >
+            Noch 5 Minuten
           </button>
           <button
             type="button"

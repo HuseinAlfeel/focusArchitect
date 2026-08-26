@@ -169,3 +169,41 @@ Stelle im Layout, waehrend `NudgeModal` (Stufe 3) als `fixed inset-0` zentrierte
 lag und sie damit verdeckte. Direkt in der Karte ist sie unuebersehbar mit der Entscheidung verbunden, die sie
 begruendet.
 **Alternative:** Position der alten Anzeige anpassen. Verworfen, direkt in der Karte ist eindeutiger.
+
+## 26.08.2026 Aktivitaetserfassung im Tab (ACTIVITY_TICK)
+
+**Entscheidung:** Neuer Hook `useActivityTicks.ts`: zaehlt `mousemove`/`wheel` (zusammen als `mouseMoves`),
+`mousedown` (`clicks`) und `keydown` (`keyPresses`) auf `window`, sendet einmal pro Minute ein `ACTIVITY_TICK`
+mit den vier Aggregaten plus `tabVisible`. Kein Tick, wenn der Tab am Ende der Minute nicht sichtbar ist.
+**Begruendung:** Husins Vorschlag, objektives Signal fuer "wie oft schaut jemand zur Anwendung" als Grundlage
+fuer eine moegliche spaetere Desktop-Erweiterung.
+**Einschraenkung, bewusst mitdokumentiert (siehe SPEZIFIKATION.md Abschnitt 4):** Erfasst nur Eingaben im
+eigenen Fenster. Waehrend der eigentlichen Arbeitsphase arbeiten Teilnehmende erwartungsgemaess in einer
+anderen Anwendung (Regel 7: bewusst fast leerer Bildschirm) - `keydown` braucht Tastaturfokus im Tab,
+`mousemove` braucht den Cursor ueber dem Fenster. Beides ist waehrend echter Arbeit woanders selten der Fall.
+Die meisten Ticks werden also nahe 0 liegen und sind inhaltlich nah an dem, was `TAB_VISIBLE`/`TAB_HIDDEN`
+schon zeigt. Trotzdem umgesetzt, da harmlos (keine Inhalte, nur Zaehler) und explizit gewuenscht - die
+Erwartungen an den Erkenntniswert sollten aber niedrig bleiben.
+**Alternative:** Nicht bauen, da die Aussagekraft waehrend der Arbeitsphase gering ist. Verworfen auf
+ausdruecklichen Wunsch.
+
+## 26.08.2026 "Noch 5 Minuten" (BREAK_SNOOZED) wieder eingefuehrt
+
+**Entscheidung:** Dritte Option neben "Pause starten"/"Ueberspringen" in `NudgeCard` und `NudgeModal`: fest
+5 Minuten, nicht waehlbar, keine Obergrenze fuers wiederholte Snoozen. Verschiebt nur die Eskalation (eigener
+Bezugspunkt `nudgeEndsAt`, getrennt von der echten Rundenendzeit `endsAt`), nicht die Rundenlaenge selbst -
+danach beginnt sie wieder bei Stufe 1, Ton eingeschlossen. Eigener Ereignistyp `BREAK_SNOOZED` mit
+`{ stage, secondsAfterEnd }`, getrennt von `BREAK_ACCEPTED`/`BREAK_SKIPPED`. Anzahl pro Runde als `snoozeCount`
+in `cycles.csv`.
+**Wichtig, direkter Bezug zur Entscheidung vom 05.08.2026 ("Kein Verschieben um 5 Minuten"):** Das ist
+bewusst kein Rueckfall in die damals verworfene Funktion. Die alte Funktion hat blind die **Rundenlaenge**
+veraendert, ohne Minutenangabe - genau das war das Problem, das seitdem das Kurzfeedback (F8) loest. Der neue
+Snooze aendert die Rundenlaenge ueberhaupt nicht, er verschiebt nur, wann der Hinweis erneut auftaucht. Da er
+als eigener Ereignistyp getrennt geloggt wird, bleibt die Kernkennzahl (bei welcher Stufe wird wirklich
+reagiert) unberuehrt.
+**Begruendung fuer fest statt waehlbar:** Ein Minuten-Regler mitten im bewusst ruhigen Hinweis wuerde Regel 8
+widersprechen (sanft, nicht aufdringlich), und feste 5 Minuten machen `snoozeCount` ueber alle zehn Personen
+vergleichbar. Keine Obergrenze, weil das der zitierten Nutzerautonomie (De Russis & Monge Roffarello 2017)
+widersprechen wuerde - haeufiges Snoozen ist selbst ein Befund, kein Fehlverhalten, das verhindert werden muss.
+**Alternative:** Waehlbare Dauer. Verworfen wegen der UI-Komplexitaet an der falschen Stelle und schlechterer
+Vergleichbarkeit der Daten.

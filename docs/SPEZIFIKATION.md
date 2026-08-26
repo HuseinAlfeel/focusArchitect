@@ -160,11 +160,11 @@ Das ist deine Umsetzung der Auto-Analogie und **das Herzstück der Arbeit**. Vie
 | **0** | 2 Min vor Ende | Hintergrundfarbe wandert sehr langsam um wenige Prozent ins Wärmere. Bewusst kaum bewusst wahrnehmbar. |
 | **1** | bei 0:00 | Farbe vollendet, dazu eine kleine ruhige Karte unten rechts: „Zeit für eine Pause". Optional ein sehr leiser einzelner Ton. Kein Modal, Arbeit bleibt möglich. |
 | **2** | +2 Min ohne Reaktion | Karte wird etwas größer, sanftes langsames Pulsieren. Immer noch am Rand. |
-| **3** | +5 Min ohne Reaktion | Ruhiges zentriertes Fenster mit zwei Optionen: „Pause starten" oder „Überspringen". Kein Rot, keine Ausrufezeichen. |
+| **3** | +5 Min ohne Reaktion | Ruhiges zentriertes Fenster mit drei Optionen: „Pause starten", „Noch 5 Minuten" oder „Überspringen". Kein Rot, keine Ausrufezeichen. |
 
 **Jede erreichte Stufe wird protokolliert, ebenso die Stufe, bei der reagiert wurde.** Das ist eines deiner wertvollsten Ergebnisse: Bei welcher Stufe reagieren Menschen tatsächlich? Reicht Stufe 1? Braucht es Stufe 3? Das ist ein echter Befund, den du in der Diskussion auswerten kannst.
 
-Optionen für Nutzende bei jeder Stufe: Pause starten oder überspringen. **Kein "5 Minuten verschieben" mehr** (Änderung 09.08.) — ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, ist durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt. „Überspringen" umgeht dabei wirklich Aktivitätsauswahl [8] und Pause [9] — nach dem Kurzfeedback geht es direkt in die nächste Arbeitsrunde, nicht nur mit anderem Ereignisnamen durch denselben Ablauf wie „Pause starten".
+Optionen für Nutzende bei jeder Stufe: Pause starten, Noch 5 Minuten oder überspringen. Zwischen 09.08. und 25.08. gab es nur die ersten beiden Optionen (**kein** "5 Minuten verschieben") — ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, war durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt. Am 25.08. kam „Noch 5 Minuten" als dritte Option zurück, aber als eigenständiges Ereignis `BREAK_SNOOZED`: es ändert nicht die Rundenlänge (das bleibt weiterhin Aufgabe des Kurzfeedbacks), sondern verschiebt nur, wann der Hinweis erneut erscheint — Details siehe Abschnitt 4, „Ereignistypen für das Log". „Überspringen" umgeht dabei wirklich Aktivitätsauswahl [8] und Pause [9] — nach dem Kurzfeedback geht es direkt in die nächste Arbeitsrunde, nicht nur mit anderem Ereignisnamen durch denselben Ablauf wie „Pause starten".
 
 Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist) — sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
 
@@ -339,8 +339,9 @@ SESSION_CREATED        CONSENT_GIVEN         SURVEY_PRE_SUBMITTED
 SESSION_STARTED        CYCLE_STARTED         WORK_STARTED
 NUDGE_STAGE_0          NUDGE_STAGE_1         NUDGE_STAGE_2         NUDGE_STAGE_3
 NUDGE_SOUND_PLAYED
-BREAK_ACCEPTED         BREAK_SKIPPED
+BREAK_ACCEPTED         BREAK_SKIPPED         BREAK_SNOOZED
 ACTIVITY_SELECTED      ACTIVITY_SKIPPED      ACTIVITY_STEP_DONE
+ACTIVITY_TICK
 BREAK_STARTED          BREAK_ENDED
 INTERVAL_ADJUSTED      CYCLE_FEEDBACK_SUBMITTED
 TAB_HIDDEN             TAB_VISIBLE
@@ -350,9 +351,13 @@ SURVEY_POST_SUBMITTED
 
 **`TAB_HIDDEN` und `TAB_VISIBLE`** über die Page Visibility API. Das ist ein kleiner, aber wertvoller Trick: Es zeigt dir, ob während der Arbeitsphase der Tab im Vordergrund war. Damit kannst du in der Diskussion die Limitation „ortsunabhängige Durchführung, keine Kontrolle" wenigstens teilweise entkräften, weil du zumindest ein objektives Signal hast.
 
-**`BREAK_ACCEPTED`/`BREAK_SKIPPED` speichern im payload die Stufe**, bei der reagiert wurde: `{ "stage": 2, "secondsAfterEnd": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht. `BREAK_SNOOZED` gibt es nicht mehr (Änderung 09.08.) — Anpassungen laufen ausschließlich über das explizite Kurzfeedback direkt danach, nicht über ein blindes Verlängern der laufenden Runde. `SESSION_REOPENED`/`SESSION_FINALIZED` gehören zum Unfall-Schutz: eine versehentlich beendete Sitzung lässt sich fortsetzen, oder man gibt sie endgültig final ab.
+**`BREAK_ACCEPTED`/`BREAK_SKIPPED` speichern im payload die Stufe**, bei der reagiert wurde: `{ "stage": 2, "secondsAfterEnd": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht. `SESSION_REOPENED`/`SESSION_FINALIZED` gehören zum Unfall-Schutz: eine versehentlich beendete Sitzung lässt sich fortsetzen, oder man gibt sie endgültig final ab.
+
+**`BREAK_SNOOZED`** (Änderung 25.08., wieder eingeführt - zwischen 09.08. und 25.08. gab es das nicht): dritte Option neben "Pause starten"/"Überspringen", verschiebt **nur die Eskalation** um feste 5 Minuten, danach beginnt sie wieder bei Stufe 1. Wichtig, warum das kein Rückfall in die am 09.08. verworfene Variante ist: die alte Funktion hat blind die **Rundenlänge** verändert (wie viele Minuten die nächste Runde dauert) ohne Minutenangabe - das war das Problem. `BREAK_SNOOZED` ändert die Rundenlänge gar nicht, sondern nur, wann der Hinweis erneut erscheint, als eigener Ereignistyp getrennt von `BREAK_ACCEPTED`/`BREAK_SKIPPED` - die Kernkennzahl (bei welcher Stufe wird *wirklich* reagiert) bleibt unberührt. Payload wie bei den anderen beiden: `{ "stage": 2, "secondsAfterEnd": 225 }`. Anzahl der Snoozes pro Runde steht im Export als `snoozeCount` in `cycles.csv`. Fest auf 5 Minuten, nicht wählbar (Konsistenz über alle Teilnehmenden, kein zusätzlicher Regler mitten im bewusst schlichten Hinweis) und ohne Obergrenze fürs wiederholte Snoozen (Nutzerautonomie, De Russis & Monge Roffarello 2017 - gehört so in Kapitel 4 der Arbeit).
 
 **`NUDGE_STAGE_0` bis `_3` speichern im payload `tabVisibleAtNudge`** (Änderung 25.08.): war der Tab in genau dem Moment sichtbar, in dem diese Stufe ausgelöst wurde? Zusammen mit `TAB_VISIBLE` ergibt das die **Reaktionslatenz** - ein objektives Maß dafür, ob ein zurückhaltender Hinweis überhaupt wahrgenommen wird, unabhängig von der Selbstauskunft in der Nachbefragung. Im Export (`cycles.csv`) dafür drei zusätzliche Spalten: `nudgeStage1At` (Zeitstempel von Stufe 1), `firstTabVisibleAfterNudge` (das nächste `TAB_VISIBLE` danach) und `latencyToTabReturnSeconds` (Differenz der beiden in Sekunden - leer, wenn der Tab durchgehend sichtbar war und es also nichts zum Zurückkommen gab).
+
+**`ACTIVITY_TICK`** (Änderung 25.08.): zählt Maus- und Tastaturaktivität *innerhalb des Tabs*, aggregiert pro Minute, keine Inhalte - `{ "mouseMoves": 3, "clicks": 1, "keyPresses": 2, "tabVisible": true }`. Ist der Tab am Ende einer Minute nicht sichtbar, wird gar kein Tick geschickt. **Wichtige Einschränkung, die so in Kapitel 5 und in die Limitationen gehört:** der Browser erfasst ausschließlich Eingaben im eigenen Fenster. Arbeiten Teilnehmende (wie vorgesehen) in einer anderen Anwendung, sieht die App dort nichts - `keydown` feuert nur bei Tastaturfokus im Tab, `mousemove` nur wenn der Cursor über dem Fenster ist. Diese Werte messen also die Interaktion mit der Anwendung, nicht die tatsächliche Arbeitsaktivität. Während der eigentlichen Arbeitsphase (Regel 7: bewusst fast leerer Bildschirm) werden die meisten Ticks deshalb nahe 0 sein - das ist erwartbar, kein Fehler. Grundlage, falls die App später auf eine Desktop-Umsetzung erweitert wird.
 
 ---
 
