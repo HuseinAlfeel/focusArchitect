@@ -62,6 +62,10 @@ export function SessionTimer({
     setNudgeEndsAt(endsAt);
   }
   const isSnoozeActive = nudgeEndsAt !== endsAt;
+  // Eigener Countdown bis zum naechsten Hinweis waehrend der Snooze-Gnadenfrist
+  // - vorher wurde der Bildschirm hier komplett leer, das wirkte wie ein Fehler
+  // (Husin, 26.08.: "Timer geht weg, unsichtbar, soll nicht so sein").
+  const { remainingMs: snoozeRemainingMs } = useCountdown(nudgeEndsAt);
   const nudgeStage = useNudgeStage(nudgeEndsAt);
   const [hasReacted, setHasReacted] = useState(false);
   const [wasSkipped, setWasSkipped] = useState(false);
@@ -212,6 +216,16 @@ export function SessionTimer({
         (nudgeStage === null || nudgeStage === 0) && (
           <p className="text-sm text-neutral-400 dark:text-neutral-600">
             {formatRemaining(remainingMs)}
+          </p>
+        )}
+
+      {isSnoozeActive &&
+        state === "WORK" &&
+        !hasReacted &&
+        snoozeRemainingMs !== null &&
+        (nudgeStage === null || nudgeStage === 0) && (
+          <p className="text-sm text-neutral-400 dark:text-neutral-600">
+            Nächster Hinweis in {formatRemaining(snoozeRemainingMs)}
           </p>
         )}
 

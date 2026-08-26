@@ -208,6 +208,12 @@ widersprechen wuerde - haeufiges Snoozen ist selbst ein Befund, kein Fehlverhalt
 **Alternative:** Waehlbare Dauer. Verworfen wegen der UI-Komplexitaet an der falschen Stelle und schlechterer
 Vergleichbarkeit der Daten.
 
+**Nachtrag 26.08.2026:** Der Bildschirm blieb waehrend der 5-Minuten-Gnadenfrist komplett leer (nur "Sitzung
+beenden" sichtbar) - bewusst so gebaut, um ein verwirrendes "0:00" zu vermeiden. Husin fand das falsch: wirkte
+wie ein Fehler ("Timer geht weg, unsichtbar"). Korrigiert: eigener Countdown "Naechster Hinweis in M:SS" waehrend
+der Gnadenfrist, gespeist aus `useCountdown(nudgeEndsAt)`. Leere Bildschirme sind nicht automatisch das ruhige
+Design, das Regel 7 will - eine Person muss trotzdem erkennen koennen, dass etwas passiert.
+
 ## 26.08.2026 Pausenzeit hat Vorrang vor Aktivitaetsdauer
 
 **Entscheidung:** `readyToContinue` in `BreakScreen` haengt nur noch von `breakDone` ab, nicht mehr zusaetzlich
