@@ -11,7 +11,7 @@ Beide vor größeren Änderungen lesen.
 
 ## Worum es geht
 
-Die Anwendung untersucht, wie Software zu gesunden Bildschirmpausen anregen kann, ohne die Arbeit zu stören. Sechs Teilnehmende nutzen sie in einer Sitzung von etwa 120 Minuten an ihrer eigenen, echten Arbeit.
+Die Anwendung untersucht, wie Software zu gesunden Bildschirmpausen anregen kann, ohne die Arbeit zu stören. Zehn Teilnehmende nutzen sie an ihrer eigenen, echten Arbeit. Die Sitzung hat kein festes Ende (Änderung 25.08.) - sie beenden selbst über den vorhandenen Knopf, sobald sie fertig sind.
 
 **Leitprinzip: Das ist ein Messinstrument, keine Produkt-App.**
 

@@ -57,12 +57,24 @@ async function participantsCsv() {
     const preAnswers = (pre?.answers ?? {}) as Record<string, unknown>;
     const postAnswers = (post?.answers ?? {}) as Record<string, unknown>;
 
+    // Gesamtdauer nicht redundant in der DB gespeichert, sondern hier aus
+    // startedAt/endedAt berechnet - beide stehen schon fest, ein eigenes Feld
+    // koennte nur aus dem Takt geraten (Husin, 25.08.: Sitzung hat jetzt kein
+    // festes Ende mehr, siehe ENTSCHEIDUNGEN.md).
+    const durationMin =
+      session.startedAt && session.endedAt
+        ? Math.round(
+            (session.endedAt.getTime() - session.startedAt.getTime()) / 60_000
+          )
+        : null;
+
     const row: Record<string, unknown> = {
       code: session.participant.code,
       sessionId: session.id,
       consentAt: session.consentAt,
       startedAt: session.startedAt,
       endedAt: session.endedAt,
+      durationMin,
       finalizedAt: session.finalizedAt,
       initialWorkMin: session.initialWorkMin,
       initialBreakMin: session.initialBreakMin,
@@ -79,6 +91,7 @@ async function participantsCsv() {
     "consentAt",
     "startedAt",
     "endedAt",
+    "durationMin",
     "finalizedAt",
     "initialWorkMin",
     "initialBreakMin",
@@ -128,6 +141,23 @@ async function cyclesCsv() {
         | null;
       const activityPayload = activitySelected?.payload as { activity?: string } | null;
 
+      // Reaktionslatenz: wie lange, bis die Person nach Stufe 1 ueberhaupt
+      // wieder zum Tab zurueckkommt - unabhaengig davon, wann/ob sie dann auf
+      // den Hinweis reagiert. Kein TAB_VISIBLE danach gefunden heisst: Tab war
+      // durchgehend sichtbar, es gab nichts zum Zurueckkommen (Husin, 25.08.).
+      const nudgeStage1 = cycleEvents.find((e) => e.type === "NUDGE_STAGE_1");
+      const firstTabVisibleAfterNudge = nudgeStage1
+        ? cycleEvents.find(
+            (e) => e.type === "TAB_VISIBLE" && e.at > nudgeStage1.at
+          )
+        : undefined;
+      const latencyToTabReturnSeconds =
+        nudgeStage1 && firstTabVisibleAfterNudge
+          ? Math.round(
+              (firstTabVisibleAfterNudge.at.getTime() - nudgeStage1.at.getTime()) / 1000
+            )
+          : null;
+
       rows.push({
         code: session.participant.code,
         sessionId: session.id,
@@ -138,6 +168,9 @@ async function cyclesCsv() {
         reactionStage: reactionPayload?.stage ?? null,
         reactionSecondsAfterEnd: reactionPayload?.secondsAfterEnd ?? null,
         reactionAt: reaction?.at ?? null,
+        nudgeStage1At: nudgeStage1?.at ?? null,
+        firstTabVisibleAfterNudge: firstTabVisibleAfterNudge?.at ?? null,
+        latencyToTabReturnSeconds,
         activity: activitySelected
           ? activityPayload?.activity ?? null
           : activitySkipped
@@ -161,6 +194,9 @@ async function cyclesCsv() {
     "reactionStage",
     "reactionSecondsAfterEnd",
     "reactionAt",
+    "nudgeStage1At",
+    "firstTabVisibleAfterNudge",
+    "latencyToTabReturnSeconds",
     "activity",
     "timing",
     "adjustmentMin",

@@ -16,8 +16,8 @@
 - [ ] **A3. Text für Einwilligung und Datenschutz.** Vorlage vom Fachgebiet erfragt oder selbst entworfen und von Holly gegengelesen.
 - [ ] **A4. Fragebogen-Items final.** Inklusive Entscheidung: eigene Skalen oder NASA-TLX / UEQ-S dazu?
 - [ ] **A5. KI-Logbuch angelegt.** Eine Textdatei. Ab jetzt jeden Tag eine Zeile.
-- [ ] **A6. Sechs Teilnehmende terminiert.** Feste Termine im Kalender, nicht nur „hat zugesagt".
-- [ ] **A7. Siebte Person für den Probelauf** angefragt.
+- [ ] **A6. Zehn Teilnehmende terminiert.** Feste Termine im Kalender, nicht nur „hat zugesagt".
+- [ ] **A7. Elfte Person für den Probelauf** angefragt.
 
 > **Fertig, wenn:** Du weißt genau, was du misst und wann du es messen darfst.
 
@@ -444,7 +444,7 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 
 *Aufwand: 1 Tag*
 
-- [ ] Siebte Person (nicht aus den sechs!) macht den kompletten Ablauf durch
+- [ ] Elfte Person (nicht aus den zehn!) macht den kompletten Ablauf durch
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?
 - [ ] Daten exportiert und geprüft: Ist alles drin, was du brauchst?
@@ -461,7 +461,7 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 
 *Aufwand: verteilt über ca. 2 Wochen*
 
-Für **jede** der sechs Personen:
+Für **jede** der zehn Personen:
 
 - [ ] Vorher: Zugangsdaten geschickt, Termin bestätigt, Dauer angekündigt
 - [ ] Kurze Einweisung (5 Min, Nachricht oder Anruf): Was passiert, dass sie an ihrer echten Arbeit arbeiten sollen, dass sie jederzeit abbrechen können
@@ -470,10 +470,10 @@ Für **jede** der sechs Personen:
 - [ ] **Sofort danach Backup ziehen**
 - [ ] Kurze Notiz für dich: Auffälligkeiten, Bemerkungen, technische Probleme
 
-Nach allen sechs:
+Nach allen zehn:
 
 - [ ] Vollständigen Export ziehen
-- [ ] Prüfen: sechs Sessions, alle mit PRE und POST, plausible Ereigniszahlen
+- [ ] Prüfen: zehn Sessions, alle mit PRE und POST, plausible Ereigniszahlen
 - [ ] Rohdaten an zwei Orten sichern
 - [ ] Server erst abschalten, wenn die Arbeit abgegeben ist
 

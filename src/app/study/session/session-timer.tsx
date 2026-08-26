@@ -178,19 +178,10 @@ export function SessionTimer({
         </p>
       )}
 
-      {overtimeMs !== null &&
-        state === "WORK" &&
-        !hasReacted &&
-        nudgeStage !== null &&
-        nudgeStage > 0 && (
-          <p className="text-xs text-neutral-400 dark:text-neutral-600">
-            +{formatRemaining(overtimeMs)}
-          </p>
-        )}
-
       {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
         <NudgeCard
           big={nudgeStage === 2}
+          overtimeMs={overtimeMs}
           onAccept={() => reactToNudge("BREAK_ACCEPTED")}
           onSkip={() => reactToNudge("BREAK_SKIPPED")}
         />
@@ -198,6 +189,7 @@ export function SessionTimer({
 
       {!hasReacted && nudgeStage === 3 && (
         <NudgeModal
+          overtimeMs={overtimeMs}
           onAccept={() => reactToNudge("BREAK_ACCEPTED")}
           onSkip={() => reactToNudge("BREAK_SKIPPED")}
         />
@@ -232,10 +224,12 @@ export function SessionTimer({
 
 function NudgeCard({
   big,
+  overtimeMs,
   onAccept,
   onSkip,
 }: {
   big: boolean;
+  overtimeMs: number | null;
   onAccept: () => void;
   onSkip: () => void;
 }) {
@@ -245,6 +239,11 @@ function NudgeCard({
         big ? "w-72 p-5 animate-nudge-pulse" : "w-60 p-4"
       }`}
     >
+      {overtimeMs !== null && (
+        <p className="mb-1 text-xs text-neutral-400 dark:text-neutral-600">
+          Seit Rundenende: +{formatRemaining(overtimeMs)}
+        </p>
+      )}
       <p className="text-sm">Zeit für eine Pause.</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
@@ -267,15 +266,22 @@ function NudgeCard({
 }
 
 function NudgeModal({
+  overtimeMs,
   onAccept,
   onSkip,
 }: {
+  overtimeMs: number | null;
   onAccept: () => void;
   onSkip: () => void;
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/10 dark:bg-black/30">
       <div className="w-80 rounded-lg border border-black/10 bg-white p-6 shadow-lg dark:border-white/15 dark:bg-neutral-900">
+        {overtimeMs !== null && (
+          <p className="mb-1 text-xs text-neutral-400 dark:text-neutral-600">
+            Seit Rundenende: +{formatRemaining(overtimeMs)}
+          </p>
+        )}
         <p className="text-sm">Zeit für eine Pause.</p>
         <div className="mt-4 flex flex-col gap-2">
           <button

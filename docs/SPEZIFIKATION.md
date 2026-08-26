@@ -68,7 +68,7 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
    │        ↓                          │
    │  [9] Pause (5 Min)                │
    └──────────────┬───────────────────┘
-                  │  ca. 4 Runden / 120 Min
+                  │  offenes Ende, Teilnehmende beenden selbst
                   ↓
 [10] Nachbefragung
       ↓
@@ -80,6 +80,13 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
 > passend" bewertet die gerade beendete Arbeitsphase; das lässt sich direkt im Anschluss zuverlässiger beantworten
 > als erst nach einer mehrminütigen Pause. Die dort entschiedene neue Arbeitszeit wird erst beim Sitzungsstart
 > nach der Pause angewendet.
+
+> **Offenes Sitzungsende (25.08. geändert):** Keine feste Obergrenze mehr (vorher ca. 120 Min / 4 Runden).
+> Teilnehmende arbeiten so lange, wie sie möchten, und beenden selbst über den vorhandenen Knopf. Mehr Zyklen
+> bedeuten mehr Gelegenheiten zur Intervallanpassung, deiner aussagekräftigsten Datenquelle, und entspricht
+> realer Nutzung. Folge für die Auswertung: unterschiedliche Sitzungslängen pro Person - die Zyklenanzahl muss
+> pro Person mitberichtet werden, gehört als Punkt in die Limitationen. Gesamtdauer steht als `durationMin`
+> in `participants.csv` (berechnet aus `endedAt - startedAt`, nicht redundant in der DB gespeichert).
 
 ### [1] Login
 
@@ -176,7 +183,7 @@ Maximal 20 Sekunden Aufwand:
 
 Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
 
-**Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle sechs Personen von 25 auf 35 gehen, hast du einen Befund.
+**Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle zehn Personen von 25 auf 35 gehen, hast du einen Befund.
 
 ### [8] Aktivitätsauswahl
 
@@ -344,6 +351,8 @@ SURVEY_POST_SUBMITTED
 **`TAB_HIDDEN` und `TAB_VISIBLE`** über die Page Visibility API. Das ist ein kleiner, aber wertvoller Trick: Es zeigt dir, ob während der Arbeitsphase der Tab im Vordergrund war. Damit kannst du in der Diskussion die Limitation „ortsunabhängige Durchführung, keine Kontrolle" wenigstens teilweise entkräften, weil du zumindest ein objektives Signal hast.
 
 **`BREAK_ACCEPTED`/`BREAK_SKIPPED` speichern im payload die Stufe**, bei der reagiert wurde: `{ "stage": 2, "secondsAfterEnd": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht. `BREAK_SNOOZED` gibt es nicht mehr (Änderung 09.08.) — Anpassungen laufen ausschließlich über das explizite Kurzfeedback direkt danach, nicht über ein blindes Verlängern der laufenden Runde. `SESSION_REOPENED`/`SESSION_FINALIZED` gehören zum Unfall-Schutz: eine versehentlich beendete Sitzung lässt sich fortsetzen, oder man gibt sie endgültig final ab.
+
+**`NUDGE_STAGE_0` bis `_3` speichern im payload `tabVisibleAtNudge`** (Änderung 25.08.): war der Tab in genau dem Moment sichtbar, in dem diese Stufe ausgelöst wurde? Zusammen mit `TAB_VISIBLE` ergibt das die **Reaktionslatenz** - ein objektives Maß dafür, ob ein zurückhaltender Hinweis überhaupt wahrgenommen wird, unabhängig von der Selbstauskunft in der Nachbefragung. Im Export (`cycles.csv`) dafür drei zusätzliche Spalten: `nudgeStage1At` (Zeitstempel von Stufe 1), `firstTabVisibleAfterNudge` (das nächste `TAB_VISIBLE` danach) und `latencyToTabReturnSeconds` (Differenz der beiden in Sekunden - leer, wenn der Tab durchgehend sichtbar war und es also nichts zum Zurückkommen gab).
 
 ---
 

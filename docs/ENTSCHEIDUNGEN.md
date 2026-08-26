@@ -128,3 +128,44 @@ Tick faellig werden und dann nahezu gleichzeitig abspielen. Mit gleichem Klangch
 seltener Doppel-Treffer wie ein einzelner, etwas voller Ton statt wie zwei widerspruechliche Klaenge.
 **Alternative:** Nur den Klangcharakter angleichen, den Tick-Loop unangetastet lassen. Verworfen, weil das nur
 das Symptom fuer genau diese eine Minuten-Kombination kaschiert haette, nicht die Ursache.
+
+## 25.08.2026 Zehn Teilnehmende statt sechs
+
+**Entscheidung:** Teilnehmerzahl auf zehn erhoeht (P07-P10 als neue Accounts angelegt), Probelauf-Person
+entsprechend zur "elften Person" statt "siebten Person".
+**Begruendung:** Empfehlung von Husins Beraterin.
+**Alternative:** Bei sechs bleiben. Verworfen auf Empfehlung.
+
+## 25.08.2026 Offenes Sitzungsende statt fester 120 Minuten
+
+**Entscheidung:** Keine Obergrenze fuer die Sitzungsdauer mehr. Teilnehmende arbeiten so lange, wie sie
+moechten, und beenden selbst ueber den vorhandenen "Sitzung beenden"-Knopf. Rundenzaehler war im Code ohnehin
+schon unbegrenzt (reines Hochzaehlen, kein Cap) - es musste nichts entfernt werden, nur die Dokumentation
+(CLAUDE.md, SPEZIFIKATION.md, CHECKLIST.md) beschrieb noch "ca. 120 Min / 4 Runden" als falschen Eindruck
+einer Grenze. Gesamtdauer wird im Export (`participants.csv`, Spalte `durationMin`) aus `endedAt - startedAt`
+berechnet, nicht redundant als eigenes DB-Feld gespeichert - beide Zeitstempel existieren schon.
+**Begruendung:** Mehr Zyklen bedeuten mehr Gelegenheiten zur Intervallanpassung, der aussagekraeftigsten
+Datenquelle der Studie, und entspricht realer Nutzung besser als eine kuenstliche Grenze.
+**Folge fuer die Auswertung:** Unterschiedliche Sitzungslaengen pro Person - die Zyklenanzahl muss pro Person
+mitberichtet werden, gehoert als Punkt in die Limitationen.
+**Alternative:** Bei fester Obergrenze bleiben. Verworfen, siehe Begruendung.
+
+## 25.08.2026 Reaktionslatenz zum Tab-Rueckkehr protokolliert
+
+**Entscheidung:** Jedes `NUDGE_STAGE_0` bis `_3`-Ereignis speichert jetzt zusaetzlich im Payload
+`tabVisibleAtNudge: true | false` (Tab-Sichtbarkeit in genau dem Moment). Im Export (`cycles.csv`) daraus drei
+neue Spalten je Runde: `nudgeStage1At`, `firstTabVisibleAfterNudge` (naechstes `TAB_VISIBLE` danach) und
+`latencyToTabReturnSeconds` (Differenz, leer wenn der Tab durchgehend sichtbar war). Kein neuer Frontend-Code
+noetig, die Basis-Ereignisse (`NUDGE_STAGE_*`, `TAB_VISIBLE`) gab es schon.
+**Begruendung:** Misst objektiv, ob ein zurueckhaltender Hinweis ueberhaupt wahrgenommen wird - direkt relevant
+fuer die Forschungsfrage, unabhaengig von der Selbstauskunft in der Nachbefragung.
+
+## 25.08.2026 Ueberzeit-Anzeige in die Hinweis-Karte verschoben
+
+**Entscheidung:** Die "+MM:SS seit Rundenende"-Anzeige steht jetzt direkt in `NudgeCard`/`NudgeModal`, ueber
+den beiden Knoepfen "Pause starten"/"Ueberspringen", statt separat mittig auf dem Bildschirm.
+**Begruendung:** Husin fand die Anzeige nicht - sie war zwar da, stand aber an einer eigenen zentrierten
+Stelle im Layout, waehrend `NudgeModal` (Stufe 3) als `fixed inset-0` zentriertes Fenster optisch genau darueber
+lag und sie damit verdeckte. Direkt in der Karte ist sie unuebersehbar mit der Entscheidung verbunden, die sie
+begruendet.
+**Alternative:** Position der alten Anzeige anpassen. Verworfen, direkt in der Karte ist eindeutiger.
