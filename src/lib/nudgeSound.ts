@@ -1,29 +1,29 @@
 "use client";
 
-// Synthetisiert die Toene fuer den abgestuften Pausenhinweis direkt per Web
+// Synthetisiert die Töne für den abgestuften Pausenhinweis direkt per Web
 // Audio API, statt externe Audiodateien zu laden (kein Lizenz-Thema, exakt
-// steuerbare Lautstaerke-Verhaeltnisse zwischen den Stufen, kein Nachladen).
+// steuerbare Lautstärke-Verhältnisse zwischen den Stufen, kein Nachladen).
 //
 // Zehn Kandidaten zum Vergleichen, in zwei Gruppen:
 //
-// ANGENEHM (fuer leise/frühe Stufen, z.B. -30s vor Timer-Ende):
+// ANGENEHM (für leise/frühe Stufen, z.B. -30s vor Timer-Ende):
 //   soft-sine     - reiner Sinuston, langsam ein-/ausgeblendet
 //   soft-bell     - Sinuston + leiser Oberton, weicher Chime
-//   singing-bowl  - zwei minimal verstimmte Sinustoene, natuerliches
+//   singing-bowl  - zwei minimal verstimmte Sinustöne, natürliches
 //                   Schweben wie bei einer Klangschale (Achtsamkeits-App-
-//                   Aesthetik, passt thematisch zur Pause)
+//                   Ästhetik, passt thematisch zur Pause)
 //   soft-mallet   - kurzer, klar gestimmter weicher Anschlag (anders als
-//                   der geraeuschhafte Holzklopf-Versuch: hier mit klarer
-//                   Tonhoehe, dadurch musikalischer statt perkussiv-hart)
+//                   der geräuschhafte Holzklopf-Versuch: hier mit klarer
+//                   Tonhöhe, dadurch musikalischer statt perkussiv-hart)
 //   water-drop    - kurzer fallender Ton, wie ein einzelner Tropfen
 //
-// STARK (fuer spaetere/auffaelligere Stufen, z.B. +120s):
-//   double-chime      - zwei aufsteigende Toene, wie eine sanfte Tuerklingel
-//   triple-ascending  - drei aufsteigende, jeweils etwas lautere Toene
-//   rich-chord        - drei gleichzeitige harmonische Toene, voller Klang
+// STARK (für spätere/auffälligere Stufen, z.B. +120s):
+//   double-chime      - zwei aufsteigende Töne, wie eine sanfte Türklingel
+//   triple-ascending  - drei aufsteigende, jeweils etwas lautere Töne
+//   rich-chord        - drei gleichzeitige harmonische Töne, voller Klang
 //   pulsing-tone      - derselbe Ton dreimal kurz hintereinander, Aufmerk-
-//                       samkeit ueber Rhythmus statt nur Lautstaerke
-//   rising-sweep      - Tonhoehe gleitet nach oben, endet hell und praesent
+//                       samkeit über Rhythmus statt nur Lautstärke
+//   rising-sweep      - Tonhöhe gleitet nach oben, endet hell und präsent
 
 export type NudgeSoundCharacter =
   | "soft-sine"
@@ -186,10 +186,10 @@ const CHARACTERS: Record<
 };
 
 /**
- * Spielt einen Hinweiston. `intensity` liegt zwischen 0 (kaum hoerbar) und 1
- * (deutlich), skaliert Lautstaerke und Klangfuelle zusammen - so bleibt jede
- * Klangfarbe ueber mehrere Stufen hinweg eine stimmige Familie statt
- * zufaellig unterschiedlich lauter Einzeldateien.
+ * Spielt einen Hinweiston. `intensity` liegt zwischen 0 (kaum hörbar) und 1
+ * (deutlich), skaliert Lautstärke und Klangfülle zusammen - so bleibt jede
+ * Klangfarbe über mehrere Stufen hinweg eine stimmige Familie statt
+ * zufällig unterschiedlich lauter Einzeldateien.
  */
 export function playNudgeSound(
   intensity: number,

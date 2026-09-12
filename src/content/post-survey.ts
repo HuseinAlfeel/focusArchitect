@@ -2,15 +2,15 @@
 // (finale Fassung vom 24.08. mit Holly abgestimmt, ersetzt die alte N1-N10-Version).
 //
 // N1-N2: Zustand nach der Sitzung, spiegeln V4/V5 aus der Vorbefragung.
-// N3-N11: etablierte Skala "wahrgenommene Ueberzeugungskraft" (Persuasiveness).
+// N3-N11: etablierte Skala "wahrgenommene Überzeugungskraft" (Persuasiveness).
 // N12-N15: etablierte Skala "wahrgenommene Aufdringlichkeit" (Intrusiveness).
-// Beide Skalen sind wortgleich aus der Vorlage uebernommen, inklusive Tippfehler
+// Beide Skalen sind wortgleich aus der Vorlage übernommen, inklusive Tippfehler
 // in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem") - so im
 // Original, bei validierten Skalen wird der Wortlaut nicht "korrigiert".
 // N16-N19: Vergleich zur gewohnten Arbeitsweise plus Freitext.
 //
 // Pflichtfelder: N1-N16 (alle Skalen + Vergleichsfrage). N17-N19 sind Freitext
-// und duerfen leer bleiben.
+// und dürfen leer bleiben.
 
 export const likertScaleLabels = [
   "Stimme überhaupt nicht zu",

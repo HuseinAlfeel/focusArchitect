@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// Schutz gegen versehentliches "Sitzung beenden": macht endedAt rueckgaengig,
+// Schutz gegen versehentliches "Sitzung beenden": macht endedAt rückgängig,
 // damit man dort weitermachen kann, wo man war (sessionStorage-Rundenzustand
-// bleibt unberuehrt, da nur der DB-Zeitstempel geloescht wird).
+// bleibt unberührt, da nur der DB-Zeitstempel gelöscht wird).
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

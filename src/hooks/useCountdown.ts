@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 
 /**
- * Zaehlt NIEMALS hoch. Restzeit wird bei jedem Tick frisch aus dem
+ * Zählt NIEMALS hoch. Restzeit wird bei jedem Tick frisch aus dem
  * Zielzeitpunkt (endsAt) berechnet - siehe CLAUDE.md Regel 1. Browser
- * drosseln setInterval in inaktiven Tabs, das wuerde eine hochzaehlende
- * Uhr verfaelschen. Da hier immer `endsAt - now` gerechnet wird, ist die
- * Anzeige nach einem Tab-Wechsel sofort wieder korrekt, unabhaengig davon,
+ * drosseln setInterval in inaktiven Tabs, das würde eine hochzählende
+ * Uhr verfälschen. Da hier immer `endsAt - now` gerechnet wird, ist die
+ * Anzeige nach einem Tab-Wechsel sofort wieder korrekt, unabhängig davon,
  * wie lange das Intervall gedrosselt war.
  *
  * `now` startet bewusst als `null`, nicht als `Date.now()`: Ein Client-
- * Component-Rendering auf dem Server wuerde sonst mit einer anderen Zeit
- * rendern als die anschliessende Hydration im Browser (Hydration-Mismatch).
+ * Component-Rendering auf dem Server würde sonst mit einer anderen Zeit
+ * rendern als die anschließende Hydration im Browser (Hydration-Mismatch).
  * Der echte Wert wird erst nach dem Mount per useEffect gesetzt.
  */
 export function useCountdown(endsAt: number) {
@@ -20,7 +20,7 @@ export function useCountdown(endsAt: number) {
 
   useEffect(() => {
     // Kein sofortiger setState-Aufruf hier: Der erste Intervall-Tick (max.
-    // 1s spaeter) und der Sichtbarkeits-Handler unten halten die Anzeige
+    // 1s später) und der Sichtbarkeits-Handler unten halten die Anzeige
     // ausreichend aktuell, ohne dass der Effekt selbst synchron rendert.
     const interval = setInterval(() => {
       setNow(Date.now());
@@ -44,8 +44,8 @@ export function useCountdown(endsAt: number) {
   }
 
   // overtimeMs wird genauso frisch aus dem Zielzeitpunkt berechnet wie
-  // remainingMs (`now - endsAt`, nicht hochgezaehlt) - zeigt nur zusaetzlich,
-  // wie lange der Zielzeitpunkt schon ueberschritten ist, statt die Anzeige
+  // remainingMs (`now - endsAt`, nicht hochgezählt) - zeigt nur zusätzlich,
+  // wie lange der Zielzeitpunkt schon überschritten ist, statt die Anzeige
   // nach Ablauf komplett verschwinden zu lassen.
   const remainingMs = Math.max(0, endsAt - now);
   const overtimeMs = Math.max(0, now - endsAt);
@@ -60,11 +60,11 @@ export function formatRemaining(ms: number) {
 }
 
 /**
- * Nur fuer die Arbeitsphase (Betreuung, 12.09.): ein sekundengenauer
- * Countdown zieht Blicke an, das widerspricht der bewusst zurueckhaltenden
+ * Nur für die Arbeitsphase (Betreuung, 12.09.): ein sekundengenauer
+ * Countdown zieht Blicke an, das widerspricht der bewusst zurückhaltenden
  * Gestaltung (Regel 7). Aufgerundet, damit "1 Min" nicht schon bei 0:01
- * Restzeit zu "0 Min" wird - das saehe nach Stillstand aus, obwohl noch Zeit
- * laeuft.
+ * Restzeit zu "0 Min" wird - das sähe nach Stillstand aus, obwohl noch Zeit
+ * läuft.
  */
 export function formatRemainingMinutes(ms: number) {
   const minutes = Math.ceil(ms / 60_000);

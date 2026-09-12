@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
 export type NudgeStage = 0 | 1 | 2 | 3 | null;
 
 const STAGE_0_LEAD_MS = 120_000; // T-2min: Hintergrund beginnt zu wandern
-const STAGE_2_AT_MS = 120_000; // +2min nach Ende: Karte groesser, Pulsieren
+const STAGE_2_AT_MS = 120_000; // +2min nach Ende: Karte größer, Pulsieren
 const STAGE_3_AT_MS = 300_000; // +5min nach Ende: zentriertes Fenster
 
 /**
  * Leitet die aktuelle Stufe des abgestuften Pausenhinweises rein aus der
- * Zeit ab (CLAUDE.md Regel 1: Zielzeitpunkt, nicht hochzaehlen).
+ * Zeit ab (CLAUDE.md Regel 1: Zielzeitpunkt, nicht hochzählen).
  *   null  -> mehr als 2 Min bis zum Ende, kein Hinweis sichtbar
  *   0     -> 2 Min oder weniger bis zum Ende: Hintergrund wandert
  *   1     -> Timer abgelaufen, weniger als 2 Min her: kleine Karte
- *   2     -> 2-5 Min nach Ende: Karte groesser, pulsiert leicht
+ *   2     -> 2-5 Min nach Ende: Karte größer, pulsiert leicht
  *   3     -> 5+ Min nach Ende: zentriertes Fenster
  */
 export function useNudgeStage(endsAt: number): NudgeStage {

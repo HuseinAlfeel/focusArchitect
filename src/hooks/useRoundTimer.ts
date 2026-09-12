@@ -10,10 +10,10 @@ type PersistedRound = {
   endsAt: number;
   activityId: string | null;
   pendingWorkMin: number | null;
-  // Der Server-Fallback-Zielzeitpunkt, mit dem diese Runde urspruenglich
-  // initialisiert wurde. Dient nur dazu, spaeter zu erkennen, ob sich die
+  // Der Server-Fallback-Zielzeitpunkt, mit dem diese Runde ursprünglich
+  // initialisiert wurde. Dient nur dazu, später zu erkennen, ob sich die
   // zugrunde liegenden Daten (z.B. initialWorkMin, direkt in Prisma Studio
-  // bearbeitet) seitdem geaendert haben - siehe unten.
+  // bearbeitet) seitdem geändert haben - siehe unten.
   initialFallbackEndsAt: number;
 };
 
@@ -40,9 +40,9 @@ function readPersistedRound(sessionId: string): PersistedRound | null {
           typeof parsed.activityId === "string" ? parsed.activityId : null,
         pendingWorkMin:
           typeof parsed.pendingWorkMin === "number" ? parsed.pendingWorkMin : null,
-        // Aeltere gespeicherte Eintraege (vor dieser Aenderung) haben dieses
-        // Feld nicht - NaN sorgt dafuer, dass der Abgleich unten dann sicher
-        // fehlschlaegt, statt sich auf einen falschen Wert zu verlassen.
+        // Ältere gespeicherte Einträge (vor dieser Änderung) haben dieses
+        // Feld nicht - NaN sorgt dafür, dass der Abgleich unten dann sicher
+        // fehlschlägt, statt sich auf einen falschen Wert zu verlassen.
         initialFallbackEndsAt:
           typeof parsed.initialFallbackEndsAt === "number"
             ? parsed.initialFallbackEndsAt
@@ -61,31 +61,31 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
 }
 
 /**
- * Haelt Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK), Runden-
- * nummer, Zielzeitpunkt, gewaehlte Aktivitaet und die im Kurzfeedback
- * entschiedene naechste Arbeitszeit (pendingWorkMin) fest, gespiegelt in
+ * Hält Rundenzustand (WORK/NUDGE/ACTIVITY_CHOICE/BREAK/FEEDBACK), Runden-
+ * nummer, Zielzeitpunkt, gewählte Aktivität und die im Kurzfeedback
+ * entschiedene nächste Arbeitszeit (pendingWorkMin) fest, gespiegelt in
  * sessionStorage. Ein Reload mitten in der Runde verliert damit nichts: beim
- * naechsten Laden wird aus sessionStorage wiederhergestellt, sofern der
+ * nächsten Laden wird aus sessionStorage wiederhergestellt, sofern der
  * gespeicherte Eintrag zur vom Server rekonstruierten Runde (serverCycle)
  * passt.
  *
- * Ausnahme, wichtig fuers Testen: Wurde die Runde noch NICHT ueber die App
- * selbst veraendert (Zustand ist noch exakt der allererste Fallback-Wert)
+ * Ausnahme, wichtig fürs Testen: Wurde die Runde noch NICHT über die App
+ * selbst verändert (Zustand ist noch exakt der allererste Fallback-Wert)
  * UND weicht der frisch vom Server berechnete Fallback jetzt davon ab, wird
- * der Cache verworfen. Das erkennt zuverlaessig den Fall "initialWorkMin
+ * der Cache verworfen. Das erkennt zuverlässig den Fall "initialWorkMin
  * direkt in Prisma Studio bearbeitet, danach die Seite neu geladen" - ohne
  * das Reload-Verhalten mitten in einer echten, bereits fortgeschrittenen
- * Runde zu beeintraechtigen (dort weicht der aktuelle Zustand laengst vom
- * urspruenglichen Fallback ab, also greift diese Ausnahme dort nicht).
+ * Runde zu beeinträchtigen (dort weicht der aktuelle Zustand längst vom
+ * ursprünglichen Fallback ab, also greift diese Ausnahme dort nicht).
  *
  * Zweite Ausnahme: Ist die im Browser gespeicherte Runde WEITER als das, was
  * der Server gerade rekonstruiert (persisted.cycle > serverCycle), wird die
- * gespeicherte Runde trotzdem benutzt statt verworfen. Der Server erfaehrt
- * von einer neuen Runde erst, wenn CYCLE_STARTED/WORK_STARTED tatsaechlich
+ * gespeicherte Runde trotzdem benutzt statt verworfen. Der Server erfährt
+ * von einer neuen Runde erst, wenn CYCLE_STARTED/WORK_STARTED tatsächlich
  * angekommen sind - die Ereignis-Queue (Phase G) verschickt die aber bewusst
- * leicht verzoegert, nicht synchron. Ohne diese Ausnahme wuerde ein Reload
+ * leicht verzögert, nicht synchron. Ohne diese Ausnahme würde ein Reload
  * genau in diesem kurzen Fenster den Browser auf den (dann veralteten)
- * Serverstand zuruecksetzen, obwohl die neue Runde laengst begonnen hatte.
+ * Serverstand zurücksetzen, obwohl die neue Runde längst begonnen hatte.
  */
 export function useRoundTimer(
   sessionId: string,

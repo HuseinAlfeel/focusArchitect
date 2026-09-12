@@ -55,9 +55,9 @@ function logSoundEvent(
 }
 
 /**
- * Spielt die Ton-Eskalation rund um das Ende der Arbeitsphase ab - laeuft
- * unabhaengig von und parallel zu den visuellen Stufen. Startet automatisch
- * 30s vor `endsAt`, laeuft unbegrenzt weiter (jede weitere Minute), bis
+ * Spielt die Ton-Eskalation rund um das Ende der Arbeitsphase ab - läuft
+ * unabhängig von und parallel zu den visuellen Stufen. Startet automatisch
+ * 30s vor `endsAt`, läuft unbegrenzt weiter (jede weitere Minute), bis
  * `active` auf false gesetzt wird (Nutzer hat reagiert).
  */
 export function useNudgeSoundSchedule(
@@ -87,13 +87,13 @@ export function useNudgeSoundSchedule(
     function tick() {
       const offsetMs = Date.now() - endsAt;
 
-      // Nur die zuletzt faellige Stufe wirklich abspielen. Wenn der Tick
-      // durch einen gedrosselten Hintergrund-Tab verzoegert wurde und dabei
-      // mehrere Schwellen gleichzeitig ueberschritten werden (z.B. +2 Min und
-      // +3 Min im selben Tick), wuerden sonst zwei Toene direkt hintereinander
-      // bzw. ueberlappend abgespielt - das "zwei Toene gleichzeitig"-Problem,
+      // Nur die zuletzt fällige Stufe wirklich abspielen. Wenn der Tick
+      // durch einen gedrosselten Hintergrund-Tab verzögert wurde und dabei
+      // mehrere Schwellen gleichzeitig überschritten werden (z.B. +2 Min und
+      // +3 Min im selben Tick), würden sonst zwei Töne direkt hintereinander
+      // bzw. überlappend abgespielt - das "zwei Töne gleichzeitig"-Problem,
       // das Husin am 24.08. gemeldet hat. Gleiche Absicherung wie unten schon
-      // fuer die minuetlichen Wiederholungstoene (Fix vom 10.08.).
+      // für die minütlichen Wiederholungstöne (Fix vom 10.08.).
       const dueFixedEntries = FIXED_ENTRIES.filter(
         (entry) => !firedRef.current.has(entry.id) && offsetMs >= entry.offsetMs
       );
@@ -108,10 +108,10 @@ export function useNudgeSoundSchedule(
         const currentIndex = Math.floor(
           (offsetMs - REPEAT_START_MS) / REPEAT_INTERVAL_MS
         );
-        // Nur den gerade faelligen Ton abspielen. Nach einer langen Pause
-        // (Tab tagelang offen, Laptop im Standby...) waeren sonst ploetzlich
-        // alle in der Zwischenzeit verpassten Minuten-Toene auf einmal faellig -
-        // das ergab genau das Geraeusch-Chaos, das Husin am 10.08. gemeldet hat.
+        // Nur den gerade fälligen Ton abspielen. Nach einer langen Pause
+        // (Tab tagelang offen, Laptop im Standby...) wären sonst plötzlich
+        // alle in der Zwischenzeit verpassten Minuten-Töne auf einmal fällig -
+        // das ergab genau das Geräusch-Chaos, das Husin am 10.08. gemeldet hat.
         for (let i = 0; i < currentIndex; i++) {
           firedRef.current.add(repeatEntry(i).id);
         }
@@ -123,8 +123,8 @@ export function useNudgeSoundSchedule(
     }
 
     // Kein sofortiger Aufruf hier (gleicher Grund wie in useCountdown.ts):
-    // der erste Intervall-Tick nach 500ms reicht fuer diesen Anwendungsfall
-    // voellig aus und vermeidet einen synchronen setState-Aufruf im Effekt.
+    // der erste Intervall-Tick nach 500ms reicht für diesen Anwendungsfall
+    // völlig aus und vermeidet einen synchronen setState-Aufruf im Effekt.
     const interval = window.setInterval(tick, 500);
 
     return () => {

@@ -2,9 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// Endgueltige Gegenstueck zu /reopen: nach dem Beenden entweder fortsetzen
-// (aus Versehen beendet) oder final abgeben (wirklich fertig). Danach ist
-// kein Reopen mehr moeglich.
+// Endgültiges Gegenstück zu /reopen. Wird seit 12.09.2026 ausschließlich
+// automatisch aufgerufen (siehe post-survey-form.tsx, direkt nach dem
+// Absenden der Nachbefragung) - der frühere manuelle "Final abgeben"-Weg
+// über die Hub-Seite ist entfernt, siehe ENTSCHEIDUNGEN.md. Danach ist
+// kein Reopen mehr möglich.
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

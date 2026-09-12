@@ -26,10 +26,10 @@ export function SoundCheckPanel() {
   const [intensity, setIntensity] = useState(0.35);
   const [lastPlayed, setLastPlayed] = useState<string | null>(null);
 
-  // Ein einziger Regler fuer alles: sowohl die Kandidaten-Knoepfe unten als
+  // Ein einziger Regler für alles: sowohl die Kandidaten-Knöpfe unten als
   // auch der explizite "Abspielen"-Knopf benutzen genau diesen Wert. Vorher
-  // hatten die Kandidaten-Knoepfe eigene feste Lautstaerken, unabhaengig vom
-  // Regler - das hat fuer Verwirrung gesorgt.
+  // hatten die Kandidaten-Knöpfe eigene feste Lautstärken, unabhängig vom
+  // Regler - das hat für Verwirrung gesorgt.
   function play(id: NudgeSoundCharacter, label: string) {
     setSelected(id);
     playNudgeSound(intensity, id);

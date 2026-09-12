@@ -5,9 +5,9 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { enqueueEvent } from "@/lib/eventQueue";
 
 /**
- * Fuehrt automatisch durch eine Liste von Aktivitaets-Schritten: ein Schritt
+ * Führt automatisch durch eine Liste von Aktivitäts-Schritten: ein Schritt
  * pro Bildschirm, jeder mit eigener Dauer, automatischer Vorschritt zum
- * naechsten (Regel 1: Zielzeitpunkt je Schritt, nicht hochgezaehlt).
+ * nächsten (Regel 1: Zielzeitpunkt je Schritt, nicht hochgezählt).
  * Protokolliert ACTIVITY_STEP_DONE, sobald ein Schritt abgeschlossen ist.
  */
 export function useActivitySteps(

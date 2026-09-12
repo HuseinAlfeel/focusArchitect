@@ -1,7 +1,7 @@
 // Items D1-D5 und V1-V7 aus docs/SPEZIFIKATION.md, Abschnitt [3] Vorbefragung.
-// D1-D5 sind demografische Angaben (24.08. mit Holly abgestimmt ergaenzt),
-// V1-V7 die urspruengliche Baseline-Erhebung. Liegen in einer eigenen Datei,
-// damit Holly sie bei Bedarf leicht anpassen kann, ohne im JSX suchen zu muessen.
+// D1-D5 sind demografische Angaben (24.08. mit Holly abgestimmt ergänzt),
+// V1-V7 die ursprüngliche Baseline-Erhebung. Liegen in einer eigenen Datei,
+// damit Holly sie bei Bedarf leicht anpassen kann, ohne im JSX suchen zu müssen.
 
 export const preSurveyItems = [
   {

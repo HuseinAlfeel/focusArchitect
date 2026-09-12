@@ -1,7 +1,7 @@
 // Kanonische Liste aller Ereignistypen aus docs/SPEZIFIKATION.md, Abschnitt 4
-// ("Ereignistypen fuer das Log"). Einmal hier pflegen, nicht als lose
-// Freitext-Strings ueber die Routen verstreut - ein Tippfehler in einem
-// Ereignistyp wuerde sonst still Forschungsdaten verfaelschen.
+// ("Ereignistypen für das Log"). Einmal hier pflegen, nicht als lose
+// Freitext-Strings über die Routen verstreut - ein Tippfehler in einem
+// Ereignistyp würde sonst still Forschungsdaten verfälschen.
 
 export const EVENT_TYPES = [
   "SESSION_CREATED",

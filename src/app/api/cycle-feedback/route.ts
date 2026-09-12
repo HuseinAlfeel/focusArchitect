@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Ungültige Anfrage." }, { status: 400 });
   }
 
-  // Der Zaehler im Kurzfeedback bewegt sich frei in 5-Minuten-Schritten
-  // (Aenderung 11.08.), keine feste Liste erlaubter Werte mehr - nur noch
-  // pruefen, dass es tatsaechlich ein Vielfaches von 5 ist.
+  // Der Zähler im Kurzfeedback bewegt sich frei in 5-Minuten-Schritten
+  // (Änderung 11.08.), keine feste Liste erlaubter Werte mehr - nur noch
+  // prüfen, dass es tatsächlich ein Vielfaches von 5 ist.
   const adjustmentMin =
     typeof adjustmentMinRaw === "number" &&
     Number.isInteger(adjustmentMinRaw) &&

@@ -4,13 +4,13 @@ import { useEffect } from "react";
 import { enqueueEvent } from "@/lib/eventQueue";
 
 /**
- * Protokolliert TAB_HIDDEN / TAB_VISIBLE ueber die Page Visibility API.
- * Liefert ein kleines, aber wertvolles Signal: ob der Tab waehrend der
- * Arbeitsphase ueberhaupt im Vordergrund war (siehe SPEZIFIKATION.md 4).
+ * Protokolliert TAB_HIDDEN / TAB_VISIBLE über die Page Visibility API.
+ * Liefert ein kleines, aber wertvolles Signal: ob der Tab während der
+ * Arbeitsphase überhaupt im Vordergrund war (siehe SPEZIFIKATION.md 4).
  *
- * Geht ueber die Ereignis-Queue (src/lib/eventQueue.ts, Phase G): landet erst
+ * Geht über die Ereignis-Queue (src/lib/eventQueue.ts, Phase G): landet erst
  * in der Queue, wird im 10s-Takt gesendet und beim Verlassen der Seite per
- * sendBeacon nachgereicht, statt bei einer kurzen Netzwerkluecke verloren zu gehen.
+ * sendBeacon nachgereicht, statt bei einer kurzen Netzwerklücke verloren zu gehen.
  */
 export function useTabVisibilityLogging(sessionId: string, cycle: number) {
   useEffect(() => {

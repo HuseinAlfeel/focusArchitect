@@ -25,8 +25,8 @@ const SNOOZE_MS = 5 * 60_000;
 // Nudge-Reaktion folgt SOFORT das Kurzfeedback (F8) - die Frage "war der
 // Zeitpunkt passend" bezieht sich auf die gerade zu Ende gegangene
 // Arbeitsphase, nicht auf die noch bevorstehende Pause. Die dort
-// entschiedene naechste Arbeitszeit (pendingWorkMin) wird erst nach der
-// Pause tatsaechlich angewendet, wenn "Sitzung starten" geklickt wird.
+// entschiedene nächste Arbeitszeit (pendingWorkMin) wird erst nach der
+// Pause tatsächlich angewendet, wenn "Sitzung starten" geklickt wird.
 export function SessionTimer({
   sessionId,
   cycle: initialCycle,
@@ -47,22 +47,22 @@ export function SessionTimer({
     initialEndsAt
   );
   const { remainingMs, overtimeMs } = useCountdown(endsAt);
-  // Eigener Bezugspunkt fuer die Eskalation (Stufen + Ton), getrennt von der
+  // Eigener Bezugspunkt für die Eskalation (Stufen + Ton), getrennt von der
   // echten Rundenendzeit `endsAt`: "Noch 5 Minuten" (reactToSnooze) verschiebt
   // nur diesen, nicht die Runde selbst - die Anzeige "Seit Rundenende" oben
-  // bleibt dadurch ehrlich (echte Gesamtverspaetung), waehrend die Eskalation
+  // bleibt dadurch ehrlich (echte Gesamtverspätung), während die Eskalation
   // nach dem Snooze wirklich bei Stufe 1 neu beginnt (Husin, 25.08.).
   const [nudgeEndsAt, setNudgeEndsAt] = useState(endsAt);
   // Setstate direkt im Render statt in einem Effect - offiziell empfohlenes
-  // Muster fuers Zuruecksetzen von State bei einer geaenderten Prop (neue
-  // Runde), ohne einen zusaetzlichen Render-Umweg ueber einen Effect.
+  // Muster fürs Zurücksetzen von State bei einer geänderten Prop (neue
+  // Runde), ohne einen zusätzlichen Render-Umweg über einen Effect.
   const [prevEndsAtForNudge, setPrevEndsAtForNudge] = useState(endsAt);
   if (endsAt !== prevEndsAtForNudge) {
     setPrevEndsAtForNudge(endsAt);
     setNudgeEndsAt(endsAt);
   }
   const isSnoozeActive = nudgeEndsAt !== endsAt;
-  // Eigener Countdown bis zum naechsten Hinweis waehrend der Snooze-Gnadenfrist
+  // Eigener Countdown bis zum nächsten Hinweis während der Snooze-Gnadenfrist
   // - vorher wurde der Bildschirm hier komplett leer, das wirkte wie ein Fehler
   // (Husin, 26.08.: "Timer geht weg, unsichtbar, soll nicht so sein").
   const { remainingMs: snoozeRemainingMs } = useCountdown(nudgeEndsAt);
@@ -70,10 +70,10 @@ export function SessionTimer({
   const [hasReacted, setHasReacted] = useState(false);
   const [wasSkipped, setWasSkipped] = useState(false);
   const [currentWorkMin, setCurrentWorkMin] = useState(initialWorkMin);
-  // Waehrend eine Rundenwechsel-Funktion unten laeuft (siehe logEvent),
-  // blockiert dieser Schalter ein zweites, ueberlapptes Ausloesen durch
-  // Doppelklicks - die Funktionen warten jetzt auf die Serverbestaetigung,
-  // bevor der Zustand wechselt, und die Knoepfe bleiben in dieser kurzen
+  // Während eine Rundenwechsel-Funktion unten läuft (siehe logEvent),
+  // blockiert dieser Schalter ein zweites, überlapptes Auslösen durch
+  // Doppelklicks - die Funktionen warten jetzt auf die Serverbestätigung,
+  // bevor der Zustand wechselt, und die Knöpfe bleiben in dieser kurzen
   // Zeit anklickbar.
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -88,12 +88,12 @@ export function SessionTimer({
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
 
-  // Wartet auf die Serverbestaetigung, statt nur "abzufeuern": schliesst man
+  // Wartet auf die Serverbestätigung, statt nur "abzufeuern": schließt man
   // den Tab (nicht nur Reload) sehr kurz nach einem Rundenwechsel, geht die
-  // im Browser gemerkte Rundennummer verloren (sessionStorage ueberlebt das
-  // nicht) - ohne diese Bestaetigung kennt der Server dann noch die alte
-  // Runde, und die Sitzung faellt beim naechsten Aufruf faelschlich darauf
-  // zurueck (Husin, 11.08.: genau das mit "Pause starten"/"Ueberspringen"
+  // im Browser gemerkte Rundennummer verloren (sessionStorage überlebt das
+  // nicht) - ohne diese Bestätigung kennt der Server dann noch die alte
+  // Runde, und die Sitzung fällt beim nächsten Aufruf fälschlich darauf
+  // zurück (Husin, 11.08.: genau das mit "Pause starten"/"Überspringen"
   // sofort nach einem frischen Rundenstart beobachtet).
   async function logEvent(
     type: EventType,
@@ -122,8 +122,8 @@ export function SessionTimer({
 
   // Verschiebt nur die Eskalation um 5 Minuten (siehe nudgeEndsAt oben), nicht
   // die Runde selbst - kein "Reagieren" im Sinne von BREAK_ACCEPTED/SKIPPED,
-  // die Runde laeuft unveraendert weiter. Eigener Ereignistyp, damit die
-  // Kernkennzahl (bei welcher Stufe wird echt reagiert) davon unberuehrt bleibt.
+  // die Runde läuft unverändert weiter. Eigener Ereignistyp, damit die
+  // Kernkennzahl (bei welcher Stufe wird echt reagiert) davon unberührt bleibt.
   async function reactToSnooze() {
     if (isTransitioning) return;
     setIsTransitioning(true);
@@ -136,9 +136,9 @@ export function SessionTimer({
     }
   }
 
-  // Gemeinsamer Startpunkt fuer die naechste Arbeitsrunde - genutzt sowohl
+  // Gemeinsamer Startpunkt für die nächste Arbeitsrunde - genutzt sowohl
   // wenn eine echte Pause zu Ende geht (fromBreak: true, "Sitzung starten"
-  // in BreakScreen) als auch wenn die Pause ganz uebersprungen wurde
+  // in BreakScreen) als auch wenn die Pause ganz übersprungen wurde
   // (fromBreak: false, direkt nach dem Kurzfeedback).
   async function startNextRound(newWorkMin: number, fromBreak: boolean) {
     if (isTransitioning) return;
@@ -151,7 +151,7 @@ export function SessionTimer({
       const nextCycle = cycle + 1;
       const nextEndsAt = Date.now() + newWorkMin * 60_000;
 
-      // Explizit nextCycle uebergeben, nicht das cycle-Closure - React hat den
+      // Explizit nextCycle übergeben, nicht das cycle-Closure - React hat den
       // State an dieser Stelle noch nicht auf die neue Runde aktualisiert.
       await logEvent("CYCLE_STARTED", undefined, nextCycle);
       await logEvent("WORK_STARTED", undefined, nextCycle);
@@ -171,8 +171,8 @@ export function SessionTimer({
 
   async function handleFeedbackSubmitted(newWorkMin: number) {
     if (wasSkipped) {
-      // Ueberspringen soll auch wirklich ueberspringen: keine
-      // Aktivitaetsauswahl, keine Pause, direkt in die naechste Runde.
+      // Überspringen soll auch wirklich überspringen: keine
+      // Aktivitätsauswahl, keine Pause, direkt in die nächste Runde.
       await startNextRound(newWorkMin, false);
       return;
     }
@@ -511,7 +511,7 @@ function FeedbackScreen({
   );
 }
 
-// Vier gleichwertig aussehende Optionen - "keine Aktivitaet" darf nicht wie
+// Vier gleichwertig aussehende Optionen - "keine Aktivität" darf nicht wie
 // die schlechte Wahl aussehen, sonst verzerrt das die Daten (SPEZIFIKATION.md [7]).
 function ActivityChoiceScreen({
   onChoose,
@@ -566,10 +566,10 @@ function BreakScreen({
     useActivitySteps(sessionId, cycle, stepDurations);
 
   // Die Pausenzeit bestimmt allein, wann "Sitzung starten" erscheint - eine
-  // Aktivitaet, die laenger dauert als die (ggf. per Kurzfeedback verkuerzte)
-  // Pause, darf den Weiterknopf nicht blockieren. Endet die Pause waehrend
-  // eine Aktivitaet noch laeuft, wird deren Anzeige einfach ausgeblendet,
-  // die Aktivitaet endet quasi mit der Pause (Husin, 26.08.).
+  // Aktivität, die länger dauert als die (ggf. per Kurzfeedback verkürzte)
+  // Pause, darf den Weiterknopf nicht blockieren. Endet die Pause während
+  // eine Aktivität noch läuft, wird deren Anzeige einfach ausgeblendet,
+  // die Aktivität endet quasi mit der Pause (Husin, 26.08.).
   const readyToContinue = breakDone;
 
   useBreakEndSound(breakEndsAt, !readyToContinue);

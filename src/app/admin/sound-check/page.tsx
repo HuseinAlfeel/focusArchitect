@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { SoundCheckPanel } from "./sound-check-panel";
 
-// Reines Testwerkzeug fuer die Kalibrierung der Pausenhinweis-Toene (F6),
-// kein Teil des Studienablaufs - deshalb nur fuer ADMIN erreichbar.
+// Reines Testwerkzeug für die Kalibrierung der Pausenhinweis-Töne (F6),
+// kein Teil des Studienablaufs - deshalb nur für ADMIN erreichbar.
 export default async function SoundCheckPage() {
   const admin = await requireAdmin();
   if (!admin) {

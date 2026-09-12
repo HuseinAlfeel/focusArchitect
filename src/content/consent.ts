@@ -1,7 +1,7 @@
 // Von Husin am 04.08.2026 freigegeben, um weiterzubauen. Inhalt mit der
 // Betreuung Ende August 2026 besprochen, hier umgesetzt am 12.09.2026: kein
-// Ethikvotum noetig, Phase A damit im Kern abgeschlossen. Aufbewahrungsfrist
-// auf konkretes Datum 11.11.2027 (ein Jahr nach der urspruenglich geplanten
+// Ethikvotum nötig, Phase A damit im Kern abgeschlossen. Aufbewahrungsfrist
+// auf konkretes Datum 11.11.2027 (ein Jahr nach der ursprünglich geplanten
 // Frist 11.11.2026) gesetzt, siehe ENTSCHEIDUNGEN.md.
 
 export const consentContent = {

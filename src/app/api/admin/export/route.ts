@@ -59,7 +59,7 @@ async function participantsCsv() {
 
     // Gesamtdauer nicht redundant in der DB gespeichert, sondern hier aus
     // startedAt/endedAt berechnet - beide stehen schon fest, ein eigenes Feld
-    // koennte nur aus dem Takt geraten (Husin, 25.08.: Sitzung hat jetzt kein
+    // könnte nur aus dem Takt geraten (Husin, 25.08.: Sitzung hat jetzt kein
     // festes Ende mehr, siehe ENTSCHEIDUNGEN.md).
     const durationMin =
       session.startedAt && session.endedAt
@@ -103,10 +103,10 @@ async function participantsCsv() {
   return toCsv(columns, rows);
 }
 
-// Eine Zeile je Runde. CycleFeedback.activity wird vom Client nie befuellt
-// (das Formular schickt dort immer null) - die tatsaechlich gewaehlte
-// Aktivitaet steht stattdessen im Ereignis-Log (ACTIVITY_SELECTED/
-// ACTIVITY_SKIPPED), deshalb hier ueber die Events je Runde zusammengefuehrt.
+// Eine Zeile je Runde. CycleFeedback.activity wird vom Client nie befüllt
+// (das Formular schickt dort immer null) - die tatsächlich gewählte
+// Aktivität steht stattdessen im Ereignis-Log (ACTIVITY_SELECTED/
+// ACTIVITY_SKIPPED), deshalb hier über die Events je Runde zusammengeführt.
 async function cyclesCsv() {
   const sessions = await prisma.session.findMany({
     include: {
@@ -141,10 +141,10 @@ async function cyclesCsv() {
         | null;
       const activityPayload = activitySelected?.payload as { activity?: string } | null;
 
-      // Reaktionslatenz: wie lange, bis die Person nach Stufe 1 ueberhaupt
-      // wieder zum Tab zurueckkommt - unabhaengig davon, wann/ob sie dann auf
-      // den Hinweis reagiert. Kein TAB_VISIBLE danach gefunden heisst: Tab war
-      // durchgehend sichtbar, es gab nichts zum Zurueckkommen (Husin, 25.08.).
+      // Reaktionslatenz: wie lange, bis die Person nach Stufe 1 überhaupt
+      // wieder zum Tab zurückkommt - unabhängig davon, wann/ob sie dann auf
+      // den Hinweis reagiert. Kein TAB_VISIBLE danach gefunden heißt: Tab war
+      // durchgehend sichtbar, es gab nichts zum Zurückkommen (Husin, 25.08.).
       const nudgeStage1 = cycleEvents.find((e) => e.type === "NUDGE_STAGE_1");
       const firstTabVisibleAfterNudge = nudgeStage1
         ? cycleEvents.find(
@@ -211,7 +211,7 @@ async function cyclesCsv() {
   return toCsv(columns, rows);
 }
 
-// Eine Zeile je Ereignis - der vollstaendige Rohlog, fuer alles, was die
+// Eine Zeile je Ereignis - der vollständige Rohlog, für alles, was die
 // beiden anderen Dateien nicht abdecken (z.B. TAB_HIDDEN/TAB_VISIBLE,
 // NUDGE_STAGE_*, NUDGE_SOUND_PLAYED).
 async function eventsCsv() {

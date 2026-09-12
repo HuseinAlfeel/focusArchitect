@@ -1,8 +1,8 @@
-// Aktivitaeten aus docs/SPEZIFIKATION.md, Abschnitt [7]. Die Spezifikation
+// Aktivitäten aus docs/SPEZIFIKATION.md, Abschnitt [7]. Die Spezifikation
 // nennt nur grobe Gesamtdauern und Stichworte ("angeleitete Dehnung,
-// Schritt fuer Schritt") - die einzelnen Schritte hier sind eine sinnvolle
-// Ausformulierung davon, kein woertliches Zitat. Bei Bedarf mit Holly
-// abstimmen und hier anpassen, nicht im JSX suchen muessen.
+// Schritt für Schritt") - die einzelnen Schritte hier sind eine sinnvolle
+// Ausformulierung davon, kein wörtliches Zitat. Bei Bedarf mit Holly
+// abstimmen und hier anpassen, nicht im JSX suchen müssen.
 
 export type ActivityStep = {
   instruction: string;

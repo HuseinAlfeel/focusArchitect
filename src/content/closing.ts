@@ -1,6 +1,6 @@
 // Text der Abschlussseite (SPEZIFIKATION.md [11]). Bewusst knapp: Dank,
-// Kontaktadresse fuer Rueckfragen und Loeschwuensche - explizit KEINE
-// Auswertung fuer Teilnehmende, das wuerde nachtraeglich ihre bereits
+// Kontaktadresse für Rückfragen und Löschwünsche - explizit KEINE
+// Auswertung für Teilnehmende, das würde nachträglich ihre bereits
 // abgegebenen Antworten beeinflussen.
 
 export const closingContent = {

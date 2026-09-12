@@ -33,13 +33,13 @@ export default async function WorkSessionPage() {
     redirect("/study");
   }
 
-  // Ab Runde 2 (F8) gibt es keinen eigenen Session-Zeitstempel fuer den
+  // Ab Runde 2 (F8) gibt es keinen eigenen Session-Zeitstempel für den
   // Rundenstart wie initialWorkMin/startedAt bei Runde 1 - die Wahrheit
-  // steht im Ereignis-Log: das juengste WORK_STARTED-Ereignis sagt, welche
-  // Runde gerade laeuft und wann sie begann. Damit ueberlebt auch ein
+  // steht im Ereignis-Log: das jüngste WORK_STARTED-Ereignis sagt, welche
+  // Runde gerade läuft und wann sie begann. Damit überlebt auch ein
   // kompletter Seiten-Reload in Runde 2+ (nicht nur ein sessionStorage-
   // Wiederherstellen), konsistent mit Regel 1 (Zielzeitpunkt, nicht
-  // hochgezaehlt).
+  // hochgezählt).
   const [latestFeedback, latestWorkStarted] = await Promise.all([
     prisma.cycleFeedback.findFirst({
       where: { sessionId: session.id },

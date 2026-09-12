@@ -18,7 +18,7 @@ export default async function PostSurveyPage() {
     redirect("/study/consent");
   }
 
-  // Die Nachbefragung gehoert ans Ende - "Sitzung beenden" ist der
+  // Die Nachbefragung gehört ans Ende - "Sitzung beenden" ist der
   // vorgesehene Weg dorthin (siehe /study Hub), erst danach ergibt sie
   // inhaltlich Sinn ("wie war die Sitzung", nicht "wie war sie bisher").
   if (!session.endedAt) {

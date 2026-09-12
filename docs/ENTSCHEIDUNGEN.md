@@ -115,174 +115,174 @@ danach Vergleichsfrage und Freitext.
 selbst gebauten N3-N6-Fragen, weil sie geprüft und vergleichbar sind.
 **Alternative:** Bei den alten N1-N10 bleiben. Verworfen, da nicht mehr die abgestimmte Fassung.
 
-## 24.08.2026 Zwei Toene gleichzeitig bei +3 Min behoben
+## 24.08.2026 Zwei Töne gleichzeitig bei +3 Min behoben
 
-**Entscheidung:** Zwei Aenderungen an `useNudgeSoundSchedule.ts`: (1) Der Klang bei +3 Min ist jetzt derselbe
+**Entscheidung:** Zwei Änderungen an `useNudgeSoundSchedule.ts`: (1) Der Klang bei +3 Min ist jetzt derselbe
 sanfte Sinuston wie bei 0:00, statt des abweichenden "pulsing-tone". (2) Der Tick-Loop spielt jetzt nur noch
-die zuletzt faellige feste Stufe wirklich ab, falls durch einen verzoegerten Tick (gedrosselter Hintergrund-Tab)
-mehrere Schwellen im selben Tick ueberschritten werden - genau dieselbe Absicherung, die es fuer die minuetlichen
-Wiederholungstoene ab +4 Min schon seit dem 10.08. gibt, war fuer die festen Stufen (-30s bis +3 Min) nie gebaut.
-**Begruendung:** Husin meldete zwei gleichzeitig laufende, gegeneinander klingende Toene bei Minute 3. Ursache:
-wenn der Tick durch Tab-Drosselung verzoegert wird, koennen zwei Schwellen (z.B. +2 Min und +3 Min) im selben
-Tick faellig werden und dann nahezu gleichzeitig abspielen. Mit gleichem Klangcharakter klingt ein solcher
-seltener Doppel-Treffer wie ein einzelner, etwas voller Ton statt wie zwei widerspruechliche Klaenge.
+die zuletzt fällige feste Stufe wirklich ab, falls durch einen verzögerten Tick (gedrosselter Hintergrund-Tab)
+mehrere Schwellen im selben Tick überschritten werden - genau dieselbe Absicherung, die es für die minütlichen
+Wiederholungstöne ab +4 Min schon seit dem 10.08. gibt, war für die festen Stufen (-30s bis +3 Min) nie gebaut.
+**Begründung:** Husin meldete zwei gleichzeitig laufende, gegeneinander klingende Töne bei Minute 3. Ursache:
+wenn der Tick durch Tab-Drosselung verzögert wird, können zwei Schwellen (z.B. +2 Min und +3 Min) im selben
+Tick fällig werden und dann nahezu gleichzeitig abspielen. Mit gleichem Klangcharakter klingt ein solcher
+seltener Doppel-Treffer wie ein einzelner, etwas voller Ton statt wie zwei widersprüchliche Klänge.
 **Alternative:** Nur den Klangcharakter angleichen, den Tick-Loop unangetastet lassen. Verworfen, weil das nur
-das Symptom fuer genau diese eine Minuten-Kombination kaschiert haette, nicht die Ursache.
+das Symptom für genau diese eine Minuten-Kombination kaschiert hätte, nicht die Ursache.
 
 ## 25.08.2026 Zehn Teilnehmende statt sechs
 
-**Entscheidung:** Teilnehmerzahl auf zehn erhoeht (P07-P10 als neue Accounts angelegt), Probelauf-Person
+**Entscheidung:** Teilnehmerzahl auf zehn erhöht (P07-P10 als neue Accounts angelegt), Probelauf-Person
 entsprechend zur "elften Person" statt "siebten Person".
-**Begruendung:** Empfehlung von Husins Beraterin.
+**Begründung:** Empfehlung von Husins Beraterin.
 **Alternative:** Bei sechs bleiben. Verworfen auf Empfehlung.
 
 ## 25.08.2026 Offenes Sitzungsende statt fester 120 Minuten
 
-**Entscheidung:** Keine Obergrenze fuer die Sitzungsdauer mehr. Teilnehmende arbeiten so lange, wie sie
-moechten, und beenden selbst ueber den vorhandenen "Sitzung beenden"-Knopf. Rundenzaehler war im Code ohnehin
-schon unbegrenzt (reines Hochzaehlen, kein Cap) - es musste nichts entfernt werden, nur die Dokumentation
+**Entscheidung:** Keine Obergrenze für die Sitzungsdauer mehr. Teilnehmende arbeiten so lange, wie sie
+möchten, und beenden selbst über den vorhandenen "Sitzung beenden"-Knopf. Rundenzähler war im Code ohnehin
+schon unbegrenzt (reines Hochzählen, kein Cap) - es musste nichts entfernt werden, nur die Dokumentation
 (CLAUDE.md, SPEZIFIKATION.md, CHECKLIST.md) beschrieb noch "ca. 120 Min / 4 Runden" als falschen Eindruck
 einer Grenze. Gesamtdauer wird im Export (`participants.csv`, Spalte `durationMin`) aus `endedAt - startedAt`
 berechnet, nicht redundant als eigenes DB-Feld gespeichert - beide Zeitstempel existieren schon.
-**Begruendung:** Mehr Zyklen bedeuten mehr Gelegenheiten zur Intervallanpassung, der aussagekraeftigsten
-Datenquelle der Studie, und entspricht realer Nutzung besser als eine kuenstliche Grenze.
-**Folge fuer die Auswertung:** Unterschiedliche Sitzungslaengen pro Person - die Zyklenanzahl muss pro Person
-mitberichtet werden, gehoert als Punkt in die Limitationen.
-**Alternative:** Bei fester Obergrenze bleiben. Verworfen, siehe Begruendung.
+**Begründung:** Mehr Zyklen bedeuten mehr Gelegenheiten zur Intervallanpassung, der aussagekräftigsten
+Datenquelle der Studie, und entspricht realer Nutzung besser als eine künstliche Grenze.
+**Folge für die Auswertung:** Unterschiedliche Sitzungslängen pro Person - die Zyklenanzahl muss pro Person
+mitberichtet werden, gehört als Punkt in die Limitationen.
+**Alternative:** Bei fester Obergrenze bleiben. Verworfen, siehe Begründung.
 
-## 25.08.2026 Reaktionslatenz zum Tab-Rueckkehr protokolliert
+## 25.08.2026 Reaktionslatenz zum Tab-Rückkehr protokolliert
 
-**Entscheidung:** Jedes `NUDGE_STAGE_0` bis `_3`-Ereignis speichert jetzt zusaetzlich im Payload
+**Entscheidung:** Jedes `NUDGE_STAGE_0` bis `_3`-Ereignis speichert jetzt zusätzlich im Payload
 `tabVisibleAtNudge: true | false` (Tab-Sichtbarkeit in genau dem Moment). Im Export (`cycles.csv`) daraus drei
-neue Spalten je Runde: `nudgeStage1At`, `firstTabVisibleAfterNudge` (naechstes `TAB_VISIBLE` danach) und
+neue Spalten je Runde: `nudgeStage1At`, `firstTabVisibleAfterNudge` (nächstes `TAB_VISIBLE` danach) und
 `latencyToTabReturnSeconds` (Differenz, leer wenn der Tab durchgehend sichtbar war). Kein neuer Frontend-Code
-noetig, die Basis-Ereignisse (`NUDGE_STAGE_*`, `TAB_VISIBLE`) gab es schon.
-**Begruendung:** Misst objektiv, ob ein zurueckhaltender Hinweis ueberhaupt wahrgenommen wird - direkt relevant
-fuer die Forschungsfrage, unabhaengig von der Selbstauskunft in der Nachbefragung.
+nötig, die Basis-Ereignisse (`NUDGE_STAGE_*`, `TAB_VISIBLE`) gab es schon.
+**Begründung:** Misst objektiv, ob ein zurückhaltender Hinweis überhaupt wahrgenommen wird - direkt relevant
+für die Forschungsfrage, unabhängig von der Selbstauskunft in der Nachbefragung.
 
-## 25.08.2026 Ueberzeit-Anzeige in die Hinweis-Karte verschoben
+## 25.08.2026 Überzeit-Anzeige in die Hinweis-Karte verschoben
 
-**Entscheidung:** Die "+MM:SS seit Rundenende"-Anzeige steht jetzt direkt in `NudgeCard`/`NudgeModal`, ueber
-den beiden Knoepfen "Pause starten"/"Ueberspringen", statt separat mittig auf dem Bildschirm.
-**Begruendung:** Husin fand die Anzeige nicht - sie war zwar da, stand aber an einer eigenen zentrierten
-Stelle im Layout, waehrend `NudgeModal` (Stufe 3) als `fixed inset-0` zentriertes Fenster optisch genau darueber
-lag und sie damit verdeckte. Direkt in der Karte ist sie unuebersehbar mit der Entscheidung verbunden, die sie
-begruendet.
+**Entscheidung:** Die "+MM:SS seit Rundenende"-Anzeige steht jetzt direkt in `NudgeCard`/`NudgeModal`, über
+den beiden Knöpfen "Pause starten"/"Überspringen", statt separat mittig auf dem Bildschirm.
+**Begründung:** Husin fand die Anzeige nicht - sie war zwar da, stand aber an einer eigenen zentrierten
+Stelle im Layout, während `NudgeModal` (Stufe 3) als `fixed inset-0` zentriertes Fenster optisch genau darüber
+lag und sie damit verdeckte. Direkt in der Karte ist sie unübersehbar mit der Entscheidung verbunden, die sie
+begründet.
 **Alternative:** Position der alten Anzeige anpassen. Verworfen, direkt in der Karte ist eindeutiger.
 
-## 26.08.2026 Aktivitaetserfassung im Tab (ACTIVITY_TICK)
+## 26.08.2026 Aktivitätserfassung im Tab (ACTIVITY_TICK)
 
-**Entscheidung:** Neuer Hook `useActivityTicks.ts`: zaehlt `mousemove`/`wheel` (zusammen als `mouseMoves`),
+**Entscheidung:** Neuer Hook `useActivityTicks.ts`: zählt `mousemove`/`wheel` (zusammen als `mouseMoves`),
 `mousedown` (`clicks`) und `keydown` (`keyPresses`) auf `window`, sendet einmal pro Minute ein `ACTIVITY_TICK`
 mit den vier Aggregaten plus `tabVisible`. Kein Tick, wenn der Tab am Ende der Minute nicht sichtbar ist.
-**Begruendung:** Husins Vorschlag, objektives Signal fuer "wie oft schaut jemand zur Anwendung" als Grundlage
-fuer eine moegliche spaetere Desktop-Erweiterung.
-**Einschraenkung, bewusst mitdokumentiert (siehe SPEZIFIKATION.md Abschnitt 4):** Erfasst nur Eingaben im
-eigenen Fenster. Waehrend der eigentlichen Arbeitsphase arbeiten Teilnehmende erwartungsgemaess in einer
+**Begründung:** Husins Vorschlag, objektives Signal für "wie oft schaut jemand zur Anwendung" als Grundlage
+für eine mögliche spätere Desktop-Erweiterung.
+**Einschränkung, bewusst mitdokumentiert (siehe SPEZIFIKATION.md Abschnitt 4):** Erfasst nur Eingaben im
+eigenen Fenster. Während der eigentlichen Arbeitsphase arbeiten Teilnehmende erwartungsgemäß in einer
 anderen Anwendung (Regel 7: bewusst fast leerer Bildschirm) - `keydown` braucht Tastaturfokus im Tab,
-`mousemove` braucht den Cursor ueber dem Fenster. Beides ist waehrend echter Arbeit woanders selten der Fall.
+`mousemove` braucht den Cursor über dem Fenster. Beides ist während echter Arbeit woanders selten der Fall.
 Die meisten Ticks werden also nahe 0 liegen und sind inhaltlich nah an dem, was `TAB_VISIBLE`/`TAB_HIDDEN`
-schon zeigt. Trotzdem umgesetzt, da harmlos (keine Inhalte, nur Zaehler) und explizit gewuenscht - die
+schon zeigt. Trotzdem umgesetzt, da harmlos (keine Inhalte, nur Zähler) und explizit gewünscht - die
 Erwartungen an den Erkenntniswert sollten aber niedrig bleiben.
-**Alternative:** Nicht bauen, da die Aussagekraft waehrend der Arbeitsphase gering ist. Verworfen auf
-ausdruecklichen Wunsch.
+**Alternative:** Nicht bauen, da die Aussagekraft während der Arbeitsphase gering ist. Verworfen auf
+ausdrücklichen Wunsch.
 
-## 26.08.2026 "Noch 5 Minuten" (BREAK_SNOOZED) wieder eingefuehrt
+## 26.08.2026 "Noch 5 Minuten" (BREAK_SNOOZED) wieder eingeführt
 
-**Entscheidung:** Dritte Option neben "Pause starten"/"Ueberspringen" in `NudgeCard` und `NudgeModal`: fest
-5 Minuten, nicht waehlbar, keine Obergrenze fuers wiederholte Snoozen. Verschiebt nur die Eskalation (eigener
-Bezugspunkt `nudgeEndsAt`, getrennt von der echten Rundenendzeit `endsAt`), nicht die Rundenlaenge selbst -
+**Entscheidung:** Dritte Option neben "Pause starten"/"Überspringen" in `NudgeCard` und `NudgeModal`: fest
+5 Minuten, nicht wählbar, keine Obergrenze fürs wiederholte Snoozen. Verschiebt nur die Eskalation (eigener
+Bezugspunkt `nudgeEndsAt`, getrennt von der echten Rundenendzeit `endsAt`), nicht die Rundenlänge selbst -
 danach beginnt sie wieder bei Stufe 1, Ton eingeschlossen. Eigener Ereignistyp `BREAK_SNOOZED` mit
 `{ stage, secondsAfterEnd }`, getrennt von `BREAK_ACCEPTED`/`BREAK_SKIPPED`. Anzahl pro Runde als `snoozeCount`
 in `cycles.csv`.
 **Wichtig, direkter Bezug zur Entscheidung vom 05.08.2026 ("Kein Verschieben um 5 Minuten"):** Das ist
-bewusst kein Rueckfall in die damals verworfene Funktion. Die alte Funktion hat blind die **Rundenlaenge**
-veraendert, ohne Minutenangabe - genau das war das Problem, das seitdem das Kurzfeedback (F8) loest. Der neue
-Snooze aendert die Rundenlaenge ueberhaupt nicht, er verschiebt nur, wann der Hinweis erneut auftaucht. Da er
+bewusst kein Rückfall in die damals verworfene Funktion. Die alte Funktion hat blind die **Rundenlänge**
+verändert, ohne Minutenangabe - genau das war das Problem, das seitdem das Kurzfeedback (F8) löst. Der neue
+Snooze ändert die Rundenlänge überhaupt nicht, er verschiebt nur, wann der Hinweis erneut auftaucht. Da er
 als eigener Ereignistyp getrennt geloggt wird, bleibt die Kernkennzahl (bei welcher Stufe wird wirklich
-reagiert) unberuehrt.
-**Begruendung fuer fest statt waehlbar:** Ein Minuten-Regler mitten im bewusst ruhigen Hinweis wuerde Regel 8
-widersprechen (sanft, nicht aufdringlich), und feste 5 Minuten machen `snoozeCount` ueber alle zehn Personen
+reagiert) unberührt.
+**Begründung für fest statt wählbar:** Ein Minuten-Regler mitten im bewusst ruhigen Hinweis würde Regel 8
+widersprechen (sanft, nicht aufdringlich), und feste 5 Minuten machen `snoozeCount` über alle zehn Personen
 vergleichbar. Keine Obergrenze, weil das der zitierten Nutzerautonomie (De Russis & Monge Roffarello 2017)
-widersprechen wuerde - haeufiges Snoozen ist selbst ein Befund, kein Fehlverhalten, das verhindert werden muss.
-**Alternative:** Waehlbare Dauer. Verworfen wegen der UI-Komplexitaet an der falschen Stelle und schlechterer
+widersprechen würde - häufiges Snoozen ist selbst ein Befund, kein Fehlverhalten, das verhindert werden muss.
+**Alternative:** Wählbare Dauer. Verworfen wegen der UI-Komplexität an der falschen Stelle und schlechterer
 Vergleichbarkeit der Daten.
 
-**Nachtrag 26.08.2026:** Der Bildschirm blieb waehrend der 5-Minuten-Gnadenfrist komplett leer (nur "Sitzung
+**Nachtrag 26.08.2026:** Der Bildschirm blieb während der 5-Minuten-Gnadenfrist komplett leer (nur "Sitzung
 beenden" sichtbar) - bewusst so gebaut, um ein verwirrendes "0:00" zu vermeiden. Husin fand das falsch: wirkte
-wie ein Fehler ("Timer geht weg, unsichtbar"). Korrigiert: eigener Countdown "Naechster Hinweis in M:SS" waehrend
+wie ein Fehler ("Timer geht weg, unsichtbar"). Korrigiert: eigener Countdown "Nächster Hinweis in M:SS" während
 der Gnadenfrist, gespeist aus `useCountdown(nudgeEndsAt)`. Leere Bildschirme sind nicht automatisch das ruhige
-Design, das Regel 7 will - eine Person muss trotzdem erkennen koennen, dass etwas passiert.
+Design, das Regel 7 will - eine Person muss trotzdem erkennen können, dass etwas passiert.
 
-## 26.08.2026 Pausenzeit hat Vorrang vor Aktivitaetsdauer
+## 26.08.2026 Pausenzeit hat Vorrang vor Aktivitätsdauer
 
-**Entscheidung:** `readyToContinue` in `BreakScreen` haengt nur noch von `breakDone` ab, nicht mehr zusaetzlich
-von `allStepsDone`. Die Aktivitaetsanzeige wird ausgeblendet, sobald die Pause vorbei ist, auch wenn die
-Aktivitaet selbst noch laufen wuerde.
-**Begruendung:** Husin testete mit einer 2-Minuten-Pause und einer laenger dauernden Aktivitaet - "Sitzung
-starten" erschien erst, wenn die Aktivitaet zu Ende war, nicht wenn die Pause endete. Aktivitaeten haben feste
-Presets (2/3/5 Min), die Pause ist aber frei einstellbar (initialBreakMin, zusaetzlich per Kurzfeedback
-anpassbar) - eine kuerzere Pause als das gewaehlte Aktivitaets-Preset ist ein realistischer Fall, nicht nur ein
+**Entscheidung:** `readyToContinue` in `BreakScreen` hängt nur noch von `breakDone` ab, nicht mehr zusätzlich
+von `allStepsDone`. Die Aktivitätsanzeige wird ausgeblendet, sobald die Pause vorbei ist, auch wenn die
+Aktivität selbst noch laufen würde.
+**Begründung:** Husin testete mit einer 2-Minuten-Pause und einer länger dauernden Aktivität - "Sitzung
+starten" erschien erst, wenn die Aktivität zu Ende war, nicht wenn die Pause endete. Aktivitäten haben feste
+Presets (2/3/5 Min), die Pause ist aber frei einstellbar (initialBreakMin, zusätzlich per Kurzfeedback
+anpassbar) - eine kürzere Pause als das gewählte Aktivitäts-Preset ist ein realistischer Fall, nicht nur ein
 Testartefakt.
-**Alternative:** Aktivitaet immer zu Ende laufen lassen, auch ueber die Pausenzeit hinaus. Verworfen, das war
+**Alternative:** Aktivität immer zu Ende laufen lassen, auch über die Pausenzeit hinaus. Verworfen, das war
 genau der gemeldete Bug.
 
-## 26.08.2026 Pausenende-Countdown reagiert jetzt auf Tab-Ruecksprung
+## 26.08.2026 Pausenende-Countdown reagiert jetzt auf Tab-Rücksprung
 
-**Entscheidung:** `useBreakEndSound.ts` prueft jetzt zusaetzlich sofort bei jedem `visibilitychange`, nicht nur
+**Entscheidung:** `useBreakEndSound.ts` prüft jetzt zusätzlich sofort bei jedem `visibilitychange`, nicht nur
 im 200ms-Takt.
-**Begruendung:** Husin hoerte bei einer Pause nur das Endsignal, keinen der zehn Klopftoene davor. Ursache:
+**Begründung:** Husin hörte bei einer Pause nur das Endsignal, keinen der zehn Klopftöne davor. Ursache:
 jeder Klopfton hat nur eine einzige Sekunde Zeitfenster, in dem der Tick ihn treffen muss - bei gedrosseltem
-Hintergrund-Tab (realistisch, da man waehrend der Pause meist nicht auf den Bildschirm schaut) reicht das
+Hintergrund-Tab (realistisch, da man während der Pause meist nicht auf den Bildschirm schaut) reicht das
 leicht zum Verpassen. Das Endsignal dagegen trifft bei jedem Tick nach 0:00 erneut zu, deshalb kam nur das an.
-**Alternative:** Taktrate weiter erhoehen. Verworfen, das hilft nicht gegen Browser-Drosselung selbst, nur die
-Rueckkehr zum Tab kann das zuverlaessig ausloesen.
+**Alternative:** Taktrate weiter erhöhen. Verworfen, das hilft nicht gegen Browser-Drosselung selbst, nur die
+Rückkehr zum Tab kann das zuverlässig auslösen.
 
 ## 12.09.2026 Ethikvotum nicht erforderlich, Phase A im Kern abgeschlossen
 
-**Entscheidung:** Kein Ethikvotum noetig (Aussage der Betreuung), ein Antrag haette ohnehin ~2 Monate gedauert
+**Entscheidung:** Kein Ethikvotum nötig (Aussage der Betreuung), ein Antrag hätte ohnehin ~2 Monate gedauert
 und war zeitlich nicht machbar. Einwilligungstext inhaltlich abgestimmt bis auf die Aufbewahrungsfrist (siehe
-naechster Eintrag).
-**Begruendung:** Klare Aussage der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 nachgetragen.
-**Bezug:** Aktualisiert den Stand aus dem 04.08.2026-Eintrag "Ethikvotum" (dort noch offen, jetzt geklaert).
+nächster Eintrag).
+**Begründung:** Klare Aussage der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 nachgetragen.
+**Bezug:** Aktualisiert den Stand aus dem 04.08.2026-Eintrag "Ethikvotum" (dort noch offen, jetzt geklärt).
 
-## 12.09.2026 "Final abgeben" entfernt, Sitzung schliesst nur ueber Nachbefragung ab
+## 12.09.2026 "Final abgeben" entfernt, Sitzung schließt nur über Nachbefragung ab
 
 **Entscheidung:** Der manuelle "Final abgeben"-Knopf auf der Hub-Seite (`/study`) ist komplett entfernt,
 inklusive der Komponente `finalize-session-button.tsx`. Nach Sitzungsende stehen nur noch zwei Optionen als
-richtige Knoepfe (vorher Textlinks): primaer "Weiter zur Nachbefragung", sekundaer "Sitzung fortsetzen".
-`SESSION_FINALIZED` wird ausschliesslich noch automatisch beim Absenden der Nachbefragung gesetzt (das gab es
-schon vorher in `post-survey-form.tsx`, unveraendert) - der Weg darueber hinweg entfaellt.
-**Begruendung:** Befund der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 umgesetzt:
-"Final abgeben" liess sich versehentlich klicken, sperrte die Sitzung endgueltig und machte die Nachbefragung
+richtige Knöpfe (vorher Textlinks): primär "Weiter zur Nachbefragung", sekundär "Sitzung fortsetzen".
+`SESSION_FINALIZED` wird ausschließlich noch automatisch beim Absenden der Nachbefragung gesetzt (das gab es
+schon vorher in `post-survey-form.tsx`, unverändert) - der Weg darüber hinweg entfällt.
+**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 umgesetzt:
+"Final abgeben" ließ sich versehentlich klicken, sperrte die Sitzung endgültig und machte die Nachbefragung
 dauerhaft unerreichbar - echter Datenverlust, kein Trainingsfehler.
-**Bezug:** Aendert die Entscheidung vom 05.08.2026 ("Sitzung fortsetzen oder final abgeben") ab - der
+**Bezug:** Ändert die Entscheidung vom 05.08.2026 ("Sitzung fortsetzen oder final abgeben") ab - der
 Unfall-Schutz (Reopen) bleibt, der zweite, riskantere Weg (manuelles Final-Abgeben) nicht.
-**Alternative:** Nur eine Sicherheitsabfrage vor "Final abgeben" ergaenzen. Verworfen, es gab schon eine
-Rueckfrage und trotzdem kam der Bug vor - die Option muss ganz weg, nicht nur schwerer erreichbar werden.
+**Alternative:** Nur eine Sicherheitsabfrage vor "Final abgeben" ergänzen. Verworfen, es gab schon eine
+Rückfrage und trotzdem kam der Bug vor - die Option muss ganz weg, nicht nur schwerer erreichbar werden.
 
-## 12.09.2026 Restzeit groesser, nur Minuten in der Arbeitsphase, Rundenanzeige ergaenzt
+## 12.09.2026 Restzeit größer, nur Minuten in der Arbeitsphase, Rundenanzeige ergänzt
 
-**Entscheidung:** Drei Aenderungen am Arbeits-/Pausenbildschirm: (1) Restzeit deutlich groesser dargestellt,
-weiterhin kontrastarm. (2) Waehrend der Arbeitsphase nur Minuten, keine Sekunden (`formatRemainingMinutes`,
+**Entscheidung:** Drei Änderungen am Arbeits-/Pausenbildschirm: (1) Restzeit deutlich größer dargestellt,
+weiterhin kontrastarm. (2) Während der Arbeitsphase nur Minuten, keine Sekunden (`formatRemainingMinutes`,
 aufgerundet) - die Pause zeigt weiterhin M:SS. (3) Kleine, kontrastarme Zeile "Fokus · Runde N" bzw.
-"Pause · Runde N" oberhalb der Restzeit, aus der schon gespeicherten Zyklusnummer, keine neue Zaehlung.
-**Begruendung:** Befund der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 umgesetzt: nicht
-erkennbar, ob Arbeits- oder Pausenphase laeuft; Restzeit zu klein zum Lesen aus normalem Sitzabstand; ein
-sekundengenauer Countdown in der Arbeitsphase zieht Blicke an und widerspricht der bewusst zurueckhaltenden
-Gestaltung (Regel 7) - Zielkollision aufgeloest durch "gross, aber kontrastarm" statt "klein".
-**Alternative:** Fortschrittsbalken oder Prozentanzeige statt Minutenzahl. Verworfen, das waere naeher an einer
+"Pause · Runde N" oberhalb der Restzeit, aus der schon gespeicherten Zyklusnummer, keine neue Zählung.
+**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 umgesetzt: nicht
+erkennbar, ob Arbeits- oder Pausenphase läuft; Restzeit zu klein zum Lesen aus normalem Sitzabstand; ein
+sekundengenauer Countdown in der Arbeitsphase zieht Blicke an und widerspricht der bewusst zurückhaltenden
+Gestaltung (Regel 7) - Zielkollision aufgelöst durch "groß, aber kontrastarm" statt "klein".
+**Alternative:** Fortschrittsbalken oder Prozentanzeige statt Minutenzahl. Verworfen, das wäre näher an einer
 Statistik-Anzeige als die Betreuung wollte.
 
 ## 12.09.2026 "Sitzung beenden" als richtiger Knopf statt Textlink
 
 **Entscheidung:** `EndSessionButton` bekommt einen sichtbaren Rahmen statt nur blassem Text.
-**Begruendung:** Befund der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 umgesetzt: der Knopf
-war zu unauffaellig, um zuverlaessig gefunden zu werden. Weiterhin klein und am Rand, mit Rueckfrage vor dem
+**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 umgesetzt: der Knopf
+war zu unauffällig, um zuverlässig gefunden zu werden. Weiterhin klein und am Rand, mit Rückfrage vor dem
 Beenden - erkennbar, aber nicht dominant.
 
-## 12.09.2026 Aufbewahrungsfrist auf 11.11.2027 (ein Jahr nach der urspruenglichen Frist)
+## 12.09.2026 Aufbewahrungsfrist auf 11.11.2027 (ein Jahr nach der ursprünglichen Frist)
 
-**Entscheidung:** Einwilligungstext geaendert von festem Datum 11.11.2026 auf festes Datum 11.11.2027.
-**Begruendung:** Vorgabe der Betreuung im Gespraech Ende August 2026: relative Angabe raus, konkretes Datum
-rein - ein Jahr laenger als die urspruenglich geplante Frist.
+**Entscheidung:** Einwilligungstext geändert von festem Datum 11.11.2026 auf festes Datum 11.11.2027.
+**Begründung:** Vorgabe der Betreuung im Gespräch Ende August 2026: relative Angabe raus, konkretes Datum
+rein - ein Jahr länger als die ursprünglich geplante Frist.

@@ -8,14 +8,14 @@ import { enqueueEvent } from "@/lib/eventQueue";
  * Protokolliert NUDGE_STAGE_0 bis NUDGE_STAGE_3 genau einmal pro Zielzeitpunkt,
  * sobald die jeweilige Stufe erstmals erreicht wird - das ist die
  * Kernkennzahl der Arbeit ("bei welcher Stufe reagieren Menschen
- * tatsaechlich?"). Nach einem Snoozen/Ueberspringen (neuer endsAt) koennen
- * dieselben Stufennummern fuer den neuen Versuch erneut protokolliert werden.
+ * tatsächlich?"). Nach einem Snoozen/Überspringen (neuer endsAt) können
+ * dieselben Stufennummern für den neuen Versuch erneut protokolliert werden.
  *
- * Jedes Ereignis bekommt zusaetzlich `tabVisibleAtNudge` im Payload - ob der
+ * Jedes Ereignis bekommt zusätzlich `tabVisibleAtNudge` im Payload - ob der
  * Tab in genau diesem Moment sichtbar war. Zusammen mit TAB_VISIBLE aus
  * useTabVisibilityLogging.ts ergibt das im Export die Reaktionslatenz: wie
- * lange, bis eine Person nach einem Hinweis ueberhaupt zurueckkommt (siehe
- * ENTSCHEIDUNGEN.md, ergaenzt Husin 25.08.).
+ * lange, bis eine Person nach einem Hinweis überhaupt zurückkommt (siehe
+ * ENTSCHEIDUNGEN.md, ergänzt Husin 25.08.).
  */
 export function useNudgeStageLogging(
   sessionId: string,

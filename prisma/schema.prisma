@@ -34,7 +34,7 @@ model Session {
   taskDescription String? // "Was arbeitest du?"
   startedAt       DateTime?
   endedAt         DateTime?
-  finalizedAt     DateTime? // endgueltig abgegeben, danach kein Reopen mehr
+  finalizedAt     DateTime? // endgültig abgegeben, danach kein Reopen mehr
   initialWorkMin  Int         @default(25)
   initialBreakMin Int         @default(5)
   createdAt       DateTime    @default(now())
@@ -78,7 +78,7 @@ model CycleFeedback {
   cycle         Int
   timing        Timing
   adjustmentMin Int      @default(0) // Vielfaches von 5, z.B. -15, -5, 0, +5, +20
-  newWorkMin    Int // Wert fuer die naechste Runde
+  newWorkMin    Int // Wert für die nächste Runde
   activity      String? // "eyes" | "neck" | "move" | null
   comment       String?
   submittedAt   DateTime @default(now())

@@ -6,19 +6,19 @@ import { enqueueEvent } from "@/lib/eventQueue";
 const TICK_MS = 60_000;
 
 /**
- * Zaehlt Maus- und Tastaturaktivitaet *innerhalb des Tabs* pro Minute, keine
- * Inhalte. Wichtige Einschraenkung (SPEZIFIKATION.md 4): erfasst nur, was im
+ * Zählt Maus- und Tastaturaktivität *innerhalb des Tabs* pro Minute, keine
+ * Inhalte. Wichtige Einschränkung (SPEZIFIKATION.md 4): erfasst nur, was im
  * eigenen Fenster ankommt - `keydown` feuert nur bei Tastaturfokus, `mousemove`
- * nur wenn der Cursor ueber dem Fenster ist. Waehrend echter Arbeit in einer
+ * nur wenn der Cursor über dem Fenster ist. Während echter Arbeit in einer
  * anderen Anwendung bleibt das meistens bei 0. Misst also die Interaktion mit
- * der Anwendung, nicht die Arbeitsaktivitaet - siehe Limitationen.
+ * der Anwendung, nicht die Arbeitsaktivität - siehe Limitationen.
  *
- * `wheel` zaehlt zusammen mit `mousemove` in `mouseMoves`, beides ist passive
+ * `wheel` zählt zusammen mit `mousemove` in `mouseMoves`, beides ist passive
  * Cursorbewegung statt einer gezielten Aktion wie Klick oder Tastendruck.
  *
  * Ist der Tab am Ende einer Minute nicht sichtbar, wird gar kein Tick
- * geschickt (spart Datenmuell) - die gezaehlten Werte fuer diese Minute
- * verfallen einfach, statt sie in die naechste zu uebernehmen.
+ * geschickt (spart Datenmüll) - die gezählten Werte für diese Minute
+ * verfallen einfach, statt sie in die nächste zu übernehmen.
  */
 export function useActivityTicks(sessionId: string, cycle: number) {
   const countsRef = useRef({ mouseMoves: 0, clicks: 0, keyPresses: 0 });

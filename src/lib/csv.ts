@@ -1,4 +1,4 @@
-// CSV-Erzeugung fuer den Admin-Export (PHASE H). Deutsches Excel erwartet
+// CSV-Erzeugung für den Admin-Export (PHASE H). Deutsches Excel erwartet
 // Semikolon als Trennzeichen und eine UTF-8-BOM am Anfang - ohne die BOM
 // interpretiert Excel Umlaute falsch oder zerlegt die Datei nicht richtig
 // in Spalten.
