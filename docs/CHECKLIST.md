@@ -221,8 +221,10 @@ npm install -D @types/bcryptjs
 
 ### F2. Vorbefragung (halber Tag)
 
-- [ ] Seite `/study/pre` mit den Items D1 bis D5 (demografisch) und V1 bis V7
+- [ ] Seite `/study/pre` mit den Blöcken A (Person/Tätigkeit), B (tatsächliches Pausenverhalten),
+      C (Einstellung), D (typisches Befinden) - Fassung vom 12.09., ersetzt die alte D1-D5/V1-V7-Version
 - [ ] Skalen als anklickbare Buttons 1 bis 7, nicht als Slider (Slider verleiten zur Mitte)
+- [ ] Anschlussfragen bei B2/B3 nur sichtbar bei „Ja", bei „Nein" Feld leer mitspeichern statt überspringen
 - [ ] Validierung: alle Pflichtfelder ausgefüllt
 - [ ] `POST /api/survey` mit `phase: "PRE"`
 - [ ] Ereignis `SURVEY_PRE_SUBMITTED`
@@ -230,6 +232,9 @@ npm install -D @types/bcryptjs
 ### F3. Sitzungsstart (2 Stunden)
 
 - [ ] Seite `/study/start`: Freitextfeld für die geplante Tätigkeit
+- [ ] Zwei Skalenfragen (Änderung 12.09.): „Wie ausgeruht fühlst du dich jetzt gerade?", „Wie konzentriert
+      fühlst du dich jetzt gerade?" - ersetzen das alte V7 aus der Vorbefragung, landen als eigene
+      Session-Felder (`restedAtStart`, `focusAtStart`) in `participants.csv`
 - [ ] Anzeige der Startwerte 25/5 mit Hinweis auf spätere Anpassbarkeit
 - [ ] `PATCH /api/session/:id/start`
 - [ ] Ereignisse `SESSION_STARTED`, `CYCLE_STARTED`, `WORK_STARTED`
@@ -315,7 +320,7 @@ npm install -D @types/bcryptjs
 
 ### F9. Nachbefragung und Abschluss (halber Tag)
 
-- [ ] Seite `/study/post` mit N1 bis N19
+- [ ] Seite `/study/post` mit N1 bis N19, plus N20 (Bedienoberfläche, Änderung 12.09.) vor N17-N19
 - [ ] `POST /api/survey` mit `phase: "POST"`
 - [ ] `PATCH /api/session/:id/end`, Ereignisse `SESSION_ENDED`, `SURVEY_POST_SUBMITTED`
 - [ ] Abschlussseite: Dank, deine Kontaktadresse für Rückfragen und Löschwünsche

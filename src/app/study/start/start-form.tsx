@@ -2,6 +2,33 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sessionStartStateItems } from "@/content/session-start";
+
+const SCALE_VALUES = [1, 2, 3, 4, 5, 6, 7] as const;
+
+function ChoiceButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded border px-3 py-1.5 text-sm ${
+        active
+          ? "border-neutral-800 bg-neutral-800 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
+          : "border-black/15 dark:border-white/20"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function StartForm({
   sessionId,
@@ -14,14 +41,18 @@ export function StartForm({
 }) {
   const router = useRouter();
   const [taskDescription, setTaskDescription] = useState("");
+  const [stateAnswers, setStateAnswers] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [triedSubmit, setTriedSubmit] = useState(false);
+
+  const allAnswered =
+    taskDescription.trim() !== "" &&
+    sessionStartStateItems.every((item) => stateAnswers[item.id] !== undefined);
 
   async function handleSubmit() {
-    if (!taskDescription.trim()) {
-      setError("Bitte beschreibe kurz, woran du arbeitest.");
-      return;
-    }
+    setTriedSubmit(true);
+    if (!allAnswered) return;
 
     setSubmitting(true);
     setError(null);
@@ -31,6 +62,8 @@ export function StartForm({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         taskDescription,
+        restedAtStart: stateAnswers.restedAtStart,
+        focusAtStart: stateAnswers.focusAtStart,
         clientAt: new Date().toISOString(),
       }),
     });
@@ -63,7 +96,38 @@ export function StartForm({
           className="w-full rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
           placeholder="z. B. Kapitel 3 der Arbeit schreiben"
         />
+        {triedSubmit && !taskDescription.trim() && (
+          <p className="text-xs text-red-600 dark:text-red-400">Bitte beantworten.</p>
+        )}
       </div>
+
+      {sessionStartStateItems.map((item) => (
+        <div key={item.id} className="space-y-2">
+          <p className="text-sm font-medium">{item.question}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-16 text-xs opacity-60">{item.lowLabel}</span>
+            <div className="flex gap-1.5">
+              {SCALE_VALUES.map((n) => (
+                <ChoiceButton
+                  key={n}
+                  active={stateAnswers[item.id] === n}
+                  onClick={() =>
+                    setStateAnswers((prev) => ({ ...prev, [item.id]: n }))
+                  }
+                >
+                  {n}
+                </ChoiceButton>
+              ))}
+            </div>
+            <span className="w-16 text-right text-xs opacity-60">
+              {item.highLabel}
+            </span>
+          </div>
+          {triedSubmit && stateAnswers[item.id] === undefined && (
+            <p className="text-xs text-red-600 dark:text-red-400">Bitte beantworten.</p>
+          )}
+        </div>
+      ))}
 
       <div className="rounded border border-black/10 p-4 text-sm dark:border-white/15">
         <p>

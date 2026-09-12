@@ -118,30 +118,61 @@ Unten: Checkbox „Ich habe die Informationen gelesen und nehme freiwillig teil"
 
 ### [3] Vorbefragung
 
-Erhebt die Baseline, also deinen Vergleichsmaßstab. Beginnt mit einem kurzen demografischen Block (24.08. mit Holly abgestimmt ergänzt), danach folgen die ursprünglichen Items V1-V7:
+Erhebt die Baseline, also deinen Vergleichsmaßstab. Überarbeitet am 12.09. (Prioritaet 2 aus der
+Betreuungsbesprechung), damit Einstellung und tatsächliches Verhalten nicht mehr vermischt sind - ersetzt die
+alte D1-D5/V1-V7-Fassung vollständig. Vier Blöcke:
+
+**Block A - Person und Tätigkeit**
 
 | # | Frage | Format |
 |---|---|---|
-| D1 | Altersgruppe | Auswahl: 18–24 / 25–34 / 35–44 / 45–54 / 55 und älter |
-| D2 | Geschlecht | Auswahl: weiblich / männlich / divers / keine Angabe |
-| D3 | Tätigkeit | Auswahl: Studium / Anstellung / selbstständig / sonstiges |
-| D4 | Wie viele Stunden arbeitest du an einem typischen Tag? | Freitext, Zahl |
-| D5 | Wie viele davon im Sitzen? | Freitext, Zahl |
-| V1 | Wie lange arbeitest du üblicherweise am Stück am Bildschirm, ohne Pause? | Auswahl: <30min / 30–60 / 60–120 / >120 |
-| V2 | Wie oft machst du bei solcher Arbeit bewusst Pausen? | Skala 1–7 (nie … sehr oft) |
-| V3 | Nutzt du bereits Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)? | Ja/Nein + Freitext |
-| V4 | Wie konzentriert fühlst du dich typischerweise am Ende eines Arbeitsblocks? | Skala 1–7 |
-| V5 | Wie erschöpft fühlst du dich typischerweise am Ende eines Arbeitsblocks? | Skala 1–7 |
-| V6 | Wie zufrieden bist du mit deiner bisherigen Pausenroutine? | Skala 1–7 |
-| V7 | Wie ausgeruht fühlst du dich **jetzt gerade**, vor dieser Sitzung? | Skala 1–7 |
+| A1 | Altersgruppe | Auswahl: 18–24 / 25–34 / 35–44 / 45–54 / 55 und älter |
+| A2 | Geschlecht | Auswahl: weiblich / männlich / divers / keine Angabe |
+| A3 | Welche Tätigkeit übst du aus? (Berufsbezeichnung oder Studiengang) | Freitext |
+| A4 | Arbeitest du überwiegend im Homeoffice? | Auswahl: ja / teilweise / nein |
+| A5 | Wie viele Stunden arbeitest du an einem typischen Arbeitstag? | Zahl |
+| A6 | Wie viele davon sitzend am Bildschirm? | Zahl |
 
-V7 ist wichtig: Es fängt die Tagesform ab. Ohne diesen Wert weißt du nachher nicht, ob jemand einfach schon müde ankam.
+**Block B - Tatsächliches Pausenverhalten**
+
+| # | Frage | Format |
+|---|---|---|
+| B1 | Wie lange arbeitest du üblicherweise am Stück am Bildschirm, ohne Pause? | Auswahl: <30min / 30–60 / 60–120 / >120 |
+| B2 | Machst du bei solcher Arbeit bewusst Pausen? | Ja/Nein, bei Ja: „Wie viele bewusste Pausen machst du an einem typischen Arbeitstag?" (Zahl) |
+| B3 | Nutzt du Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)? | Ja/Nein, bei Ja: „Welche, und wie regelmäßig nutzt du sie?" (Freitext) |
+| B4 | Beschreibe kurz, wie du Pausen machst. | Freitext |
+
+**Block C - Einstellung**
+
+| # | Frage | Format |
+|---|---|---|
+| C1 | Wie wichtig sind dir Pausen bei der Bildschirmarbeit? | Skala 1–7 (gar nicht wichtig … sehr wichtig) |
+
+**Block D - Typisches Befinden**
+
+| # | Frage | Format |
+|---|---|---|
+| D1 | Wie erschöpft fühlst du dich typischerweise am Ende eines Arbeitstages? | Skala 1–7 |
+| D2 | Wie konzentriert fühlst du dich typischerweise am Ende eines Arbeitstages? | Skala 1–7 |
+
+Block D ist eine Baseline-Einschätzung des typischen Befindens, kein Sitzungsvergleich mehr - der
+verlässlichere Vergleichswert für die Nachbefragung wird jetzt direkt vor der Sitzung erhoben, siehe [4].
+
+Bei B2 und B3 erscheint die Anschlussfrage nur bei „Ja". Bei „Nein" wird das Anschlussfeld leer
+mitgespeichert, nicht übersprungen.
 
 ### [4] Sitzungsstart
 
 - Freitextfeld: „Woran wirst du in dieser Sitzung arbeiten?" (eine Zeile, wird gespeichert)
+- „Wie ausgeruht fühlst du dich jetzt gerade?" - Skala 1–7
+- „Wie konzentriert fühlst du dich jetzt gerade?" - Skala 1–7
 - Anzeige der Startwerte: 25 Minuten Arbeit, 5 Minuten Pause, mit Hinweis, dass man das später anpassen kann
 - Knopf „Sitzung starten"
+
+Die beiden Skalenwerte (ergänzt 12.09., Prioritaet 2) ersetzen das alte V7 aus der Vorbefragung. Eine Messung
+unmittelbar vor der Sitzung ist ein verlässlicherer Vergleichswert als eine Einschätzung des typischen
+Zustands, und beide Werte lassen sich direkt gegen N1/N2 aus der Nachbefragung stellen. Gespeichert als
+eigene Felder auf `Session` (`restedAtStart`, `focusAtStart`), landen aber trotzdem in `participants.csv`.
 
 ### [5] Arbeitsphase
 
@@ -231,10 +262,11 @@ Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, da
 | N17 | Warum? | Freitext, optional |
 | N18 | Was hat dich am meisten gestört? | Freitext, optional |
 | N19 | Was hat am besten funktioniert? | Freitext, optional |
+| N20 | Wie hat dir die Bedienoberfläche gefallen? Was würdest du daran ändern? | Freitext, optional |
 
 \* Zustimmungsskala 1–7: 1 = Stimme überhaupt nicht zu · 2 = Stimme nicht zu · 3 = Stimme eher nicht zu · 4 = Neutral · 5 = Stimme eher zu · 6 = Stimme zu · 7 = Stimme voll und ganz zu
 
-N3-N11 sind die Skala "wahrgenommene Überzeugungskraft" (Persuasiveness), N12-N15 die Skala "wahrgenommene Aufdringlichkeit" (Intrusiveness) - beide wortgleich übernommen, inklusive Tippfehler in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem"). N1/N2 vergleichst du gegen V4/V5 aus der Vorbefragung. Pflichtfelder: N1-N16. N17-N19 dürfen leer bleiben.
+N3-N11 sind die Skala "wahrgenommene Überzeugungskraft" (Persuasiveness), N12-N15 die Skala "wahrgenommene Aufdringlichkeit" (Intrusiveness) - beide wortgleich übernommen, inklusive Tippfehler in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem"). N1/N2 vergleichst du gegen die Sitzungsstart-Werte focusAtStart/restedAtStart [4], nicht mehr gegen die alten V4/V5 der Vorbefragung. N20 kam am 12.09. dazu (Prioritaet 2 aus der Betreuungsbesprechung), steht im Formular vor N17-N19. Pflichtfelder: N1-N16. N17-N20 dürfen leer bleiben.
 
 ### [11] Abschluss
 

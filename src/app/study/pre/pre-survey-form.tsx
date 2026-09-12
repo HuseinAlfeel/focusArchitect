@@ -2,21 +2,31 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { preSurveyItems } from "@/content/pre-survey";
+import { preSurveyItems, preSurveyBlockTitles } from "@/content/pre-survey";
 
 type PreSurveyItem = (typeof preSurveyItems)[number];
-type YesNoValue = { usesTool: boolean; detail: string };
+type YesNoValue = { yes: boolean; followUp: string };
 type AnswerValue = number | string | YesNoValue;
 
 const SCALE_VALUES = [1, 2, 3, 4, 5, 6, 7] as const;
 
 function isAnswered(item: PreSurveyItem, value: AnswerValue | undefined) {
-  if (value === undefined) return false;
   if (item.type === "yesno") {
-    return typeof (value as YesNoValue).usesTool === "boolean";
+    const v = value as YesNoValue | undefined;
+    if (typeof v?.yes !== "boolean") return false;
+    if (!v.yes) return true;
+    if (!("followUp" in item)) return true;
+    if (item.followUp.type === "number") {
+      return v.followUp !== "" && !Number.isNaN(Number(v.followUp));
+    }
+    return v.followUp.trim() !== "";
   }
+  if (value === undefined) return false;
   if (item.type === "number") {
     return value !== "" && value !== null && !Number.isNaN(Number(value));
+  }
+  if (item.type === "text" || item.type === "textarea") {
+    return typeof value === "string" && value.trim() !== "";
   }
   return value !== "" && value !== null;
 }
@@ -46,9 +56,11 @@ function ChoiceButton({
 }
 
 function YesNoQuestion({
+  followUp,
   value,
   onChange,
 }: {
+  followUp: { type: "number" | "text"; question: string } | undefined;
   value: YesNoValue | undefined;
   onChange: (value: YesNoValue) => void;
 }) {
@@ -56,28 +68,31 @@ function YesNoQuestion({
     <div className="space-y-2">
       <div className="flex gap-2">
         <ChoiceButton
-          active={value?.usesTool === true}
-          onClick={() => onChange({ usesTool: true, detail: value?.detail ?? "" })}
+          active={value?.yes === true}
+          onClick={() => onChange({ yes: true, followUp: value?.followUp ?? "" })}
         >
           Ja
         </ChoiceButton>
         <ChoiceButton
-          active={value?.usesTool === false}
-          onClick={() => onChange({ usesTool: false, detail: "" })}
+          active={value?.yes === false}
+          onClick={() => onChange({ yes: false, followUp: "" })}
         >
           Nein
         </ChoiceButton>
       </div>
-      {value?.usesTool === true && (
-        <input
-          type="text"
-          placeholder="Welches? (optional)"
-          value={value.detail}
-          onChange={(event) =>
-            onChange({ usesTool: true, detail: event.target.value })
-          }
-          className="w-full rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
-        />
+      {followUp && value?.yes === true && (
+        <div className="space-y-1">
+          <p className="text-sm">{followUp.question}</p>
+          <input
+            type={followUp.type === "number" ? "number" : "text"}
+            inputMode={followUp.type === "number" ? "decimal" : undefined}
+            value={value.followUp}
+            onChange={(event) =>
+              onChange({ yes: true, followUp: event.target.value })
+            }
+            className="w-full rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+          />
+        </div>
       )}
     </div>
   );
@@ -129,10 +144,12 @@ export function PreSurveyForm() {
 
   return (
     <div className="space-y-8">
-      {preSurveyItems.map((item, index) => (
+      {preSurveyItems.map((item) => (
         <div key={item.id} className="space-y-2">
-          {index === 0 && (
-            <h2 className="text-base font-semibold">Demografische Angaben</h2>
+          {preSurveyBlockTitles[item.id] && (
+            <h2 className="text-base font-semibold">
+              {preSurveyBlockTitles[item.id]}
+            </h2>
           )}
           <p className="text-sm font-medium">{item.question}</p>
 
@@ -150,9 +167,27 @@ export function PreSurveyForm() {
             />
           )}
 
+          {item.type === "text" && (
+            <input
+              type="text"
+              value={(answers[item.id] as string) ?? ""}
+              onChange={(event) => setAnswer(item.id, event.target.value)}
+              className="w-full rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+            />
+          )}
+
+          {item.type === "textarea" && (
+            <textarea
+              value={(answers[item.id] as string) ?? ""}
+              onChange={(event) => setAnswer(item.id, event.target.value)}
+              rows={2}
+              className="w-full rounded border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+            />
+          )}
+
           {item.type === "scale" && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="w-16 text-xs opacity-60">{item.lowLabel}</span>
+              <span className="w-20 text-xs opacity-60">{item.lowLabel}</span>
               <div className="flex gap-1.5">
                 {SCALE_VALUES.map((n) => (
                   <ChoiceButton
@@ -164,7 +199,7 @@ export function PreSurveyForm() {
                   </ChoiceButton>
                 ))}
               </div>
-              <span className="w-16 text-right text-xs opacity-60">
+              <span className="w-20 text-right text-xs opacity-60">
                 {item.highLabel}
               </span>
             </div>
@@ -186,6 +221,7 @@ export function PreSurveyForm() {
 
           {item.type === "yesno" && (
             <YesNoQuestion
+              followUp={"followUp" in item ? item.followUp : undefined}
               value={answers[item.id] as YesNoValue | undefined}
               onChange={(value) => setAnswer(item.id, value)}
             />

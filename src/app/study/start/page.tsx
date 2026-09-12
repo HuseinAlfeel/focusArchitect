@@ -35,7 +35,7 @@ export default async function SessionStartPage() {
       <div>
         <h1 className="text-xl font-medium">Sitzung starten</h1>
         <p className="mt-2 text-sm opacity-80">
-          Bevor es losgeht: woran arbeitest du in dieser Sitzung?
+          Bevor es losgeht: ein paar kurze Angaben.
         </p>
       </div>
 

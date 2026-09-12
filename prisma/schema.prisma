@@ -37,6 +37,8 @@ model Session {
   finalizedAt     DateTime? // endgültig abgegeben, danach kein Reopen mehr
   initialWorkMin  Int         @default(25)
   initialBreakMin Int         @default(5)
+  restedAtStart   Int? // Skala 1-7, "Wie ausgeruht fühlst du dich jetzt gerade?" direkt vor Sitzungsstart
+  focusAtStart    Int? // Skala 1-7, "Wie konzentriert fühlst du dich jetzt gerade?" direkt vor Sitzungsstart
   createdAt       DateTime    @default(now())
 
   events  Event[]

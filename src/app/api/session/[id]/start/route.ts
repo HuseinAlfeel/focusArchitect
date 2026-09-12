@@ -2,6 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+function isScaleValue(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 7;
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -16,11 +20,22 @@ export async function PATCH(
   const body = await request.json().catch(() => null);
   const taskDescription = (body as { taskDescription?: unknown } | null)
     ?.taskDescription;
+  const restedAtStart = (body as { restedAtStart?: unknown } | null)
+    ?.restedAtStart;
+  const focusAtStart = (body as { focusAtStart?: unknown } | null)
+    ?.focusAtStart;
   const clientAtRaw = (body as { clientAt?: unknown } | null)?.clientAt;
 
   if (typeof taskDescription !== "string" || !taskDescription.trim()) {
     return NextResponse.json(
       { error: "Bitte beschreibe kurz, woran du arbeitest." },
+      { status: 400 }
+    );
+  }
+
+  if (!isScaleValue(restedAtStart) || !isScaleValue(focusAtStart)) {
+    return NextResponse.json(
+      { error: "Bitte beantworte, wie ausgeruht und konzentriert du dich fühlst." },
       { status: 400 }
     );
   }
@@ -57,7 +72,12 @@ export async function PATCH(
 
   const updated = await prisma.session.update({
     where: { id },
-    data: { taskDescription: taskDescription.trim(), startedAt },
+    data: {
+      taskDescription: taskDescription.trim(),
+      restedAtStart,
+      focusAtStart,
+      startedAt,
+    },
   });
 
   await prisma.event.createMany({

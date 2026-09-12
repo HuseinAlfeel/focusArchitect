@@ -286,3 +286,36 @@ Beenden - erkennbar, aber nicht dominant.
 **Entscheidung:** Einwilligungstext geändert von festem Datum 11.11.2026 auf festes Datum 11.11.2027.
 **Begründung:** Vorgabe der Betreuung im Gespräch Ende August 2026: relative Angabe raus, konkretes Datum
 rein - ein Jahr länger als die ursprünglich geplante Frist.
+
+## 12.09.2026 Vorbefragung in vier Blöcke geteilt, Einstellung von Verhalten getrennt
+
+**Entscheidung:** Die alte D1-D5/V1-V7-Fassung ist komplett ersetzt durch vier Blöcke: A (Person und
+Tätigkeit), B (tatsächliches Pausenverhalten), C (Einstellung), D (typisches Befinden am Ende eines
+Arbeitstages). "Wie oft machst du bewusst Pausen?" (Skala) und "Wie zufrieden bist du mit deiner
+Pausenroutine?" entfallen ersatzlos, dafür neu in Block B: "Machst du bewusst Pausen?" (Ja/Nein, bei Ja
+zusätzlich die Anzahl pro Tag), "Nutzt du Hilfsmittel?" (Ja/Nein, bei Ja Freitext welche/wie regelmäßig) und
+"Beschreibe kurz, wie du Pausen machst" (Freitext). Bei "Nein" wird das jeweilige Anschlussfeld leer
+mitgespeichert, nicht übersprungen.
+**Begründung:** Befund der Betreuung: die alte Fassung vermischte an mehreren Stellen Einstellung
+("wie wichtig/zufrieden") und tatsächliches Verhalten - beides misst etwas anderes und sollte nicht in einer
+Skala beantwortet werden.
+**Bezug:** V7 ("wie ausgeruht jetzt gerade") ist raus aus der Vorbefragung, siehe nächster Eintrag.
+
+## 12.09.2026 Zustand direkt vor der Sitzung wandert vom Fragebogen zum Sitzungsstart
+
+**Entscheidung:** `/study/start` fragt jetzt zusätzlich zur Tätigkeit "wie ausgeruht" und "wie konzentriert"
+fühlst du dich jetzt gerade (Skala 1-7). Ersetzt das alte V7 aus der Vorbefragung. Gespeichert als eigene
+Felder auf `Session` (`restedAtStart`, `focusAtStart`) statt in der Vorbefragung, landen aber weiterhin in
+`participants.csv`.
+**Begründung:** Eine Messung unmittelbar vor der Sitzung ist ein verlässlicherer Vergleichswert als eine
+Einschätzung des typischen Zustands (Vorbefragung kann zeitlich vor der eigentlichen Sitzung liegen) - beide
+Werte lassen sich jetzt direkt gegen N1/N2 aus der Nachbefragung stellen.
+**Alternative:** Als weiteren `SurveyResponse`-Eintrag mit `phase: "PRE"` nachspeichern. Verworfen, eigene
+Session-Felder sind einfacher abzufragen und die Sitzung existiert an dieser Stelle bereits.
+
+## 12.09.2026 Feedback zur Bedienoberfläche in der Nachbefragung ergänzt
+
+**Entscheidung:** Neues optionales Freitextfeld N20 "Wie hat dir die Bedienoberfläche gefallen? Was würdest
+du daran ändern?", steht im Formular vor den bestehenden Feldern N17-N19. Die neun PPS-Items und die vier
+Obtrusiveness-Items bleiben unverändert in Wortlaut und Reihenfolge.
+**Begründung:** Vorgabe der Betreuung, zusätzliches Feedback zur Bedienung einzusammeln.

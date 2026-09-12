@@ -79,6 +79,8 @@ async function participantsCsv() {
       initialWorkMin: session.initialWorkMin,
       initialBreakMin: session.initialBreakMin,
       taskDescription: session.taskDescription,
+      restedAtStart: session.restedAtStart,
+      focusAtStart: session.focusAtStart,
     };
     for (const id of PRE_IDS) row[id] = preAnswers[id];
     for (const id of POST_IDS) row[id] = postAnswers[id];
@@ -96,6 +98,8 @@ async function participantsCsv() {
     "initialWorkMin",
     "initialBreakMin",
     "taskDescription",
+    "restedAtStart",
+    "focusAtStart",
     ...PRE_IDS,
     ...POST_IDS,
   ];

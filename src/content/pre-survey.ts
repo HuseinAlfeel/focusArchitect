@@ -1,11 +1,20 @@
-// Items D1-D5 und V1-V7 aus docs/SPEZIFIKATION.md, Abschnitt [3] Vorbefragung.
-// D1-D5 sind demografische Angaben (24.08. mit Holly abgestimmt ergänzt),
-// V1-V7 die ursprüngliche Baseline-Erhebung. Liegen in einer eigenen Datei,
-// damit Holly sie bei Bedarf leicht anpassen kann, ohne im JSX suchen zu müssen.
+// Vier Bloecke aus docs/SPEZIFIKATION.md, Abschnitt [3] Vorbefragung
+// (ueberarbeitet 12.09. mit Holly, Prioritaet 2 aus der Betreuungsbesprechung,
+// ersetzt die alte D1-D5/V1-V7-Fassung vollstaendig).
+//
+// Block A: Person und Taetigkeit. Block B: tatsaechliches Pausenverhalten
+// (Verhalten, keine Einschaetzung). Block C: Einstellung zu Pausen, eigener
+// kleiner Block statt vermischt mit Verhalten. Block D: typisches Befinden
+// an einem normalen Arbeitstag (Baseline-Trait, kein Sitzungsvergleich mehr -
+// der verlaesslichere Vergleichswert fuer die Nachbefragung ist jetzt
+// restedAtStart/focusAtStart vom Sitzungsstart, siehe session-start.ts).
+//
+// B2 und B3 haben eine bedingte Anschlussfrage (nur bei "ja" sichtbar). Bei
+// "nein" wird das Anschlussfeld leer mitgespeichert, nicht weggelassen.
 
 export const preSurveyItems = [
   {
-    id: "D1",
+    id: "A1",
     type: "choice",
     question: "Altersgruppe",
     options: [
@@ -17,7 +26,7 @@ export const preSurveyItems = [
     ],
   },
   {
-    id: "D2",
+    id: "A2",
     type: "choice",
     question: "Geschlecht",
     options: [
@@ -28,28 +37,32 @@ export const preSurveyItems = [
     ],
   },
   {
-    id: "D3",
+    id: "A3",
+    type: "text",
+    question: "Welche Tätigkeit übst du aus? (Berufsbezeichnung oder Studiengang)",
+  },
+  {
+    id: "A4",
     type: "choice",
-    question: "Tätigkeit",
+    question: "Arbeitest du überwiegend im Homeoffice?",
     options: [
-      { value: "studium", label: "Studium" },
-      { value: "anstellung", label: "Anstellung" },
-      { value: "selbststaendig", label: "selbstständig" },
-      { value: "sonstiges", label: "sonstiges" },
+      { value: "ja", label: "ja" },
+      { value: "teilweise", label: "teilweise" },
+      { value: "nein", label: "nein" },
     ],
   },
   {
-    id: "D4",
+    id: "A5",
     type: "number",
-    question: "Wie viele Stunden arbeitest du an einem typischen Tag?",
+    question: "Wie viele Stunden arbeitest du an einem typischen Arbeitstag?",
   },
   {
-    id: "D5",
+    id: "A6",
     type: "number",
-    question: "Wie viele davon im Sitzen?",
+    question: "Wie viele davon sitzend am Bildschirm?",
   },
   {
-    id: "V1",
+    id: "B1",
     type: "choice",
     question:
       "Wie lange arbeitest du üblicherweise am Stück am Bildschirm, ohne Pause?",
@@ -61,46 +74,56 @@ export const preSurveyItems = [
     ],
   },
   {
-    id: "V2",
-    type: "scale",
-    question: "Wie oft machst du bei solcher Arbeit bewusst Pausen?",
-    lowLabel: "nie",
-    highLabel: "sehr oft",
-  },
-  {
-    id: "V3",
+    id: "B2",
     type: "yesno",
-    question:
-      "Nutzt du bereits Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)?",
+    question: "Machst du bei solcher Arbeit bewusst Pausen?",
+    followUp: {
+      type: "number",
+      question: "Wie viele bewusste Pausen machst du an einem typischen Arbeitstag?",
+    },
   },
   {
-    id: "V4",
+    id: "B3",
+    type: "yesno",
+    question: "Nutzt du Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)?",
+    followUp: {
+      type: "text",
+      question: "Welche, und wie regelmäßig nutzt du sie?",
+    },
+  },
+  {
+    id: "B4",
+    type: "textarea",
+    question: "Beschreibe kurz, wie du Pausen machst.",
+  },
+  {
+    id: "C1",
     type: "scale",
-    question:
-      "Wie konzentriert fühlst du dich typischerweise am Ende eines Arbeitsblocks?",
+    question: "Wie wichtig sind dir Pausen bei der Bildschirmarbeit?",
+    lowLabel: "gar nicht wichtig",
+    highLabel: "sehr wichtig",
+  },
+  {
+    id: "D1",
+    type: "scale",
+    question: "Wie erschöpft fühlst du dich typischerweise am Ende eines Arbeitstages?",
     lowLabel: "gar nicht",
     highLabel: "sehr",
   },
   {
-    id: "V5",
+    id: "D2",
     type: "scale",
-    question:
-      "Wie erschöpft fühlst du dich typischerweise am Ende eines Arbeitsblocks?",
-    lowLabel: "gar nicht",
-    highLabel: "sehr",
-  },
-  {
-    id: "V6",
-    type: "scale",
-    question: "Wie zufrieden bist du mit deiner bisherigen Pausenroutine?",
-    lowLabel: "gar nicht",
-    highLabel: "sehr",
-  },
-  {
-    id: "V7",
-    type: "scale",
-    question: "Wie ausgeruht fühlst du dich jetzt gerade, vor dieser Sitzung?",
+    question: "Wie konzentriert fühlst du dich typischerweise am Ende eines Arbeitstages?",
     lowLabel: "gar nicht",
     highLabel: "sehr",
   },
 ] as const;
+
+// Ueberschriften vor dem jeweils ersten Item eines Blocks (siehe Rendering
+// in pre-survey-form.tsx).
+export const preSurveyBlockTitles: Record<string, string> = {
+  A1: "Person und Tätigkeit",
+  B1: "Tatsächliches Pausenverhalten",
+  C1: "Einstellung",
+  D1: "Typisches Befinden",
+};
