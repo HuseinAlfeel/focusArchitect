@@ -238,22 +238,22 @@ leicht zum Verpassen. Das Endsignal dagegen trifft bei jedem Tick nach 0:00 erne
 **Alternative:** Taktrate weiter erhöhen. Verworfen, das hilft nicht gegen Browser-Drosselung selbst, nur die
 Rückkehr zum Tab kann das zuverlässig auslösen.
 
-## 12.09.2026 Ethikvotum nicht erforderlich, Phase A im Kern abgeschlossen
+## 01.09.2026 Ethikvotum nicht erforderlich, Phase A im Kern abgeschlossen
 
 **Entscheidung:** Kein Ethikvotum nötig (Aussage der Betreuung), ein Antrag hätte ohnehin ~2 Monate gedauert
 und war zeitlich nicht machbar. Einwilligungstext inhaltlich abgestimmt bis auf die Aufbewahrungsfrist (siehe
 nächster Eintrag).
-**Begründung:** Klare Aussage der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 nachgetragen.
+**Begründung:** Klare Aussage der Betreuung im Gespräch Ende August 2026, hier am 01.09.2026 nachgetragen.
 **Bezug:** Aktualisiert den Stand aus dem 04.08.2026-Eintrag "Ethikvotum" (dort noch offen, jetzt geklärt).
 
-## 12.09.2026 "Final abgeben" entfernt, Sitzung schließt nur über Nachbefragung ab
+## 01.09.2026 "Final abgeben" entfernt, Sitzung schließt nur über Nachbefragung ab
 
 **Entscheidung:** Der manuelle "Final abgeben"-Knopf auf der Hub-Seite (`/study`) ist komplett entfernt,
 inklusive der Komponente `finalize-session-button.tsx`. Nach Sitzungsende stehen nur noch zwei Optionen als
 richtige Knöpfe (vorher Textlinks): primär "Weiter zur Nachbefragung", sekundär "Sitzung fortsetzen".
 `SESSION_FINALIZED` wird ausschließlich noch automatisch beim Absenden der Nachbefragung gesetzt (das gab es
 schon vorher in `post-survey-form.tsx`, unverändert) - der Weg darüber hinweg entfällt.
-**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 umgesetzt:
+**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 01.09.2026 umgesetzt:
 "Final abgeben" ließ sich versehentlich klicken, sperrte die Sitzung endgültig und machte die Nachbefragung
 dauerhaft unerreichbar - echter Datenverlust, kein Trainingsfehler.
 **Bezug:** Ändert die Entscheidung vom 05.08.2026 ("Sitzung fortsetzen oder final abgeben") ab - der
@@ -261,27 +261,27 @@ Unfall-Schutz (Reopen) bleibt, der zweite, riskantere Weg (manuelles Final-Abgeb
 **Alternative:** Nur eine Sicherheitsabfrage vor "Final abgeben" ergänzen. Verworfen, es gab schon eine
 Rückfrage und trotzdem kam der Bug vor - die Option muss ganz weg, nicht nur schwerer erreichbar werden.
 
-## 12.09.2026 Restzeit größer, nur Minuten in der Arbeitsphase, Rundenanzeige ergänzt
+## 01.09.2026 Restzeit größer, nur Minuten in der Arbeitsphase, Rundenanzeige ergänzt
 
 **Entscheidung:** Drei Änderungen am Arbeits-/Pausenbildschirm: (1) Restzeit deutlich größer dargestellt,
 weiterhin kontrastarm. (2) Während der Arbeitsphase nur Minuten, keine Sekunden (`formatRemainingMinutes`,
 aufgerundet) - die Pause zeigt weiterhin M:SS. (3) Kleine, kontrastarme Zeile "Fokus · Runde N" bzw.
 "Pause · Runde N" oberhalb der Restzeit, aus der schon gespeicherten Zyklusnummer, keine neue Zählung.
-**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 umgesetzt: nicht
+**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 01.09.2026 umgesetzt: nicht
 erkennbar, ob Arbeits- oder Pausenphase läuft; Restzeit zu klein zum Lesen aus normalem Sitzabstand; ein
 sekundengenauer Countdown in der Arbeitsphase zieht Blicke an und widerspricht der bewusst zurückhaltenden
 Gestaltung (Regel 7) - Zielkollision aufgelöst durch "groß, aber kontrastarm" statt "klein".
 **Alternative:** Fortschrittsbalken oder Prozentanzeige statt Minutenzahl. Verworfen, das wäre näher an einer
 Statistik-Anzeige als die Betreuung wollte.
 
-## 12.09.2026 "Sitzung beenden" als richtiger Knopf statt Textlink
+## 01.09.2026 "Sitzung beenden" als richtiger Knopf statt Textlink
 
 **Entscheidung:** `EndSessionButton` bekommt einen sichtbaren Rahmen statt nur blassem Text.
-**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 12.09.2026 umgesetzt: der Knopf
+**Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 01.09.2026 umgesetzt: der Knopf
 war zu unauffällig, um zuverlässig gefunden zu werden. Weiterhin klein und am Rand, mit Rückfrage vor dem
 Beenden - erkennbar, aber nicht dominant.
 
-## 12.09.2026 Aufbewahrungsfrist auf 11.11.2027 (ein Jahr nach der ursprünglichen Frist)
+## 01.09.2026 Aufbewahrungsfrist auf 11.11.2027 (ein Jahr nach der ursprünglichen Frist)
 
 **Entscheidung:** Einwilligungstext geändert von festem Datum 11.11.2026 auf festes Datum 11.11.2027.
 **Begründung:** Vorgabe der Betreuung im Gespräch Ende August 2026: relative Angabe raus, konkretes Datum
