@@ -261,16 +261,16 @@ Unfall-Schutz (Reopen) bleibt, der zweite, riskantere Weg (manuelles Final-Abgeb
 **Alternative:** Nur eine Sicherheitsabfrage vor "Final abgeben" ergänzen. Verworfen, es gab schon eine
 Rückfrage und trotzdem kam der Bug vor - die Option muss ganz weg, nicht nur schwerer erreichbar werden.
 
-## 01.09.2026 Restzeit größer, nur Minuten in der Arbeitsphase, Rundenanzeige ergänzt
+## 01.09.2026 Restzeit größer, Rundenanzeige ergänzt
 
 **Entscheidung:** Drei Änderungen am Arbeits-/Pausenbildschirm: (1) Restzeit deutlich größer dargestellt,
-weiterhin kontrastarm. (2) Während der Arbeitsphase nur Minuten, keine Sekunden (`formatRemainingMinutes`,
-aufgerundet) - die Pause zeigt weiterhin M:SS. (3) Kleine, kontrastarme Zeile "Fokus · Runde N" bzw.
-"Pause · Runde N" oberhalb der Restzeit, aus der schon gespeicherten Zyklusnummer, keine neue Zählung.
+weiterhin kontrastarm. (2) Während der Arbeitsphase testweise nur Minuten statt M:SS
+(`formatRemainingMinutes`, aufgerundet) - am 12.09. wieder zurückgenommen, siehe dortigen Eintrag. (3) Kleine,
+kontrastarme Zeile "Fokus · Runde N" bzw. "Pause · Runde N" oberhalb der Restzeit, aus der schon
+gespeicherten Zyklusnummer, keine neue Zählung.
 **Begründung:** Befund der Betreuung im Gespräch Ende August 2026, hier am 01.09.2026 umgesetzt: nicht
-erkennbar, ob Arbeits- oder Pausenphase läuft; Restzeit zu klein zum Lesen aus normalem Sitzabstand; ein
-sekundengenauer Countdown in der Arbeitsphase zieht Blicke an und widerspricht der bewusst zurückhaltenden
-Gestaltung (Regel 7) - Zielkollision aufgelöst durch "groß, aber kontrastarm" statt "klein".
+erkennbar, ob Arbeits- oder Pausenphase läuft; Restzeit zu klein zum Lesen aus normalem Sitzabstand -
+Zielkollision aufgelöst durch "groß, aber kontrastarm" statt "klein".
 **Alternative:** Fortschrittsbalken oder Prozentanzeige statt Minutenzahl. Verworfen, das wäre näher an einer
 Statistik-Anzeige als die Betreuung wollte.
 
@@ -319,3 +319,31 @@ Session-Felder sind einfacher abzufragen und die Sitzung existiert an dieser Ste
 du daran ändern?", steht im Formular vor den bestehenden Feldern N17-N19. Die neun PPS-Items und die vier
 Obtrusiveness-Items bleiben unverändert in Wortlaut und Reihenfolge.
 **Begründung:** Vorgabe der Betreuung, zusätzliches Feedback zur Bedienung einzusammeln.
+
+## 12.09.2026 Arbeits- und Pausenbildschirm visuell überarbeitet
+
+**Entscheidung:** Beide Bildschirme bekommen einen sehr sanften, langsam atmenden Farbfleck im Hintergrund
+(kühl bei Arbeit, warm bei Pause), die Restzeit steht jetzt groß in einem dezenten Rahmen statt als nackter
+Text, und die Rundenbeschriftung ist eine kleine Pille statt Fließtext. Reine Typografie/Layout-Änderung,
+keine neue Information: kein Fortschrittsbalken, keine Kennzahl, keine Motivationssprüche, weiterhin
+kontrastarm. Nebenbei global behoben: `body` nutzte trotz konfigurierter Geist-Schriftart hart Arial.
+**Begründung:** Holly fand den bisherigen Stand (reiner Grau-Text auf Weiß) "zu langweilig und trocken", zu
+minimalistisch statt bewusst schlicht.
+**Bezug:** Ändert nichts an Regel 7 (weiterhin kontrastarm, weiterhin fast leer) - nur wie das umgesetzt ist.
+
+## 12.09.2026 Sekundenanzeige in der Arbeitsphase doch wieder da
+
+**Entscheidung:** Die Arbeitsphase zeigt die Restzeit wieder als M:SS (`formatRemaining`), genau wie die
+Pause - nicht mehr nur Minuten.
+**Begründung:** Husins ausdrücklicher Wunsch, nach dem visuellen Überarbeiten von Fokus- und
+Pausenbildschirm am selben Tag. Der Eintrag vom 01.09. ("Restzeit größer, Rundenanzeige ergänzt") hatte die
+testweise Minuten-Anzeige fälschlich mit einem Befund der Betreuung begründet - laut Husin haben Holly/Orhan
+das nie so gesagt, diese Zuschreibung war schlicht falsch.
+**Alternative:** Bei Minuten bleiben. Auf Nachfrage klar abgelehnt.
+
+## 12.09.2026 "Sitzung beenden" nach oben rechts verschoben, eigener Bestätigungsdialog
+
+**Entscheidung:** Der Knopf steht jetzt oben rechts statt unten links, und die Rückfrage vor dem Beenden ist
+ein eigenes Fenster im Stil des Pausenhinweises statt `window.confirm()`.
+**Begründung:** Der Knopf unten links überlappte in der lokalen Entwicklung mit dem Next.js-Dev-Icon; der
+native Browser-Dialog wirkte "hässlich und primitiv" (Husin).

@@ -60,11 +60,10 @@ export function formatRemaining(ms: number) {
 }
 
 /**
- * Nur für die Arbeitsphase (Betreuung, 12.09.): ein sekundengenauer
- * Countdown zieht Blicke an, das widerspricht der bewusst zurückhaltenden
- * Gestaltung (Regel 7). Aufgerundet, damit "1 Min" nicht schon bei 0:01
- * Restzeit zu "0 Min" wird - das sähe nach Stillstand aus, obwohl noch Zeit
- * läuft.
+ * Nur noch für den Hinweis "Nächster Hinweis in X Min" während der
+ * Snooze-Gnadenfrist - die Arbeitsphase selbst zeigt seit 12.09. wieder
+ * M:SS wie die Pause (formatRemaining), siehe ENTSCHEIDUNGEN.md. Aufgerundet,
+ * damit "1 Min" nicht schon bei 0:01 Restzeit zu "0 Min" wird.
  */
 export function formatRemainingMinutes(ms: number) {
   const minutes = Math.ceil(ms / 60_000);

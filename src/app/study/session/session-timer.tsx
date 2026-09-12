@@ -210,18 +210,27 @@ export function SessionTimer({
         transition: "background-color 60s ease",
       }}
     >
+      {(state === "WORK" || state === "BREAK") && !isNudging && (
+        <div
+          aria-hidden="true"
+          className={`phase-glow ${state === "BREAK" ? "phase-glow-break" : "phase-glow-work"}`}
+        />
+      )}
+
       {state === "WORK" && (nudgeStage === null || nudgeStage === 0) && (
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-xs text-neutral-400 dark:text-neutral-600">
+        <div className="relative z-10 flex flex-col items-center gap-5">
+          <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:border-white/15 dark:text-neutral-500">
             Fokus · Runde {cycle}
-          </p>
+          </span>
           {!isSnoozeActive && remainingMs !== null && (
-            <p className="text-3xl text-neutral-400 dark:text-neutral-600">
-              {formatRemainingMinutes(remainingMs)}
-            </p>
+            <div className="rounded-3xl border border-black/5 px-14 py-10 dark:border-white/10">
+              <span className="text-7xl font-extralight tabular-nums text-neutral-500 dark:text-neutral-400">
+                {formatRemaining(remainingMs)}
+              </span>
+            </div>
           )}
           {isSnoozeActive && !hasReacted && snoozeRemainingMs !== null && (
-            <p className="text-3xl text-neutral-400 dark:text-neutral-600">
+            <p className="text-lg text-neutral-400 dark:text-neutral-600">
               Nächster Hinweis in {formatRemainingMinutes(snoozeRemainingMs)}
             </p>
           )}
@@ -575,15 +584,17 @@ function BreakScreen({
   useBreakEndSound(breakEndsAt, !readyToContinue);
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className="relative z-10 flex flex-col items-center gap-5 text-center">
       {remainingMs !== null && (
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-xs text-neutral-400 dark:text-neutral-600">
+        <div className="flex flex-col items-center gap-5">
+          <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:border-white/15 dark:text-neutral-500">
             Pause · Runde {cycle}
-          </p>
-          <p className="text-3xl text-neutral-400 dark:text-neutral-600">
-            {formatRemaining(remainingMs)}
-          </p>
+          </span>
+          <div className="rounded-3xl border border-black/5 px-14 py-10 dark:border-white/10">
+            <span className="text-7xl font-extralight tabular-nums text-neutral-500 dark:text-neutral-400">
+              {formatRemaining(remainingMs)}
+            </span>
+          </div>
         </div>
       )}
 
@@ -614,14 +625,10 @@ function BreakScreen({
 
 function EndSessionButton({ sessionId }: { sessionId: string }) {
   const router = useRouter();
+  const [confirming, setConfirming] = useState(false);
   const [ending, setEnding] = useState(false);
 
   async function handleEnd() {
-    const confirmed = window.confirm(
-      "Sitzung wirklich beenden? Danach geht es weiter zur Nachbefragung."
-    );
-    if (!confirmed) return;
-
     setEnding(true);
 
     await fetch(`/api/session/${sessionId}/end`, {
@@ -635,13 +642,42 @@ function EndSessionButton({ sessionId }: { sessionId: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleEnd}
-      disabled={ending}
-      className="fixed bottom-4 left-4 rounded border border-black/15 px-3 py-1.5 text-xs text-neutral-500 hover:border-black/30 disabled:opacity-40 dark:border-white/20 dark:text-neutral-400 dark:hover:border-white/30"
-    >
-      Sitzung beenden
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        disabled={ending}
+        className="fixed top-4 right-4 z-10 rounded border border-black/15 px-3 py-1.5 text-xs text-neutral-500 hover:border-black/30 disabled:opacity-40 dark:border-white/20 dark:text-neutral-400 dark:hover:border-white/30"
+      >
+        Sitzung beenden
+      </button>
+
+      {confirming && (
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/10 dark:bg-black/30">
+          <div className="w-80 rounded-lg border border-black/10 bg-white p-6 shadow-lg dark:border-white/15 dark:bg-neutral-900">
+            <p className="text-sm">
+              Sitzung wirklich beenden? Danach geht es weiter zur Nachbefragung.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="rounded border border-black/15 px-3 py-1.5 text-sm dark:border-white/20"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={handleEnd}
+                disabled={ending}
+                className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
+              >
+                {ending ? "Wird beendet …" : "Sitzung beenden"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -253,13 +253,16 @@ npm install -D @types/bcryptjs
 ### F5. Arbeitsphase (2 Stunden)
 
 - [ ] Seite `/study/session`, bewusst fast leer
-- [ ] Nur Restzeit, geringer Kontrast, aber groß genug fürs Lesen aus normalem Sitzabstand (Änderung 12.09.:
-      zurückhaltend heißt nicht unlesbar). In der Arbeitsphase nur Minuten (`formatRemainingMinutes`), keine
-      Sekunden — die zögen Blicke an. Pause zeigt weiterhin M:SS
+- [ ] Restzeit als M:SS (`formatRemaining`), groß und in einem dezenten Rahmen, aber weiterhin kontrastarm
+      (Änderung 12.09.: zurückhaltend heißt nicht unlesbar). Arbeitsphase kurzzeitig nur auf Minuten reduziert,
+      auf Husins Wunsch noch am selben Tag wieder auf M:SS zurückgestellt — siehe ENTSCHEIDUNGEN.md
+- [ ] Sehr sanfter, langsam atmender Farbfleck im Hintergrund (`.phase-glow`, kühl bei Arbeit, warm bei Pause) —
+      rein dekorativ, keine Kennzahl (Änderung 12.09., Betreuung: bisheriges Grau-auf-Weiss wirkte zu trocken)
 - [ ] Kleine, kontrastarme Zeile „Fokus · Runde N" / „Pause · Runde N" über der Restzeit (Änderung 12.09.),
       damit erkennbar ist, welche Phase läuft — nutzt die schon gespeicherte Zyklusnummer
-- [ ] Knopf „Sitzung beenden", klar erkennbar am Rand, aber nicht dominant (Änderung 12.09.: vorher ein kaum
-      sichtbarer Textlink)
+- [ ] Knopf „Sitzung beenden" oben rechts, klar erkennbar, aber nicht dominant (Änderung 12.09.: erst
+      Textlink, dann Knopf unten links hinter dem Next.js-Dev-Icon). Rückfrage über ein eigenes
+      Bestätigungsfenster statt des nativen Browser-Dialogs
 - [ ] Page Visibility API: `TAB_HIDDEN` und `TAB_VISIBLE` protokollieren
 - [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
       sichtbarem Tab, keine Inhalte. Einschränkung dokumentieren: misst Interaktion mit der App, nicht die

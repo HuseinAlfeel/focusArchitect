@@ -5,6 +5,11 @@
   --foreground: #171717;
   /* Stufe 0 des Pausenhinweises: Hintergrund wandert minimal ins Waermere. */
   --background-nudge: #fdf3e6;
+  /* Sehr dezenter Farbakzent hinter Arbeits-/Pausenbildschirm (siehe
+     .phase-glow) - unterscheidet die beiden Phasen zusaetzlich zur
+     Textbeschriftung, ohne Kontrast oder Aufmerksamkeit zu erhoehen. */
+  --glow-work: rgba(90, 120, 160, 0.16);
+  --glow-break: rgba(120, 150, 100, 0.18);
 }
 
 @theme inline {
@@ -19,13 +24,15 @@
     --background: #0a0a0a;
     --foreground: #ededed;
     --background-nudge: #1c150e;
+    --glow-work: rgba(90, 120, 160, 0.12);
+    --glow-break: rgba(120, 150, 100, 0.12);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 /* Sehr langsames, sanftes Pulsieren fuer Stufe 2 des Pausenhinweises -
@@ -42,4 +49,50 @@ body {
 
 .animate-nudge-pulse {
   animation: nudge-pulse 4s ease-in-out infinite;
+}
+
+/* Ambienter Farbfleck hinter dem Arbeits-/Pausenbildschirm (Betreuung,
+   12.09.: reines Grau auf Weiss wirkte "zu trocken/minimalistisch"). Rein
+   dekorativ, kein Fortschrittsbalken und keine Kennzahl - atmet sehr
+   langsam, damit der Bildschirm Ruhe ausstrahlt statt Aufmerksamkeit zu
+   ziehen (Regel 7/8). Feste Groesse und Position, kein Layout-Einfluss. */
+.phase-glow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(70vw, 640px);
+  height: min(70vw, 640px);
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+  animation: phase-breathe 16s ease-in-out infinite;
+}
+
+.phase-glow-work {
+  background: var(--glow-work);
+}
+
+.phase-glow-break {
+  background: var(--glow-break);
+}
+
+@keyframes phase-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-glow {
+    animation: none;
+    opacity: 0.8;
+  }
 }
