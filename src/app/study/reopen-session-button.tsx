@@ -24,9 +24,9 @@ export function ReopenSessionButton({ sessionId }: { sessionId: string }) {
       type="button"
       onClick={handleReopen}
       disabled={reopening}
-      className="text-sm underline disabled:opacity-50"
+      className="rounded border border-black/15 px-4 py-2 text-sm disabled:opacity-50 dark:border-white/20"
     >
-      {reopening ? "Wird fortgesetzt …" : "Aus Versehen beendet? Sitzung fortsetzen"}
+      {reopening ? "Wird fortgesetzt …" : "Sitzung fortsetzen"}
     </button>
   );
 }

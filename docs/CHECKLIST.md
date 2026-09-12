@@ -248,8 +248,13 @@ npm install -D @types/bcryptjs
 ### F5. Arbeitsphase (2 Stunden)
 
 - [ ] Seite `/study/session`, bewusst fast leer
-- [ ] Nur Restzeit, klein, geringer Kontrast
-- [ ] Knopf „Sitzung beenden" klein am Rand
+- [ ] Nur Restzeit, geringer Kontrast, aber groß genug fürs Lesen aus normalem Sitzabstand (Änderung 12.09.:
+      zurückhaltend heißt nicht unlesbar). In der Arbeitsphase nur Minuten (`formatRemainingMinutes`), keine
+      Sekunden — die zögen Blicke an. Pause zeigt weiterhin M:SS
+- [ ] Kleine, kontrastarme Zeile „Fokus · Runde N" / „Pause · Runde N" über der Restzeit (Änderung 12.09.),
+      damit erkennbar ist, welche Phase läuft — nutzt die schon gespeicherte Zyklusnummer
+- [ ] Knopf „Sitzung beenden", klar erkennbar am Rand, aber nicht dominant (Änderung 12.09.: vorher ein kaum
+      sichtbarer Textlink)
 - [ ] Page Visibility API: `TAB_HIDDEN` und `TAB_VISIBLE` protokollieren
 - [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
       sichtbarem Tab, keine Inhalte. Einschränkung dokumentieren: misst Interaktion mit der App, nicht die

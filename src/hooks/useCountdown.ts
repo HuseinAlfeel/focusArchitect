@@ -58,3 +58,15 @@ export function formatRemaining(ms: number) {
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
+
+/**
+ * Nur fuer die Arbeitsphase (Betreuung, 12.09.): ein sekundengenauer
+ * Countdown zieht Blicke an, das widerspricht der bewusst zurueckhaltenden
+ * Gestaltung (Regel 7). Aufgerundet, damit "1 Min" nicht schon bei 0:01
+ * Restzeit zu "0 Min" wird - das saehe nach Stillstand aus, obwohl noch Zeit
+ * laeuft.
+ */
+export function formatRemainingMinutes(ms: number) {
+  const minutes = Math.ceil(ms / 60_000);
+  return `${minutes} Min`;
+}

@@ -147,9 +147,9 @@ V7 ist wichtig: Es fängt die Tagesform ab. Ohne diesen Wert weißt du nachher n
 
 **Der wichtigste Bildschirm, und der muss fast leer sein.** Das ist der Kern deiner Forschungsfrage: Wenn dieser Bildschirm ablenkt, hast du dein eigenes Prinzip verletzt.
 
-Sichtbar: die verbleibende Zeit, sehr dezent, klein, geringer Kontrast. Sonst nichts. Kein Fortschrittsbalken der zappelt, keine Statistiken, keine Motivationssprüche.
+Sichtbar: die verbleibende Zeit, geringer Kontrast, aber **groß genug für normalen Sitzabstand** (Änderung 12.09., Betreuung: zurückhaltend heißt nicht unlesbar - die Lösung ist große Schrift bei wenig Kontrast, nicht kleine Schrift). Nur Minuten, keine Sekunden - ein sekundengenauer Countdown zieht Blicke an, das widerspricht der Zurückhaltung. Zusätzlich klein und kontrastarm darüber: „Fokus · Runde N" bzw. „Pause · Runde N" während der Pause, damit erkennbar ist, welche Phase gerade läuft (dieselbe schon gespeicherte Zyklusnummer, keine eigene Zählung). Sonst nichts. Kein Fortschrittsbalken der zappelt, keine Statistiken, keine Motivationssprüche.
 
-Erlaubte Interaktion: „Sitzung beenden" (klein, am Rand).
+Erlaubte Interaktion: „Sitzung beenden" — eine klar erkennbare Schaltfläche am Rand (Änderung 12.09.: vorher ein kaum sichtbarer Textlink, jetzt ein richtiger, aber kleiner Knopf), erkennbar ohne dominant zu sein. Weiterhin mit Rückfrage vor dem Beenden.
 
 ### [6] Der abgestufte Pausenhinweis
 
@@ -353,7 +353,7 @@ SURVEY_POST_SUBMITTED
 
 **`TAB_HIDDEN` und `TAB_VISIBLE`** über die Page Visibility API. Das ist ein kleiner, aber wertvoller Trick: Es zeigt dir, ob während der Arbeitsphase der Tab im Vordergrund war. Damit kannst du in der Diskussion die Limitation „ortsunabhängige Durchführung, keine Kontrolle" wenigstens teilweise entkräften, weil du zumindest ein objektives Signal hast.
 
-**`BREAK_ACCEPTED`/`BREAK_SKIPPED` speichern im payload die Stufe**, bei der reagiert wurde: `{ "stage": 2, "secondsAfterEnd": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht. `SESSION_REOPENED`/`SESSION_FINALIZED` gehören zum Unfall-Schutz: eine versehentlich beendete Sitzung lässt sich fortsetzen, oder man gibt sie endgültig final ab.
+**`BREAK_ACCEPTED`/`BREAK_SKIPPED` speichern im payload die Stufe**, bei der reagiert wurde: `{ "stage": 2, "secondsAfterEnd": 143 }`. Das ist die Zahl, die deine Arbeit interessant macht. `SESSION_REOPENED`/`SESSION_FINALIZED` gehören zum Unfall-Schutz: eine versehentlich beendete Sitzung lässt sich fortsetzen. `SESSION_FINALIZED` wird seit 12.09.2026 **ausschließlich automatisch** beim Absenden der Nachbefragung gesetzt (siehe `post-survey-form.tsx`) - der manuelle "Final abgeben"-Knopf auf der Hub-Seite ist entfernt, weil er eine Sitzung endgültig sperren konnte, ohne dass die Nachbefragung je beantwortet wurde (echter Datenverlust, siehe ENTSCHEIDUNGEN.md).
 
 **`BREAK_SNOOZED`** (Änderung 25.08., wieder eingeführt - zwischen 09.08. und 25.08. gab es das nicht): dritte Option neben "Pause starten"/"Überspringen", verschiebt **nur die Eskalation** um feste 5 Minuten, danach beginnt sie wieder bei Stufe 1. Wichtig, warum das kein Rückfall in die am 09.08. verworfene Variante ist: die alte Funktion hat blind die **Rundenlänge** verändert (wie viele Minuten die nächste Runde dauert) ohne Minutenangabe - das war das Problem. `BREAK_SNOOZED` ändert die Rundenlänge gar nicht, sondern nur, wann der Hinweis erneut erscheint, als eigener Ereignistyp getrennt von `BREAK_ACCEPTED`/`BREAK_SKIPPED` - die Kernkennzahl (bei welcher Stufe wird *wirklich* reagiert) bleibt unberührt. Payload wie bei den anderen beiden: `{ "stage": 2, "secondsAfterEnd": 225 }`. Anzahl der Snoozes pro Runde steht im Export als `snoozeCount` in `cycles.csv`. Fest auf 5 Minuten, nicht wählbar (Konsistenz über alle Teilnehmenden, kein zusätzlicher Regler mitten im bewusst schlichten Hinweis) und ohne Obergrenze fürs wiederholte Snoozen (Nutzerautonomie, De Russis & Monge Roffarello 2017 - gehört so in Kapitel 4 der Arbeit).
 

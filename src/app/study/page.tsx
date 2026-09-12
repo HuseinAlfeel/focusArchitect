@@ -4,7 +4,6 @@ import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "./logout-button";
 import { ReopenSessionButton } from "./reopen-session-button";
-import { FinalizeSessionButton } from "./finalize-session-button";
 
 export default async function StudyPlaceholderPage() {
   const participant = await getCurrentParticipant();
@@ -61,16 +60,24 @@ export default async function StudyPlaceholderPage() {
       )}
 
       {session?.endedAt && !session.finalizedAt && (
-        <div className="space-y-2">
-          <p className="text-sm opacity-70">
-            Sitzung beendet um {session.endedAt.toLocaleString("de-DE")}.
+        <div className="space-y-3">
+          <p className="text-sm font-medium">
+            Sitzung beendet um {session.endedAt.toLocaleString("de-DE")}
           </p>
-          <Link href="/study/post" className="text-sm underline">
-            Zur Nachbefragung
-          </Link>
-          <div className="flex justify-center gap-4">
+          {/* Keine "Final abgeben"-Option mehr hier (Betreuung, 12.09.): eine
+              Sitzung gilt erst als abgeschlossen, wenn die Nachbefragung
+              abgesendet wurde (finalisiert dann automatisch, siehe
+              post-survey-form.tsx). Vorher war "Final abgeben" ein dritter,
+              versehentlich klickbarer Weg, der die Nachbefragung komplett
+              unerreichbar machte - echter Datenverlust. */}
+          <div className="flex flex-col items-center gap-2">
+            <Link
+              href="/study/post"
+              className="rounded bg-neutral-800 px-4 py-2 text-sm text-white dark:bg-neutral-100 dark:text-neutral-900"
+            >
+              Weiter zur Nachbefragung
+            </Link>
             <ReopenSessionButton sessionId={session.id} />
-            <FinalizeSessionButton sessionId={session.id} />
           </div>
         </div>
       )}

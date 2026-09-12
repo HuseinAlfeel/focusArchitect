@@ -1,6 +1,12 @@
-// Vorlaeufiger Stand, von Husin am 04.08.2026 freigegeben, um weiterzubauen.
-// Holly hat den Studienaufbau noch nicht gegengelesen (CHECKLIST.md A1/A3) -
-// falls sie Aenderungen verlangt, wird dieser Text danach angepasst.
+// Von Husin am 04.08.2026 freigegeben, um weiterzubauen. Laut Betreuung
+// (12.09.2026) inhaltlich abgestimmt, Phase A damit im Kern abgeschlossen -
+// kein Ethikvotum noetig. Offen: Aufbewahrungsfrist unten steht als
+// Platzhalter "[TT.MM.JJJJ]" auf ein Jahr nach Studienende, aber ohne
+// bekanntes Studienende (Probelauf/Deployment stehen noch aus) laesst sich
+// kein konkretes Datum eintragen, ohne es zu raten - siehe CLAUDE.md
+// ("bei Unklarheiten ueber Studieninhalte nicht raten, sondern nachfragen").
+// Sobald der Studienzeitraum feststeht: Platzhalter durch echtes Datum
+// ersetzen, hier UND im Anhang-Dokument der Arbeit.
 
 export const consentContent = {
   title: "Einwilligung zur Teilnahme",
@@ -21,7 +27,7 @@ export const consentContent = {
     },
     {
       heading: "Wo und wie lange werden die Daten gespeichert?",
-      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum 11.11.2026 aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
+      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum [TT.MM.JJJJ] (ein Jahr nach Ende der Studie) aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
     },
     {
       heading: "Freiwilligkeit",

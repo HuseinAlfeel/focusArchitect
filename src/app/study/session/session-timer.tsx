@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCountdown, formatRemaining } from "@/hooks/useCountdown";
+import { useCountdown, formatRemaining, formatRemainingMinutes } from "@/hooks/useCountdown";
 import { useRoundTimer } from "@/hooks/useRoundTimer";
 import { useTabVisibilityLogging } from "@/hooks/useTabVisibilityLogging";
 import { useNudgeSoundSchedule } from "@/hooks/useNudgeSoundSchedule";
@@ -210,24 +210,23 @@ export function SessionTimer({
         transition: "background-color 60s ease",
       }}
     >
-      {remainingMs !== null &&
-        state === "WORK" &&
-        !isSnoozeActive &&
-        (nudgeStage === null || nudgeStage === 0) && (
-          <p className="text-sm text-neutral-400 dark:text-neutral-600">
-            {formatRemaining(remainingMs)}
+      {state === "WORK" && (nudgeStage === null || nudgeStage === 0) && (
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-xs text-neutral-400 dark:text-neutral-600">
+            Fokus · Runde {cycle}
           </p>
-        )}
-
-      {isSnoozeActive &&
-        state === "WORK" &&
-        !hasReacted &&
-        snoozeRemainingMs !== null &&
-        (nudgeStage === null || nudgeStage === 0) && (
-          <p className="text-sm text-neutral-400 dark:text-neutral-600">
-            Nächster Hinweis in {formatRemaining(snoozeRemainingMs)}
-          </p>
-        )}
+          {!isSnoozeActive && remainingMs !== null && (
+            <p className="text-3xl text-neutral-400 dark:text-neutral-600">
+              {formatRemainingMinutes(remainingMs)}
+            </p>
+          )}
+          {isSnoozeActive && !hasReacted && snoozeRemainingMs !== null && (
+            <p className="text-3xl text-neutral-400 dark:text-neutral-600">
+              Nächster Hinweis in {formatRemainingMinutes(snoozeRemainingMs)}
+            </p>
+          )}
+        </div>
+      )}
 
       {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
         <NudgeCard
@@ -578,9 +577,14 @@ function BreakScreen({
   return (
     <div className="flex flex-col items-center gap-4 text-center">
       {remainingMs !== null && (
-        <p className="text-sm text-neutral-400 dark:text-neutral-600">
-          Pause: {formatRemaining(remainingMs)}
-        </p>
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-xs text-neutral-400 dark:text-neutral-600">
+            Pause · Runde {cycle}
+          </p>
+          <p className="text-3xl text-neutral-400 dark:text-neutral-600">
+            {formatRemaining(remainingMs)}
+          </p>
+        </div>
       )}
 
       {activity && !allStepsDone && !breakDone && (
@@ -635,7 +639,7 @@ function EndSessionButton({ sessionId }: { sessionId: string }) {
       type="button"
       onClick={handleEnd}
       disabled={ending}
-      className="fixed bottom-3 left-3 text-xs text-neutral-400 opacity-40 hover:opacity-80 disabled:opacity-20 dark:text-neutral-600"
+      className="fixed bottom-4 left-4 rounded border border-black/15 px-3 py-1.5 text-xs text-neutral-500 hover:border-black/30 disabled:opacity-40 dark:border-white/20 dark:text-neutral-400 dark:hover:border-white/30"
     >
       Sitzung beenden
     </button>
