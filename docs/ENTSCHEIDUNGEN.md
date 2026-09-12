@@ -243,7 +243,7 @@ Rueckkehr zum Tab kann das zuverlaessig ausloesen.
 **Entscheidung:** Kein Ethikvotum noetig (Aussage der Betreuung), ein Antrag haette ohnehin ~2 Monate gedauert
 und war zeitlich nicht machbar. Einwilligungstext inhaltlich abgestimmt bis auf die Aufbewahrungsfrist (siehe
 naechster Eintrag).
-**Begruendung:** Klare Aussage der Betreuung nach dem Treffen am 12.09.2026.
+**Begruendung:** Klare Aussage der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 nachgetragen.
 **Bezug:** Aktualisiert den Stand aus dem 04.08.2026-Eintrag "Ethikvotum" (dort noch offen, jetzt geklaert).
 
 ## 12.09.2026 "Final abgeben" entfernt, Sitzung schliesst nur ueber Nachbefragung ab
@@ -253,8 +253,9 @@ inklusive der Komponente `finalize-session-button.tsx`. Nach Sitzungsende stehen
 richtige Knoepfe (vorher Textlinks): primaer "Weiter zur Nachbefragung", sekundaer "Sitzung fortsetzen".
 `SESSION_FINALIZED` wird ausschliesslich noch automatisch beim Absenden der Nachbefragung gesetzt (das gab es
 schon vorher in `post-survey-form.tsx`, unveraendert) - der Weg darueber hinweg entfaellt.
-**Begruendung:** Befund der Betreuung: "Final abgeben" liess sich versehentlich klicken, sperrte die Sitzung
-endgueltig und machte die Nachbefragung dauerhaft unerreichbar - echter Datenverlust, kein Trainingsfehler.
+**Begruendung:** Befund der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 umgesetzt:
+"Final abgeben" liess sich versehentlich klicken, sperrte die Sitzung endgueltig und machte die Nachbefragung
+dauerhaft unerreichbar - echter Datenverlust, kein Trainingsfehler.
 **Bezug:** Aendert die Entscheidung vom 05.08.2026 ("Sitzung fortsetzen oder final abgeben") ab - der
 Unfall-Schutz (Reopen) bleibt, der zweite, riskantere Weg (manuelles Final-Abgeben) nicht.
 **Alternative:** Nur eine Sicherheitsabfrage vor "Final abgeben" ergaenzen. Verworfen, es gab schon eine
@@ -266,25 +267,22 @@ Rueckfrage und trotzdem kam der Bug vor - die Option muss ganz weg, nicht nur sc
 weiterhin kontrastarm. (2) Waehrend der Arbeitsphase nur Minuten, keine Sekunden (`formatRemainingMinutes`,
 aufgerundet) - die Pause zeigt weiterhin M:SS. (3) Kleine, kontrastarme Zeile "Fokus · Runde N" bzw.
 "Pause · Runde N" oberhalb der Restzeit, aus der schon gespeicherten Zyklusnummer, keine neue Zaehlung.
-**Begruendung:** Befund der Betreuung: nicht erkennbar, ob Arbeits- oder Pausenphase laeuft; Restzeit zu klein
-zum Lesen aus normalem Sitzabstand; ein sekundengenauer Countdown in der Arbeitsphase zieht Blicke an und
-widerspricht der bewusst zurueckhaltenden Gestaltung (Regel 7) - Zielkollision aufgeloest durch "gross, aber
-kontrastarm" statt "klein".
+**Begruendung:** Befund der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 umgesetzt: nicht
+erkennbar, ob Arbeits- oder Pausenphase laeuft; Restzeit zu klein zum Lesen aus normalem Sitzabstand; ein
+sekundengenauer Countdown in der Arbeitsphase zieht Blicke an und widerspricht der bewusst zurueckhaltenden
+Gestaltung (Regel 7) - Zielkollision aufgeloest durch "gross, aber kontrastarm" statt "klein".
 **Alternative:** Fortschrittsbalken oder Prozentanzeige statt Minutenzahl. Verworfen, das waere naeher an einer
 Statistik-Anzeige als die Betreuung wollte.
 
 ## 12.09.2026 "Sitzung beenden" als richtiger Knopf statt Textlink
 
 **Entscheidung:** `EndSessionButton` bekommt einen sichtbaren Rahmen statt nur blassem Text.
-**Begruendung:** Befund der Betreuung: der Knopf war zu unauffaellig, um zuverlaessig gefunden zu werden.
-Weiterhin klein und am Rand, mit Rueckfrage vor dem Beenden - erkennbar, aber nicht dominant.
+**Begruendung:** Befund der Betreuung im Gespraech Ende August 2026, hier am 12.09.2026 umgesetzt: der Knopf
+war zu unauffaellig, um zuverlaessig gefunden zu werden. Weiterhin klein und am Rand, mit Rueckfrage vor dem
+Beenden - erkennbar, aber nicht dominant.
 
-## 12.09.2026 Aufbewahrungsfrist auf ein Jahr nach Studienende, Datum als Platzhalter
+## 12.09.2026 Aufbewahrungsfrist auf 11.11.2027 (ein Jahr nach der urspruenglichen Frist)
 
-**Entscheidung:** Einwilligungstext geaendert von festem Datum (11.11.2026) auf "ein Jahr nach Ende der
-Studie". Das konkrete Datum steht als `[TT.MM.JJJJ]`-Platzhalter, noch nicht eingetragen.
-**Begruendung:** Vorgabe der Betreuung: relative Angabe raus, konkretes Datum rein. Aber der Studienzeitraum
-selbst steht noch nicht fest (Probelauf und Deployment stehen noch aus) - ein Datum jetzt einzutragen waere
-geraten, nicht abgestimmt (CLAUDE.md: bei Unklarheiten ueber Studieninhalte nicht raten, sondern nachfragen).
-**Offen:** Sobald der Studienzeitraum feststeht, Platzhalter durch echtes Datum ersetzen - hier UND im
-Anhang-Dokument der schriftlichen Arbeit.
+**Entscheidung:** Einwilligungstext geaendert von festem Datum 11.11.2026 auf festes Datum 11.11.2027.
+**Begruendung:** Vorgabe der Betreuung im Gespraech Ende August 2026: relative Angabe raus, konkretes Datum
+rein - ein Jahr laenger als die urspruenglich geplante Frist.

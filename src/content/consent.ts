@@ -1,12 +1,8 @@
-// Von Husin am 04.08.2026 freigegeben, um weiterzubauen. Laut Betreuung
-// (12.09.2026) inhaltlich abgestimmt, Phase A damit im Kern abgeschlossen -
-// kein Ethikvotum noetig. Offen: Aufbewahrungsfrist unten steht als
-// Platzhalter "[TT.MM.JJJJ]" auf ein Jahr nach Studienende, aber ohne
-// bekanntes Studienende (Probelauf/Deployment stehen noch aus) laesst sich
-// kein konkretes Datum eintragen, ohne es zu raten - siehe CLAUDE.md
-// ("bei Unklarheiten ueber Studieninhalte nicht raten, sondern nachfragen").
-// Sobald der Studienzeitraum feststeht: Platzhalter durch echtes Datum
-// ersetzen, hier UND im Anhang-Dokument der Arbeit.
+// Von Husin am 04.08.2026 freigegeben, um weiterzubauen. Inhalt mit der
+// Betreuung Ende August 2026 besprochen, hier umgesetzt am 12.09.2026: kein
+// Ethikvotum noetig, Phase A damit im Kern abgeschlossen. Aufbewahrungsfrist
+// auf konkretes Datum 11.11.2027 (ein Jahr nach der urspruenglich geplanten
+// Frist 11.11.2026) gesetzt, siehe ENTSCHEIDUNGEN.md.
 
 export const consentContent = {
   title: "Einwilligung zur Teilnahme",
@@ -27,7 +23,7 @@ export const consentContent = {
     },
     {
       heading: "Wo und wie lange werden die Daten gespeichert?",
-      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum [TT.MM.JJJJ] (ein Jahr nach Ende der Studie) aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
+      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum 11.11.2027 aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
     },
     {
       heading: "Freiwilligkeit",
