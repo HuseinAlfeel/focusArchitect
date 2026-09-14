@@ -27,8 +27,11 @@ export default async function PreSurveyPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
-      <PreSurveyForm />
+    <main className="relative mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
+      <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+      <div className="relative z-10">
+        <PreSurveyForm />
+      </div>
     </main>
   );
 }

@@ -238,6 +238,10 @@ export function SessionTimer({
         />
       )}
 
+      {(state === "FEEDBACK" || state === "ACTIVITY_CHOICE") && (
+        <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+      )}
+
       {state === "WORK" && (nudgeStage === null || nudgeStage === 0) && (
         <div className="relative z-10 flex flex-col items-center gap-5">
           <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:border-white/15 dark:text-neutral-500">
@@ -466,8 +470,8 @@ function FeedbackScreen({
   }
 
   return (
-    <div className="w-full max-w-sm space-y-4 text-center">
-      <p className="text-sm">War der Zeitpunkt der Pause passend?</p>
+    <div className="relative z-10 w-full max-w-sm space-y-5 rounded-3xl border border-black/5 px-8 py-8 text-center dark:border-white/10">
+      <p className="text-sm font-medium">War der Zeitpunkt der Pause passend?</p>
 
       <div className="flex justify-center gap-2">
         {(
@@ -560,8 +564,8 @@ function ActivityChoiceScreen({
   onChoose: (id: ActivityId | "none") => void;
 }) {
   return (
-    <div className="w-full max-w-sm space-y-3 text-center">
-      <p className="text-sm">Möchtest du etwas in der Pause machen?</p>
+    <div className="relative z-10 w-full max-w-sm space-y-4 rounded-3xl border border-black/5 px-8 py-8 text-center dark:border-white/10">
+      <p className="text-sm font-medium">Möchtest du etwas in der Pause machen?</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {activities.map((activity) => (
           <button

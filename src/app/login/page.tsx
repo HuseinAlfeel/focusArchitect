@@ -34,11 +34,18 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen flex-1 items-center justify-center px-4">
+      <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-xs space-y-4 rounded-lg border border-black/10 p-6 dark:border-white/15"
+        className="relative z-10 w-full max-w-xs space-y-5 rounded-3xl border border-black/5 p-8 dark:border-white/10"
       >
-        <h1 className="text-lg font-medium">Anmelden</h1>
+        <div className="space-y-1 text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:text-neutral-500">
+            FocusArchitect
+          </p>
+          <h1 className="text-lg font-medium">Anmelden</h1>
+        </div>
 
         <div className="space-y-1">
           <label htmlFor="code" className="block text-sm opacity-70">
@@ -83,7 +90,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded bg-neutral-800 px-3 py-2 text-sm text-white transition-opacity disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900"
+          className="w-full rounded bg-neutral-800 px-3 py-2.5 text-sm text-white transition-opacity disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900"
         >
           {submitting ? "Anmelden …" : "Anmelden"}
         </button>

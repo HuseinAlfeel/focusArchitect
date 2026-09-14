@@ -10,13 +10,17 @@ export default async function ConsentPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
-      <div>
+    <main className="relative mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
+      <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+
+      <div className="relative z-10 space-y-1">
         <h1 className="text-xl font-medium">{consentContent.title}</h1>
-        <p className="mt-2 text-sm opacity-80">{consentContent.intro}</p>
+        <p className="text-sm opacity-80">{consentContent.intro}</p>
       </div>
 
-      <ConsentForm />
+      <div className="relative z-10">
+        <ConsentForm />
+      </div>
     </main>
   );
 }

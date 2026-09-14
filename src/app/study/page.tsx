@@ -42,8 +42,9 @@ export default async function StudyPage() {
 
   if (session.endedAt && !session.finalizedAt) {
     return (
-      <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
-        <div className="space-y-3">
+      <main className="relative flex min-h-screen flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+        <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+        <div className="relative z-10 space-y-3">
           <p className="text-sm font-medium">
             Sitzung beendet um {session.endedAt.toLocaleString("de-DE")}
           </p>
@@ -63,18 +64,23 @@ export default async function StudyPage() {
             <ReopenSessionButton sessionId={session.id} />
           </div>
         </div>
-        <LogoutButton />
+        <div className="relative z-10">
+          <LogoutButton />
+        </div>
       </main>
     );
   }
 
   if (session.finalizedAt) {
     return (
-      <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
-        <p className="text-sm opacity-70">
+      <main className="relative flex min-h-screen flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+        <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+        <p className="relative z-10 text-sm opacity-70">
           Studie abgeschlossen am {session.finalizedAt.toLocaleString("de-DE")}.
         </p>
-        <LogoutButton />
+        <div className="relative z-10">
+          <LogoutButton />
+        </div>
       </main>
     );
   }
@@ -82,15 +88,18 @@ export default async function StudyPage() {
   // Einwilligung und Vorbefragung stehen, die Sitzung ist noch nicht
   // gestartet - das eigentliche Dashboard.
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
-      <DashboardStartForm
-        participantCode={participant.code}
-        sessionId={session.id}
-        initialWorkMin={session.initialWorkMin}
-        initialBreakMin={session.initialBreakMin}
-      />
-      <div className="flex justify-center">
-        <LogoutButton />
+    <main className="relative mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
+      <div aria-hidden="true" className="phase-glow phase-glow-neutral" />
+      <div className="relative z-10">
+        <DashboardStartForm
+          participantCode={participant.code}
+          sessionId={session.id}
+          initialWorkMin={session.initialWorkMin}
+          initialBreakMin={session.initialBreakMin}
+        />
+        <div className="flex justify-center">
+          <LogoutButton />
+        </div>
       </div>
     </main>
   );

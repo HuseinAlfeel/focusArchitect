@@ -59,11 +59,11 @@ export function ConsentForm() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div
         ref={handleContentRef}
         onScroll={handleScroll}
-        className="max-h-80 space-y-4 overflow-y-auto rounded border border-black/10 p-4 dark:border-white/15"
+        className="max-h-80 space-y-4 overflow-y-auto rounded-2xl border border-black/5 p-5 dark:border-white/10"
       >
         {consentContent.sections.map((section) => (
           <section key={section.heading}>
@@ -109,7 +109,7 @@ export function ConsentForm() {
         type="button"
         disabled={!allChecked || submitting}
         onClick={handleSubmit}
-        className="w-full rounded bg-neutral-800 px-3 py-2 text-sm text-white transition-opacity disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
+        className="w-full rounded-xl bg-neutral-800 px-3 py-3 text-sm font-medium text-white transition-opacity disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
       >
         {submitting ? "Speichern …" : consentContent.submitLabel}
       </button>

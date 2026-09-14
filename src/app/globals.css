@@ -10,6 +10,11 @@
      Textbeschriftung, ohne Kontrast oder Aufmerksamkeit zu erhoehen. */
   --glow-work: rgba(90, 120, 160, 0.16);
   --glow-break: rgba(120, 150, 100, 0.18);
+  /* Fuer alle Bildschirme ausserhalb der eigentlichen Sitzung (Login,
+     Einwilligung, Kurzfeedback/Aktivitaet, Abschluss) - derselbe ruhige
+     Look wie Arbeits-/Pausenbildschirm, aber neutral statt an eine Phase
+     gebunden (Husin, 14.09.: "alles einheitlich aussehen lassen"). */
+  --glow-neutral: rgba(110, 110, 150, 0.14);
 }
 
 @theme inline {
@@ -26,6 +31,7 @@
     --background-nudge: #1c150e;
     --glow-work: rgba(90, 120, 160, 0.12);
     --glow-break: rgba(120, 150, 100, 0.12);
+    --glow-neutral: rgba(130, 130, 170, 0.12);
   }
 }
 
@@ -76,6 +82,10 @@ body {
 
 .phase-glow-break {
   background: var(--glow-break);
+}
+
+.phase-glow-neutral {
+  background: var(--glow-neutral);
 }
 
 @keyframes phase-breathe {

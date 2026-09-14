@@ -483,3 +483,18 @@ Datenmodell - nur an Seitenaufteilung und Reihenfolge im Formular.
 Antworten bleiben beim Zurückblättern erhalten, N19/N18/N20 in der vorgegebenen Reihenfolge, `POST
 /api/survey` und `PATCH .../finalize` liefern beide 200, `pageTimings` korrekt in der Datenbank, neue
 Export-Spalten in `participants.csv` vorhanden und korrekt berechnet.
+
+## 14.09.2026 Restliche Bildschirme optisch an den Rest angeglichen
+
+**Entscheidung:** Login, Einwilligung, Abschlussseite, Kurzfeedback und Aktivitätsauswahl bekommen denselben
+ruhigen, atmenden Hintergrund-Farbfleck wie Fokus-/Pausenbildschirm und Dashboard - dafür eine neue neutrale
+Variante `--glow-neutral`/`.phase-glow-neutral` (weder Arbeit-Blau noch Pause-Grün, für alles, was zu keiner
+Phase gehört). Inhalte selbst unverändert, nur Rahmen/Karten-Optik und der Farbfleck ergänzt. Login bekommt
+zusätzlich eine kleine "FocusArchitect"-Kennzeichnung über der Überschrift - vorher stand nirgends, welche
+App das überhaupt ist.
+**Begründung:** Husins Vorgabe - alles, was Teilnehmende sehen, soll einheitlich aussehen. Vorher wirkten
+diese Bildschirme merklich schlichter/älter als die frisch überarbeiteten Fokus-/Pausen- und Onboarding-
+Bildschirme.
+**Bezug:** Rein optisch, keine Text- oder Verhaltensänderung. Dashboard, Vorbefragung und Nachbefragung
+haben denselben Farbfleck ergänzt bekommen, obwohl nicht explizit genannt - für echte Einheitlichkeit über
+den gesamten sichtbaren Ablauf.
