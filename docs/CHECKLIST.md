@@ -420,66 +420,43 @@ npm install -D @types/bcryptjs
 
 ### I1. Dockerfile
 
-In `next.config.js` ergänzen: `output: 'standalone'`
+**Kein `output: 'standalone'` (Abweichung 14.09., bewusst)** - der ursprüngliche Plan hier. Grund: der
+Seed-Befehl (`npx prisma db seed`) braucht das Prisma-CLI, `tsx` und die Quelldateien unter `src/` zur
+Laufzeit im Container - mit `standalone` wird `node_modules` auf das Nötigste für den *Server* gekürzt, das
+CLI wäre weg. Einfacher/robuster für den Anfang: das Runner-Image bekommt das volle `node_modules`, `src/`
+und `tsconfig.json` mit, etwas größer, dafür funktioniert `docker compose exec app npx prisma ...` ohne
+Zusatzaufwand.
 
-- [ ] Mehrstufiges Dockerfile schreiben (deps, builder, runner)
-- [ ] Lokal testen: `docker build -t focusarchitect .` läuft durch
+- [x] Mehrstufiges Dockerfile schreiben (deps, builder, runner) - `node:22-bookworm-slim` statt Alpine
+      (Alpine/musl bräuchte `binaryTargets` in `schema.prisma` für Prisma, unnötige Komplexität), `openssl`
+      per `apt-get` ergänzt (Prisma-Engine braucht es, "slim" bringt es nicht mit)
+- [x] Lokal getestet: `docker build -t focusarchitect .` läuft durch
 
 ### I2. docker-compose für den Server
 
-Drei Dienste: `app`, `db`, `caddy`
+Drei Dienste: `app`, `db`, `caddy` - fertig in `docker-compose.yml` im Projekt-Root (nicht mehr nur hier als
+Beispiel). Gegenüber dem ursprünglichen Plan zwei Ergänzungen, beide beim lokalen Testen des ganzen Stacks
+gefunden:
 
-```yaml
-services:
-  db:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: focus
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: focusdb
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+- `db` hat einen `healthcheck` (`pg_isready`), `app` wartet mit `depends_on: condition: service_healthy`
+  darauf - ohne das startet `app` manchmal schneller als Postgres wirklich bereit ist und stürzt beim
+  allerersten Start ab.
+- `app` hängt `credentials.local.json` read-only ein (`volumes:`). Die Datei enthält echte
+  Teilnehmer-Passwörter und darf nie ins Image (steht in `.dockerignore`) - für `prisma db seed` muss sie
+  trotzdem zur Laufzeit da sein, deshalb nur eingehängt, nicht kopiert.
 
-  app:
-    build: .
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://focus:${DB_PASSWORD}@db:5432/focusdb
-      SESSION_SECRET: ${SESSION_SECRET}
-      NODE_ENV: production
-    depends_on:
-      - db
+`Caddyfile` (ebenfalls fertig im Projekt-Root): `deine-domain.de` durch die echte Domain ersetzen, dann holt
+Caddy das HTTPS-Zertifikat automatisch. Du musst sonst nichts konfigurieren.
 
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-
-volumes:
-  pgdata:
-  caddy_data:
-```
-
-`Caddyfile`:
-```
-deine-domain.de {
-    reverse_proxy app:3000
-}
-```
-
-Caddy holt das HTTPS-Zertifikat automatisch. Du musst nichts konfigurieren.
+`.env.example` zeigt, welche zwei Variablen `docker-compose.yml` braucht (`DB_PASSWORD`, `SESSION_SECRET`) -
+auf dem Server als `.env` mit echten, **anderen** Werten als lokal anlegen (siehe I2-Schritte unten).
 
 - [ ] Code auf den Server holen (`git clone` mit Deploy-Key, oder per `scp`)
-- [ ] `.env` auf dem Server anlegen mit **anderen** Passwörtern als lokal
+- [ ] `.env` auf dem Server anlegen mit **anderen** Passwörtern als lokal (siehe `.env.example`)
+- [ ] `credentials.local.json` auf den Server kopieren (z. B. `scp`), liegt neben `docker-compose.yml`
 - [ ] `docker compose up -d --build`
-- [ ] `npx prisma migrate deploy` im App-Container ausführen
-- [ ] Seed auf dem Server ausführen (Accounts anlegen)
+- [ ] `docker compose exec app npx prisma migrate deploy`
+- [ ] `docker compose exec app npx prisma db seed`
 
 ### I3. Prüfen
 

@@ -1,0 +1,15 @@
+# Alles hier wird NICHT in den Docker-Build-Kontext geschickt - wichtig fuer
+# Geschwindigkeit (kein node_modules/.next hochladen) und vor allem fuer
+# Sicherheit: .env und credentials.local.json duerfen niemals ins Image.
+node_modules
+.next
+.git
+npm-debug.log*
+
+.env
+.env.*
+credentials.local.json
+
+*.md
+.vscode
+.idea

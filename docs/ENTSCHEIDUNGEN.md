@@ -560,3 +560,37 @@ beantwortet nur "warum", nicht "wie".
 Vorbefragungs-Schritten - die zählen jetzt nur als Schritt 2 und 3 statt 1 und 2.
 **Getestet:** Per Playwright - Schritt erscheint nach der Einwilligung mit korrekter Schrittzählung, "Los
 geht's" führt zu Block A weiter, dort korrekt "Schritt 2 von 3".
+
+## 14.09.2026 Phase I: Dockerfile, docker-compose.yml, Caddyfile für den Server
+
+**Entscheidung:** Deployment-Dateien für den Hetzner-Server geschrieben: `Dockerfile` (dreistufig: deps,
+builder, runner), `docker-compose.yml` (db/app/caddy), `Caddyfile`, `.dockerignore`, `.env.example`. Zwei
+bewusste Abweichungen vom ursprünglichen Plan in `docs/CHECKLIST.md`:
+1. Kein `output: "standalone"` in `next.config.ts`. Grund: `npx prisma db seed` (siehe `prisma/seed.ts`)
+   braucht zur Laufzeit das Prisma-CLI, `tsx` und die Quelldateien unter `src/` (Pfad-Alias `@/...`) - mit
+   `standalone` wird `node_modules` gerade auf das gekürzt, was der reine Next.js-Server braucht, das CLI
+   wäre weg. Stattdessen bekommt die Runner-Stufe das volle `node_modules` (aus der `deps`-Stufe, nicht der
+   `builder`-Stufe - keine Build-Artefakte mitschleppen) plus `src/` und `tsconfig.json` mit. Etwas größeres
+   Image, dafür funktioniert `docker compose exec app npx prisma migrate deploy`/`db seed` ohne Sonderweg -
+   für ein Einzelperson-Projekt auf einem eigenen Server wichtiger als ein paar hundert MB Ersparnis.
+2. `node:22-bookworm-slim` statt `node:22-alpine` als Basis-Image. Alpine nutzt musl statt glibc, Prisma
+   braucht dafür einen eigenen `binaryTargets`-Eintrag in `schema.prisma` - vermeidbare Fehlerquelle für den
+   Einstieg. Debian "slim" ist etwas größer, dafür funktioniert Prisma ohne Sonderkonfiguration. `openssl`
+   zusätzlich per `apt-get` installiert, weil die Prisma-Engine zur Laufzeit dagegen linkt und "slim" das
+   nicht mitbringt.
+**Begründung:** Husins Bitte, Phase I jetzt umzusetzen und ihm dabei Docker/Deployment beizubringen - beide
+Abweichungen sind bewusste Vereinfachungen für den Einstieg, nicht Nachlässigkeit.
+**Getestet, nicht nur gebaut:** Kompletten Stack lokal hochgefahren (`docker compose up -d --build`, isolierte
+Test-`.env` außerhalb des Projekts, eigener `-p`-Projektname und Port, um die echte lokale Dev-Datenbank nicht
+zu berühren) - `db`-Healthcheck greift korrekt, `npx prisma migrate deploy` und `npx prisma db seed` liefen
+im laufenden `app`-Container durch, Login und `/admin` funktionierten per `curl` über den echten HTTP-Port,
+Caddy startet und versucht korrekt (aber erwartbar erfolglos) ein Zertifikat für die Platzhalter-Domain zu
+holen. Dabei zwei echte Fehler gefunden und behoben, bevor sie auf dem echten Server aufgefallen wären: der
+Seed-Befehl schlug erst fehl (fehlendes `src/`/`tsconfig.json`, siehe oben), und `credentials.local.json`
+fehlte im Container (liegt per `.dockerignore` bewusst nicht im Image, jetzt stattdessen zur Laufzeit
+eingehängt).
+**Hinweis für Husin:** Beim Testen aus Versehen kurz die lokale `.env` mit Test-Werten überschrieben (beim
+allerersten Versuch, den Stack lokal hochzufahren, bevor die isolierte Test-Env-Datei benutzt wurde) - sofort
+bemerkt und mit der korrekten `DATABASE_URL` (aus `docker-compose.dev.yml` rekonstruiert) sowie einem neuen
+`SESSION_SECRET` wiederhergestellt. Einzige Auswirkung: bestehende Login-Cookies in deinem Browser sind
+ungültig geworden, einmal neu einloggen genügt.

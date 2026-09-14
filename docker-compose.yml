@@ -1,0 +1,61 @@
+# Produktions-Setup fuer den Hetzner-Server - NICHT lokal benutzen, dafuer
+# gibt es docker-compose.dev.yml. Drei Dienste, die zusammen die App
+# ergeben:
+#
+#   db     - die Datenbank (Postgres), Daten liegen dauerhaft im Volume "pgdata"
+#   app    - dieses Next.js-Projekt (Frontend + Backend in einem, siehe Dockerfile)
+#   caddy  - Reverse Proxy davor: nimmt Anfragen von aussen (Port 80/443)
+#            entgegen, holt sich automatisch ein HTTPS-Zertifikat fuer deine
+#            Domain, und reicht die Anfragen intern an "app" weiter
+#
+# Passwoerter/Secrets kommen aus einer .env-Datei NEBEN dieser Datei auf dem
+# Server (siehe .env.example) - die landet nie im Git.
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: focus
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: focusdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U focus -d focusdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://focus:${DB_PASSWORD}@db:5432/focusdb
+      SESSION_SECRET: ${SESSION_SECRET}
+      NODE_ENV: production
+    # Nur fuer "docker compose exec app npx prisma db seed" (siehe
+    # CHECKLIST.md Phase I) - die Datei enthaelt echte Teilnehmer-Passwoerter
+    # und darf deshalb nie im Image landen (siehe .dockerignore), nur zur
+    # Laufzeit eingehaengt werden. Read-only, die App selbst liest sie nicht.
+    volumes:
+      - ./credentials.local.json:/app/credentials.local.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  caddy_data:

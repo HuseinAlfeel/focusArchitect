@@ -1,0 +1,14 @@
+# Caddy ist der "Reverse Proxy" davor: er nimmt die Anfragen unter deiner
+# Domain entgegen und leitet sie intern an den App-Container weiter (Port
+# 3000, der Next.js-Standardport). "app" ist hier kein Platzhalter, sondern
+# der Dienstname aus docker-compose.yml - Docker loest den innerhalb des
+# gleichen Compose-Netzwerks automatisch zur richtigen internen IP auf.
+#
+# Sobald hier eine echte Domain steht (kein "http://" davor, kein Port
+# dahinter), beantragt Caddy beim ersten Start automatisch und kostenlos ein
+# HTTPS-Zertifikat (Let's Encrypt) und erneuert es von selbst - dafuer musst
+# du nichts weiter tun, nur DNS muss vorher schon auf den Server zeigen.
+
+deine-domain.de {
+    reverse_proxy app:3000
+}
