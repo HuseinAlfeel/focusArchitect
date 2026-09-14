@@ -322,6 +322,9 @@ npm install -D @types/bcryptjs
 - [ ] `ACTIVITY_SELECTED` oder `ACTIVITY_SKIPPED` protokollieren
 - [ ] Pausenbildschirm mit Restzeit, ruhig gestaltet
 - [ ] Bei gewählter Aktivität: Schritt-für-Schritt-Anleitung, ein Schritt je Bildschirm, `ACTIVITY_STEP_DONE`
+- [ ] Jeder Anleitungsschritt einmal per `speechSynthesis` vorgelesen (ergänzt 14.09., `useSpeech.ts`) —
+      deutsche Stimme falls verfügbar, `rate` 0.9, Schalter „Sprachausgabe an/aus" (Vorgabe an),
+      `SPEECH_TOGGLED`-Ereignis, kein Fehler falls die API fehlt. Nur hier, nicht in Arbeitsphase/Pausenhinweis
 - [ ] Letzte 10 Sekunden der Pause: leiser Klopf-Countdown, bei 0 ein klares Signal ("Pause vorbei") — vorher
       endete die Pause komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (Husin, 09.08.)
 - [ ] Am Ende **kein** automatischer Rücksprung, sondern Knopf „Sitzung starten" (die im F8-Kurzfeedback

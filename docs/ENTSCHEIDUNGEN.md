@@ -362,3 +362,26 @@ nur als Reaktion auf den Systemhinweis.
 bezieht sich auf den *Hinweis*, den es hier nicht gab). Die `workMin`-Spalte in `cycles.csv` wird dafür
 jetzt fortlaufend mitgeführt statt je Runde nur aus dem direkt vorherigen `CycleFeedback` abgeleitet - sonst
 stünde die Arbeitszeit der Runde nach einer selbst gestarteten Pause fälschlich leer da.
+
+## 14.09.2026 Pausenanleitung wird vorgelesen
+
+**Entscheidung:** Jeder Schritt der Aktivitäts-Anleitung (Augenentlastung, Nacken und Schultern, Aufstehen)
+wird einmal per `speechSynthesis` vorgelesen (`useSpeech.ts`, neuer Hook). Deutsche Stimme, falls verfügbar,
+sonst Standardstimme; unter mehreren deutschen Stimmen wird die vermutlich natürlichste gewählt (Heuristik:
+"Online"/"Natural"/"Google" im Namen, Netzwerk- statt lokale Stimme bevorzugt - die eigentliche Klangqualität
+liefert das Betriebssystem, wir wählen nur unter dem Verfügbaren aus). `rate` 0.9. Schalter „Sprachausgabe:
+an/aus" direkt bei der Anleitung, Voreinstellung an, protokolliert als `SPEECH_TOGGLED` mit `{ enabled }`.
+Laufende Ausgabe wird abgebrochen (`speechSynthesis.cancel()`), sobald der Schritt wechselt, die Anleitung
+endet oder die Pause vorbei ist - sonst überlappt es mit dem nächsten Bildschirm. Ohne `speechSynthesis` im
+Browser: kein Fehler, Text erscheint wie bisher nur schriftlich.
+**Begründung:** Husins Vorgabe. Bei der Augenentlastung schaut man bewusst vom Bildschirm weg - ein reiner
+Anleitungstext ist in dem Moment funktional unbrauchbar, weil er sich nicht lesen lässt. Bei der
+Nackenübung abgeschwächt dasselbe Problem.
+**Bezug:** Ausschließlich in den Pausenanleitungen, nicht in der Arbeitsphase und nicht beim Pausenhinweis -
+dort bleibt es bei der bewusst zurückhaltenden Gestaltung (Regel 7/8).
+**Getestet:** Per Playwright mit instrumentiertem `speechSynthesis` (echte Audioausgabe lässt sich headless
+nicht prüfen) - Text, Sprechgeschwindigkeit, Sprache und gewählte Stimme pro Schritt korrekt, kein erneutes
+Vorlesen bei ausgeschaltetem Schalter, Fortsetzen beim Wiedereinschalten erst beim nächsten Schritt, Ereignis
+`SPEECH_TOGGLED` mit korrektem `enabled`-Wert in beide Richtungen. Auf diesem Windows-Entwicklungsrechner
+liefert Chromium tatsächlich eine deutsche Stimme ("Microsoft Katja") - auf anderen Rechnern/Systemen kann
+das abweichen oder ganz fehlen, deshalb der Fallback auf die Standardstimme bzw. reinen Text.

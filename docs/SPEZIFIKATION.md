@@ -216,6 +216,8 @@ Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
 
 **Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle zehn Personen von 25 auf 35 gehen, hast du einen Befund.
 
+**Ausnahme (ergänzt 14.09.):** Bei einer selbst gestarteten Pause (Knopf „Pause jetzt starten" während der Arbeitsphase, `BREAK_SELF_INITIATED`) entfällt das Kurzfeedback komplett - es gab keinen Systemhinweis, dessen Zeitpunkt man bewerten könnte. Die nächste Runde läuft unverändert mit der bisherigen Arbeitszeit weiter, direkt zur Aktivitätsauswahl [8].
+
 ### [8] Aktivitätsauswahl
 
 Drei bis vier kurze Vorschläge plus die Option „keine Aktivität":
@@ -230,6 +232,8 @@ Auswahl wird protokolliert. Die Option „keine" muss gleichwertig aussehen, nic
 ### [9] Pause
 
 Ruhiger Bildschirm mit Restzeit. Falls eine Aktivität gewählt wurde: schrittweise Anleitung, ein Schritt pro Bildschirm, automatisch weiter.
+
+**Sprachausgabe für die Anleitung** (ergänzt 14.09.): Bei „Augenentlastung" schaut man bewusst vom Bildschirm weg - ein reiner Anleitungstext lässt sich in dem Moment nicht lesen, bei „Nacken und Schultern" abgeschwächt genauso. Jeder Schritt wird deshalb einmal per `speechSynthesis` (Web Speech API, keine externe Bibliothek/kein Dienst) vorgelesen: deutsche Stimme falls verfügbar, sonst Standardstimme, Sprechgeschwindigkeit leicht reduziert (`rate` 0.9). Schalter „Sprachausgabe: an/aus" direkt bei der Anleitung, Voreinstellung an, protokolliert als `SPEECH_TOGGLED` mit `{ enabled }`. Ist `speechSynthesis` nicht verfügbar, erscheint kein Fehler, nur der Text wie zuvor. Ausschließlich hier - nicht in der Arbeitsphase, nicht beim Pausenhinweis.
 
 **Die Pausenzeit hat Vorrang vor der Aktivität** (Änderung 26.08.): dauert die gewählte Aktivität länger als die Pause (z. B. beim Testen mit kurzen Pausenzeiten, oder wenn das Kurzfeedback die Pause selbst nicht betrifft, aber die Aktivität-Presets fix sind), blockiert das nicht den Weiterknopf — die Aktivitätsanzeige wird einfach ausgeblendet, sobald die Pausenzeit abgelaufen ist, die Aktivität endet quasi mit der Pause. Vorher musste die Aktivität immer erst zu Ende laufen, auch wenn die Pause selbst schon lange vorbei war.
 
@@ -375,7 +379,7 @@ NUDGE_STAGE_0          NUDGE_STAGE_1         NUDGE_STAGE_2         NUDGE_STAGE_3
 NUDGE_SOUND_PLAYED
 BREAK_ACCEPTED         BREAK_SKIPPED         BREAK_SNOOZED         BREAK_SELF_INITIATED
 ACTIVITY_SELECTED      ACTIVITY_SKIPPED      ACTIVITY_STEP_DONE
-ACTIVITY_TICK
+ACTIVITY_TICK          SPEECH_TOGGLED
 BREAK_STARTED          BREAK_ENDED
 INTERVAL_ADJUSTED      CYCLE_FEEDBACK_SUBMITTED
 TAB_HIDDEN             TAB_VISIBLE

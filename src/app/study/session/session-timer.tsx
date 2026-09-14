@@ -11,8 +11,9 @@ import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
 import { useActivityTicks } from "@/hooks/useActivityTicks";
 import { useBreakEndSound } from "@/hooks/useBreakEndSound";
+import { useSpeech } from "@/hooks/useSpeech";
 import { activities, type ActivityId } from "@/content/activities";
-import { sendEventNow, startEventQueue } from "@/lib/eventQueue";
+import { sendEventNow, enqueueEvent, startEventQueue } from "@/lib/eventQueue";
 import type { EventType } from "@/lib/events";
 
 const MIN_WORK_MIN = 5;
@@ -614,6 +615,37 @@ function BreakScreen({
 
   useBreakEndSound(breakEndsAt, !readyToContinue);
 
+  // Sprachausgabe nur für die Pausenanleitungen (Husin, 14.09.) - die
+  // Augenentlastung verlangt, vom Bildschirm wegzuschauen, eine reine
+  // Textanleitung lässt sich in dem Moment nicht lesen.
+  const { isSupported: speechSupported, speak, cancel: cancelSpeech } = useSpeech();
+  const [speechEnabled, setSpeechEnabled] = useState(true);
+
+  useEffect(() => {
+    if (!speechEnabled || !activity || allStepsDone || breakDone) return;
+    const text = activity.steps[currentStepIndex]?.instruction;
+    if (text) speak(text);
+    // Nur beim tatsächlichen Schrittwechsel neu vorlesen, nicht bei jedem
+    // Re-Render (z.B. durch den Sekunden-Countdown der Schrittanzeige).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speechEnabled, activity, currentStepIndex]);
+
+  // Abbrechen statt zu Ende laufen lassen, sobald die Anleitung/Pause vorbei
+  // ist oder die Komponente verlassen wird - sonst überlappt die Ausgabe
+  // mit dem nächsten Bildschirm.
+  useEffect(() => {
+    if (allStepsDone || breakDone) cancelSpeech();
+  }, [allStepsDone, breakDone, cancelSpeech]);
+
+  useEffect(() => cancelSpeech, [cancelSpeech]);
+
+  function toggleSpeech() {
+    const next = !speechEnabled;
+    setSpeechEnabled(next);
+    if (!next) cancelSpeech();
+    enqueueEvent(sessionId, "SPEECH_TOGGLED", { cycle, payload: { enabled: next } });
+  }
+
   return (
     <div className="relative z-10 flex flex-col items-center gap-5 text-center">
       {remainingMs !== null && (
@@ -630,10 +662,19 @@ function BreakScreen({
       )}
 
       {activity && !allStepsDone && !breakDone && (
-        <div className="max-w-xs space-y-1">
+        <div className="max-w-xs space-y-2">
           <p className="text-sm">{activity.steps[currentStepIndex]?.instruction}</p>
           {stepRemainingMs !== null && (
             <p className="text-xs opacity-50">{formatRemaining(stepRemainingMs)}</p>
+          )}
+          {speechSupported && (
+            <button
+              type="button"
+              onClick={toggleSpeech}
+              className="rounded border border-black/10 px-2.5 py-1 text-xs text-neutral-400 dark:border-white/15 dark:text-neutral-500"
+            >
+              Sprachausgabe: {speechEnabled ? "an" : "aus"}
+            </button>
           )}
         </div>
       )}
