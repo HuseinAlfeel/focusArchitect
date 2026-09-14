@@ -1,18 +1,20 @@
-// Vier Bloecke aus docs/SPEZIFIKATION.md, Abschnitt [3] Vorbefragung
-// (ueberarbeitet 12.09. mit Holly, Prioritaet 2 aus der Betreuungsbesprechung,
-// ersetzt die alte D1-D5/V1-V7-Fassung vollstaendig).
+// Vorbefragung aus docs/SPEZIFIKATION.md, Abschnitt [3] (ueberarbeitet 14.09.,
+// zweigeteilt fuer den Onboarding-Flow: Schritt 1 = Block A, Schritt 2 =
+// Bloecke B+C+D in einem, siehe pre-survey-form.tsx).
 //
 // Block A: Person und Taetigkeit. Block B: tatsaechliches Pausenverhalten
-// (Verhalten, keine Einschaetzung). Block C: Einstellung zu Pausen, eigener
-// kleiner Block statt vermischt mit Verhalten. Block D: typisches Befinden
-// an einem normalen Arbeitstag (Baseline-Trait, kein Sitzungsvergleich mehr -
-// der verlaesslichere Vergleichswert fuer die Nachbefragung ist jetzt
-// restedAtStart/focusAtStart vom Sitzungsstart, siehe session-start.ts).
+// (Verhalten, keine Einschaetzung). Block C: Einstellung zu Pausen. Block D:
+// typisches Befinden an einem normalen Arbeitstag (Baseline-Trait, kein
+// Sitzungsvergleich - der verlaesslichere Vergleichswert fuer die
+// Nachbefragung ist restedAtStart/focusAtStart vom Sitzungsstart, siehe
+// session-start.ts). Die "typische Konzentration" (frueher D2) ist bewusst
+// raus, Husins Vorgabe beim Onboarding-Umbau am 14.09. - Erschoepfung allein
+// reicht als Baseline-Trait.
 //
 // B2 und B3 haben eine bedingte Anschlussfrage (nur bei "ja" sichtbar). Bei
 // "nein" wird das Anschlussfeld leer mitgespeichert, nicht weggelassen.
 
-export const preSurveyItems = [
+export const preSurveyStep1Items = [
   {
     id: "A1",
     type: "choice",
@@ -61,6 +63,9 @@ export const preSurveyItems = [
     type: "number",
     question: "Wie viele davon sitzend am Bildschirm?",
   },
+] as const;
+
+export const preSurveyStep2Items = [
   {
     id: "B1",
     type: "choice",
@@ -110,20 +115,15 @@ export const preSurveyItems = [
     lowLabel: "gar nicht",
     highLabel: "sehr",
   },
-  {
-    id: "D2",
-    type: "scale",
-    question: "Wie konzentriert fühlst du dich typischerweise am Ende eines Arbeitstages?",
-    lowLabel: "gar nicht",
-    highLabel: "sehr",
-  },
 ] as const;
 
-// Ueberschriften vor dem jeweils ersten Item eines Blocks (siehe Rendering
-// in pre-survey-form.tsx).
+export const preSurveyItems = [...preSurveyStep1Items, ...preSurveyStep2Items] as const;
+
+// Ueberschriften vor dem jeweils ersten Item eines Unterblocks innerhalb von
+// Schritt 2 (siehe Rendering in pre-survey-form.tsx). Schritt 1 ist selbst
+// schon Block A, braucht keine zusaetzliche Unterueberschrift.
 export const preSurveyBlockTitles: Record<string, string> = {
-  A1: "Person und Tätigkeit",
-  B1: "Tatsächliches Pausenverhalten",
+  B1: "Pausenverhalten",
   C1: "Einstellung",
   D1: "Typisches Befinden",
 };

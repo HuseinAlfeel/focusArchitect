@@ -88,6 +88,13 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
 > pro Person mitberichtet werden, gehört als Punkt in die Limitationen. Gesamtdauer steht als `durationMin`
 > in `participants.csv` (berechnet aus `endedAt - startedAt`, nicht redundant in der DB gespeichert).
 
+> **Onboarding auf drei Bildschirme verdichtet (Änderung 14.09.):** [3] und [4] sind jetzt genau drei
+> aufeinanderfolgende Bildschirme ohne Zwischenklick: Vorbefragung Teil 1 (Block A), Vorbefragung Teil 2
+> (Block B+C+D) und ein kombinierter Dashboard-/Sitzungsstart-Bildschirm. Die vorher leere
+> "Eingeloggt als..."-Zwischenseite ist komplett weg - nach Login und Einwilligung geht es ohne Klick direkt
+> weiter. Der kombinierte dritte Bildschirm ist ab jetzt auch die normale Startseite (`/study`) für jeden
+> weiteren Login, solange die Sitzung noch nicht gestartet ist. Details siehe [3] und [4].
+
 ### [1] Login
 
 Kein Registrierungsformular. Du legst die Accounts vorher selbst an:
@@ -120,7 +127,13 @@ Unten: Checkbox „Ich habe die Informationen gelesen und nehme freiwillig teil"
 
 Erhebt die Baseline, also deinen Vergleichsmaßstab. Überarbeitet am 12.09. (Prioritaet 2 aus der
 Betreuungsbesprechung), damit Einstellung und tatsächliches Verhalten nicht mehr vermischt sind - ersetzt die
-alte D1-D5/V1-V7-Fassung vollständig. Vier Blöcke:
+alte D1-D5/V1-V7-Fassung vollständig. Vier Blöcke, ein einmaliges Profil-Setup (nicht bei jeder Sitzung neu).
+
+**Zwei Bildschirme statt einem (Änderung 14.09.):** Block A ist der erste Bildschirm ("Willkommen! Ein paar
+Angaben zu deinem Arbeitsalltag."), Block B+C+D zusammen der zweite ("Noch dein Pausenverhalten."). Antworten
+aus Schritt 1 bleiben beim Zurückgehen erhalten (reiner Client-Zustand, noch kein Datenbank-Schreiben). Erst
+am Ende von Schritt 2 ("Profil speichern & Weiter") wird alles zusammen als eine `SurveyResponse` gespeichert
+- am Datenmodell ändert das nichts, nur an der Aufteilung im Formular.
 
 **Block A - Person und Tätigkeit**
 
@@ -153,21 +166,29 @@ alte D1-D5/V1-V7-Fassung vollständig. Vier Blöcke:
 | # | Frage | Format |
 |---|---|---|
 | D1 | Wie erschöpft fühlst du dich typischerweise am Ende eines Arbeitstages? | Skala 1–7 |
-| D2 | Wie konzentriert fühlst du dich typischerweise am Ende eines Arbeitstages? | Skala 1–7 |
 
 Block D ist eine Baseline-Einschätzung des typischen Befindens, kein Sitzungsvergleich mehr - der
-verlässlichere Vergleichswert für die Nachbefragung wird jetzt direkt vor der Sitzung erhoben, siehe [4].
+verlässlichere Vergleichswert für die Nachbefragung wird jetzt direkt vor der Sitzung erhoben, siehe [4]. Die
+frühere Frage nach der typischen Konzentration (D2) ist seit 14.09. ersatzlos gestrichen (Husins Vorgabe) -
+Erschöpfung allein reicht als Baseline-Trait, `focusAtStart` aus [4] deckt Konzentration bereits situativ ab.
 
 Bei B2 und B3 erscheint die Anschlussfrage nur bei „Ja". Bei „Nein" wird das Anschlussfeld leer
 mitgespeichert, nicht übersprungen.
 
 ### [4] Sitzungsstart
 
+Dritter und letzter Onboarding-Bildschirm (Änderung 14.09.), zugleich das Dashboard: sobald Profil (Block
+A-D) einmal steht, landet man hier bei jedem Login, solange die Sitzung noch nicht gestartet ist - kein Klick
+durch eine Zwischenseite mehr.
+
+- Kopfzeile „Hallo {Teilnehmercode}!", darunter „Bevor es losgeht: Wie sieht es jetzt gerade aus?"
 - Freitextfeld: „Woran wirst du in dieser Sitzung arbeiten?" (eine Zeile, wird gespeichert)
 - „Wie ausgeruht fühlst du dich jetzt gerade?" - Skala 1–7
 - „Wie konzentriert fühlst du dich jetzt gerade?" - Skala 1–7
-- Anzeige der Startwerte: 25 Minuten Arbeit, 5 Minuten Pause, mit Hinweis, dass man das später anpassen kann
-- Knopf „Sitzung starten"
+- Dezenter Hinweistext: Startwerte (25/5 Minuten) plus kurze Erklärung, dass sich das über das Kurzfeedback
+  anpasst
+- Ein großer, primärer Knopf „🚀 Fokus-Sitzung starten" - löst `PATCH /api/session/:id/start` aus und
+  springt bei Erfolg **sofort** zur Timer-Ansicht [5], ohne Zwischenstation über das Dashboard
 
 Die beiden Skalenwerte (ergänzt 12.09., Prioritaet 2) ersetzen das alte V7 aus der Vorbefragung. Eine Messung
 unmittelbar vor der Sitzung ist ein verlässlicherer Vergleichswert als eine Einschätzung des typischen

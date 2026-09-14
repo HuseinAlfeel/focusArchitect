@@ -221,22 +221,31 @@ npm install -D @types/bcryptjs
 
 ### F2. Vorbefragung (halber Tag)
 
-- [ ] Seite `/study/pre` mit den Blöcken A (Person/Tätigkeit), B (tatsächliches Pausenverhalten),
-      C (Einstellung), D (typisches Befinden) - Fassung vom 12.09., ersetzt die alte D1-D5/V1-V7-Version
+- [ ] Seite `/study/pre`, zwei Schritte in einer Client-Komponente (Änderung 14.09., kein Datenbank-Schreiben
+      zwischen den Schritten): Schritt 1 = Block A (Person/Tätigkeit), Schritt 2 = Block B (tatsächliches
+      Pausenverhalten) + C (Einstellung) + D (nur noch Erschöpfung, "typische Konzentration" gestrichen)
+- [ ] Schritt 1: Knopf „Weiter (1/2)". Schritt 2: „🔙 Zurück" (Antworten aus Schritt 1 bleiben erhalten) und
+      „Profil speichern & Weiter" - erst hier wird tatsächlich gespeichert
 - [ ] Skalen als anklickbare Buttons 1 bis 7, nicht als Slider (Slider verleiten zur Mitte)
 - [ ] Anschlussfragen bei B2/B3 nur sichtbar bei „Ja", bei „Nein" Feld leer mitspeichern statt überspringen
-- [ ] Validierung: alle Pflichtfelder ausgefüllt
-- [ ] `POST /api/survey` mit `phase: "PRE"`
+- [ ] Validierung: alle Pflichtfelder des jeweiligen Schritts ausgefüllt
+- [ ] `POST /api/survey` mit `phase: "PRE"` (beide Schritte zusammen als eine Antwort)
 - [ ] Ereignis `SURVEY_PRE_SUBMITTED`
 
-### F3. Sitzungsstart (2 Stunden)
+### F3. Sitzungsstart / Dashboard (2 Stunden)
 
-- [ ] Seite `/study/start`: Freitextfeld für die geplante Tätigkeit
+- [ ] Dritter Onboarding-Schritt, jetzt direkt auf `/study` (Änderung 14.09.): sobald Profil steht und die
+      Sitzung noch nicht läuft, zeigt die Startseite selbst dieses Dashboard - keine eigene Route mehr, die
+      alte leere "Eingeloggt als..."-Seite ist komplett weg
+- [ ] Kopfzeile „Hallo {Code}!", Freitextfeld für die geplante Tätigkeit
 - [ ] Zwei Skalenfragen (Änderung 12.09.): „Wie ausgeruht fühlst du dich jetzt gerade?", „Wie konzentriert
       fühlst du dich jetzt gerade?" - ersetzen das alte V7 aus der Vorbefragung, landen als eigene
       Session-Felder (`restedAtStart`, `focusAtStart`) in `participants.csv`
-- [ ] Anzeige der Startwerte 25/5 mit Hinweis auf spätere Anpassbarkeit
+- [ ] Dezenter Hinweistext zu den Startwerten 25/5 und zur späteren Anpassbarkeit
+- [ ] Großer, primärer Knopf „🚀 Fokus-Sitzung starten"
 - [ ] `PATCH /api/session/:id/start`
+- [ ] Bei Erfolg direkt zu `/study/session`, nicht zurück zum Dashboard (Änderung 14.09.: vorher ein
+      zusätzlicher Klick über die Hub-Seite nötig)
 - [ ] Ereignisse `SESSION_STARTED`, `CYCLE_STARTED`, `WORK_STARTED`
 
 ### F4. Timer-Logik (1 Tag, kritisch)

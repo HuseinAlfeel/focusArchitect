@@ -385,3 +385,32 @@ Vorlesen bei ausgeschaltetem Schalter, Fortsetzen beim Wiedereinschalten erst be
 `SPEECH_TOGGLED` mit korrektem `enabled`-Wert in beide Richtungen. Auf diesem Windows-Entwicklungsrechner
 liefert Chromium tatsächlich eine deutsche Stimme ("Microsoft Katja") - auf anderen Rechnern/Systemen kann
 das abweichen oder ganz fehlen, deshalb der Fallback auf die Standardstimme bzw. reinen Text.
+
+## 14.09.2026 Onboarding auf drei Bildschirme verdichtet, leere Zwischenseite weg
+
+**Entscheidung:** Einwilligung bleibt ein eigener Schritt, aber alles zwischen Einwilligung und Sitzungsstart
+ist jetzt genau drei Bildschirme ohne Zwischenklick:
+1. `/study/pre`, Schritt 1: Block A (Person/Tätigkeit) - Titel "Willkommen! Ein paar Angaben zu deinem
+   Arbeitsalltag.", Knopf "Weiter (1/2)".
+2. `/study/pre`, Schritt 2 (gleiche Seite, gleiche Komponente, nur Client-State): Block B+C+D - Titel "Noch
+   dein Pausenverhalten.", Knöpfe "🔙 Zurück" (Antworten aus Schritt 1 bleiben erhalten) und "Profil
+   speichern & Weiter" (erst hier tatsächlich `POST /api/survey`, beide Schritte zusammen als eine
+   `SurveyResponse`). Die Frage nach der typischen Konzentration (frühere D2) ist ersatzlos gestrichen.
+3. `/study` selbst, sobald Profil steht und die Sitzung noch nicht läuft: kombiniertes Dashboard mit
+   Begrüßung "Hallo {Code}!", den drei situativen Feldern (Tätigkeit, ausgeruht, konzentriert - wie zuvor
+   unter `/study/start`) und einem großen Knopf "🚀 Fokus-Sitzung starten", der bei Erfolg sofort zu
+   `/study/session` springt statt zurück zum Dashboard.
+Die alte, inhaltsleere "Eingeloggt als..."-Seite (nur Text + Link) ist komplett weg, `/study/start` als
+eigene Route ebenso - dessen Inhalt (`start-form.tsx`) ist jetzt `dashboard-start-form.tsx` und wird direkt
+von `/study/page.tsx` gerendert, sobald der Zustand passt. Alle anderen Zustände von `/study` (Sitzung
+läuft, beendet, abgeschlossen) sind unverändert, nur im selben File zusammengeführt statt über Links auf
+separate Seiten zu verweisen.
+**Begründung:** Husins Vorgabe - "Time-to-Value" (Zeit bis der Timer läuft) drastisch verkürzen, keine
+Bildschirme ohne eigenen Zweck.
+**Bezug:** Ändert nichts am Datenmodell oder an der API - `POST /api/survey`, `PATCH /api/session/:id/start`
+und die Feldnamen bleiben exakt wie in den Einträgen vom 12.09. Betrifft ausschließlich, wie das Formular im
+Browser aufgeteilt ist und wie `/study` je nach Sitzungszustand rendert.
+**Getestet:** Per Playwright, kompletter Durchlauf von Login bis Timer-Ansicht - Weiterleitung ohne Klick
+nach Login/Einwilligung, Pflichtfeld-Validierung pro Schritt, Antworten bleiben beim Zurückgehen erhalten,
+D2 tatsächlich nicht mehr vorhanden, Dashboard zeigt korrekten Teilnehmercode, `PATCH .../start` liefert 200
+und die Seite springt direkt zur Timer-Ansicht.

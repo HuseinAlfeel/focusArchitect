@@ -30,11 +30,17 @@ function ChoiceButton({
   );
 }
 
-export function StartForm({
+// Das "Jetzt" - Dashboard und Sitzungsstart in einem (Husin, 14.09.: die
+// Vorbefragung ist ein einmaliges Profil, das hier Abgefragte ist situativ
+// und kommt bei jedem Timer-Start neu dran). Der Knopf startet die Runde
+// sofort und springt direkt zum Timer, keine Zwischenseite mehr.
+export function DashboardStartForm({
+  participantCode,
   sessionId,
   initialWorkMin,
   initialBreakMin,
 }: {
+  participantCode: string;
   sessionId: string;
   initialWorkMin: number;
   initialBreakMin: number;
@@ -77,12 +83,20 @@ export function StartForm({
       return;
     }
 
-    router.push("/study");
+    // Direkt zum Timer, keine Zwischenstation mehr über den Hub.
+    router.push("/study/session");
     router.refresh();
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-xl font-medium">Hallo {participantCode}!</h1>
+        <p className="mt-1 text-sm opacity-80">
+          Bevor es losgeht: Wie sieht es jetzt gerade aus?
+        </p>
+      </div>
+
       <div className="space-y-1">
         <label htmlFor="task" className="block text-sm font-medium">
           Woran wirst du in dieser Sitzung arbeiten?
@@ -129,15 +143,10 @@ export function StartForm({
         </div>
       ))}
 
-      <div className="rounded border border-black/10 p-4 text-sm dark:border-white/15">
-        <p>
-          Start: <strong>{initialWorkMin} Minuten</strong> Arbeit,{" "}
-          <strong>{initialBreakMin} Minuten</strong> Pause.
-        </p>
-        <p className="mt-1 text-xs opacity-60">
-          Du kannst das nach jeder Pause anpassen.
-        </p>
-      </div>
+      <p className="text-xs opacity-50">
+        Start: {initialWorkMin} Minuten Arbeit, {initialBreakMin} Minuten Pause. Das
+        System lernt aus deinem Feedback und passt sich später an dich an.
+      </p>
 
       {error && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">
@@ -149,9 +158,9 @@ export function StartForm({
         type="button"
         onClick={handleSubmit}
         disabled={submitting}
-        className="w-full rounded bg-neutral-800 px-3 py-2 text-sm text-white transition-opacity disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
+        className="w-full rounded-xl bg-neutral-800 px-6 py-5 text-lg font-semibold text-white transition-opacity disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
       >
-        {submitting ? "Wird gestartet …" : "Sitzung starten"}
+        {submitting ? "Wird gestartet …" : "🚀 Fokus-Sitzung starten"}
       </button>
     </div>
   );

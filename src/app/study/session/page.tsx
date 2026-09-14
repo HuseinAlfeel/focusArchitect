@@ -26,7 +26,7 @@ export default async function WorkSessionPage() {
   }
 
   if (!session.startedAt) {
-    redirect("/study/start");
+    redirect("/study");
   }
 
   if (session.endedAt) {
