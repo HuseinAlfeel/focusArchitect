@@ -618,17 +618,28 @@ function BreakScreen({
   // Sprachausgabe nur für die Pausenanleitungen (Husin, 14.09.) - die
   // Augenentlastung verlangt, vom Bildschirm wegzuschauen, eine reine
   // Textanleitung lässt sich in dem Moment nicht lesen.
-  const { isSupported: speechSupported, speak, cancel: cancelSpeech } = useSpeech();
+  const {
+    isSupported: speechSupported,
+    voicesReady,
+    speak,
+    cancel: cancelSpeech,
+  } = useSpeech();
   const [speechEnabled, setSpeechEnabled] = useState(true);
 
   useEffect(() => {
     if (!speechEnabled || !activity || allStepsDone || breakDone) return;
+    // Ohne dieses Warten sprach der allererste Schritt mit der Browser-
+    // Standardstimme statt der gewählten (Husin, 14.09.: klang bei
+    // "Augenentlastung" hörbar anders/roboterhafter als Schritt 2 und 3) -
+    // sobald voicesReady kippt, läuft dieser Effekt erneut und holt den
+    // aktuellen Schritt dann mit der richtigen Stimme nach.
+    if (!voicesReady) return;
     const text = activity.steps[currentStepIndex]?.instruction;
     if (text) speak(text);
     // Nur beim tatsächlichen Schrittwechsel neu vorlesen, nicht bei jedem
     // Re-Render (z.B. durch den Sekunden-Countdown der Schrittanzeige).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speechEnabled, activity, currentStepIndex]);
+  }, [speechEnabled, activity, currentStepIndex, voicesReady]);
 
   // Abbrechen statt zu Ende laufen lassen, sobald die Anleitung/Pause vorbei
   // ist oder die Komponente verlassen wird - sonst überlappt die Ausgabe

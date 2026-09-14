@@ -393,7 +393,7 @@ ist jetzt genau drei Bildschirme ohne Zwischenklick:
 1. `/study/pre`, Schritt 1: Block A (Person/Tätigkeit) - Titel "Willkommen! Ein paar Angaben zu deinem
    Arbeitsalltag.", Knopf "Weiter (1/2)".
 2. `/study/pre`, Schritt 2 (gleiche Seite, gleiche Komponente, nur Client-State): Block B+C+D - Titel "Noch
-   dein Pausenverhalten.", Knöpfe "🔙 Zurück" (Antworten aus Schritt 1 bleiben erhalten) und "Profil
+   dein Pausenverhalten.", Knöpfe "Zurück" (Antworten aus Schritt 1 bleiben erhalten) und "Profil
    speichern & Weiter" (erst hier tatsächlich `POST /api/survey`, beide Schritte zusammen als eine
    `SurveyResponse`). Die Frage nach der typischen Konzentration (frühere D2) ist ersatzlos gestrichen.
 3. `/study` selbst, sobald Profil steht und die Sitzung noch nicht läuft: kombiniertes Dashboard mit
@@ -414,3 +414,22 @@ Browser aufgeteilt ist und wie `/study` je nach Sitzungszustand rendert.
 nach Login/Einwilligung, Pflichtfeld-Validierung pro Schritt, Antworten bleiben beim Zurückgehen erhalten,
 D2 tatsächlich nicht mehr vorhanden, Dashboard zeigt korrekten Teilnehmercode, `PATCH .../start` liefert 200
 und die Seite springt direkt zur Timer-Ansicht.
+
+## 14.09.2026 Erster vorgelesener Schritt klang anders als die folgenden
+
+**Entscheidung:** `useSpeech.ts` spricht jetzt erst, wenn `voicesReady` true ist (neuer Rückgabewert des
+Hooks) - `BreakScreen` wartet damit vor dem allerersten Vorlesen kurz, statt sofort loszulegen.
+**Begründung:** Husin fiel bei der Augenentlastung auf, dass der erste Anleitungsschritt mit einer anderen,
+roboterhafter klingenden Stimme gesprochen wurde als Schritt 2 und 3. Ursache: `speechSynthesis.getVoices()`
+liefert bei manchen Browsern (v.a. Chrome/Chromium) direkt nach dem Laden der Seite noch eine leere Liste,
+die echte Stimmenliste kommt asynchron über das `voiceschanged`-Ereignis nach. Der Hook wählte beim allerersten
+Aufruf also aus einer leeren Liste (Ergebnis: keine Stimme gesetzt, Browser nimmt seine eigene Standardstimme),
+und erst ab dem zweiten Aufruf stand die eigentlich gewünschte, bessere Stimme fest. Jetzt wird auf
+`voiceschanged` gewartet (mit 300ms-Fallback, falls das Ereignis nie feuert), bevor überhaupt gesprochen wird.
+**Bezug:** Reine Bugfix, an der Stimmauswahl-Heuristik selbst (siehe Eintrag oben) ändert sich nichts.
+
+## 14.09.2026 Emoji im "Zurück"-Knopf entfernt
+
+**Entscheidung:** Der Knopf in der Vorbefragung heißt jetzt nur noch "Zurück", ohne das 🔙-Emoji davor.
+**Begründung:** Husin fand es kindisch wirkend - das Emoji zeigt in den meisten Emoji-Schriftarten zusätzlich
+den englischen Schriftzug "BACK" mit an, was neben dem deutschen "Zurück" unpassend aussah.

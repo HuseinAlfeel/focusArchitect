@@ -51,20 +51,37 @@ export function useSpeech() {
   const [isSupported] = useState(
     () => typeof window !== "undefined" && "speechSynthesis" in window
   );
+  // Erst wenn dies true ist, ist die Stimmauswahl verlaesslich - vorher
+  // liefert getVoices() oft eine leere Liste, siehe Kommentar unten.
+  const [voicesReady, setVoicesReady] = useState(false);
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
   useEffect(() => {
     if (!isSupported) return;
 
     function loadVoices() {
-      voiceRef.current = pickBestGermanVoice(window.speechSynthesis.getVoices());
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) return;
+      voiceRef.current = pickBestGermanVoice(voices);
+      setVoicesReady(true);
     }
     loadVoices();
     // Chrome laedt Stimmen asynchron nach - beim ersten Aufruf direkt nach
     // dem Laden der Seite liefert getVoices() dort oft noch eine leere
-    // Liste.
+    // Liste. Ohne dieses Warten wurde genau deshalb der allererste Satz mit
+    // der Browser-Standardstimme gesprochen (oft eine andere, schlechter
+    // klingende als die spaeter korrekt gewaehlte) - Husin ist genau das an
+    // der Augenentlastung aufgefallen: erster Schritt klang anders/
+    // roboterhafter als der zweite und dritte.
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+    // Fallback: manche Browser/Systeme liefern die Liste synchron und
+    // feuern "voiceschanged" nie - nach kurzer Wartezeit trotzdem
+    // freigeben, damit die Anleitung nicht stumm bleibt.
+    const timeoutId = window.setTimeout(() => setVoicesReady(true), 300);
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+      window.clearTimeout(timeoutId);
+    };
   }, [isSupported]);
 
   const speak = useCallback(
@@ -88,5 +105,5 @@ export function useSpeech() {
     window.speechSynthesis.cancel();
   }, [isSupported]);
 
-  return { isSupported, speak, cancel };
+  return { isSupported, voicesReady, speak, cancel };
 }

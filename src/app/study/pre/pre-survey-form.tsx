@@ -306,7 +306,7 @@ export function PreSurveyForm() {
           disabled={submitting}
           className="rounded border border-black/15 px-4 py-2 text-sm disabled:opacity-40 dark:border-white/20"
         >
-          🔙 Zurück
+          Zurück
         </button>
         <button
           type="button"

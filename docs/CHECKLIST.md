@@ -224,7 +224,7 @@ npm install -D @types/bcryptjs
 - [ ] Seite `/study/pre`, zwei Schritte in einer Client-Komponente (Änderung 14.09., kein Datenbank-Schreiben
       zwischen den Schritten): Schritt 1 = Block A (Person/Tätigkeit), Schritt 2 = Block B (tatsächliches
       Pausenverhalten) + C (Einstellung) + D (nur noch Erschöpfung, "typische Konzentration" gestrichen)
-- [ ] Schritt 1: Knopf „Weiter (1/2)". Schritt 2: „🔙 Zurück" (Antworten aus Schritt 1 bleiben erhalten) und
+- [ ] Schritt 1: Knopf „Weiter (1/2)". Schritt 2: „Zurück" (Antworten aus Schritt 1 bleiben erhalten) und
       „Profil speichern & Weiter" - erst hier wird tatsächlich gespeichert
 - [ ] Skalen als anklickbare Buttons 1 bis 7, nicht als Slider (Slider verleiten zur Mitte)
 - [ ] Anschlussfragen bei B2/B3 nur sichtbar bei „Ja", bei „Nein" Feld leer mitspeichern statt überspringen
