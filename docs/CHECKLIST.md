@@ -312,6 +312,10 @@ npm install -D @types/bcryptjs
 - [ ] Eigene Ton-Eskalation (mit Husin abgestimmt, Zeitplan siehe `useNudgeSoundSchedule.ts`): −30s/0s/+1min/
       +2min/+3min sanfter Sinuston steigender Lautstärke, ab +4min pulsierender Ton jede weitere Minute —
       protokolliert als `NUDGE_SOUND_PLAYED`
+- [ ] Hinweis-Karte/-Modal nur bei `state === "WORK"` rendern, nicht nur bei `!hasReacted` (Bugfix 14.09.) —
+      sonst kann nach einem Reload mitten in Pause/Kurzfeedback/Aktivitätsauswahl der alte Hinweis der
+      vorherigen Runde wieder aufscheinen, weil `hasReacted` (anders als der Rundenzustand) nicht in
+      `sessionStorage` gesichert wird und bei jedem Neu-Mount auf `false` zurückfällt
 
 > Das ist die Funktion, aus der dein wichtigstes Ergebnis kommt. Nimm dir hier Zeit und teste alle vier Stufen mit verkürzten Zeiten (z. B. 1 Min statt 25).
 
@@ -339,6 +343,10 @@ npm install -D @types/bcryptjs
 - [ ] `ACTIVITY_SELECTED` oder `ACTIVITY_SKIPPED` protokollieren
 - [ ] Pausenbildschirm mit Restzeit, ruhig gestaltet
 - [ ] Bei gewählter Aktivität: Schritt-für-Schritt-Anleitung, ein Schritt je Bildschirm, `ACTIVITY_STEP_DONE`
+- [ ] Während eines Schritts eigene Ansicht statt der großen Pausenuhr (Änderung 14.09.): Beschriftung
+      „{Aktivität} · Schritt X von Y", Fortschritts-Ring, größere Anleitung, kleine Zeile mit der
+      verbleibenden Gesamtpause. Leiser Übergangston bei jedem Schrittwechsel (`playNudgeSound(0.25,
+      "water-drop")`). Nach dem letzten Schritt wieder die normale, große Pausenuhr
 - [ ] Jeder Anleitungsschritt einmal per `speechSynthesis` vorgelesen (ergänzt 14.09., `useSpeech.ts`) —
       deutsche Stimme falls verfügbar, `rate` 0.9, Schalter „Sprachausgabe an/aus" (Vorgabe an),
       `SPEECH_TOGGLED`-Ereignis, kein Fehler falls die API fehlt. Nur hier, nicht in Arbeitsphase/Pausenhinweis

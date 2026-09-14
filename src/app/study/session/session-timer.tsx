@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCountdown, formatRemaining, formatRemainingMinutes } from "@/hooks/useCountdown";
 import { useRoundTimer } from "@/hooks/useRoundTimer";
@@ -12,12 +12,15 @@ import { useActivitySteps } from "@/hooks/useActivitySteps";
 import { useActivityTicks } from "@/hooks/useActivityTicks";
 import { useBreakEndSound } from "@/hooks/useBreakEndSound";
 import { useSpeech } from "@/hooks/useSpeech";
+import { playNudgeSound } from "@/lib/nudgeSound";
 import { activities, type ActivityId } from "@/content/activities";
 import { sendEventNow, enqueueEvent, startEventQueue } from "@/lib/eventQueue";
 import type { EventType } from "@/lib/events";
 
 const MIN_WORK_MIN = 5;
 const ADJUSTMENT_STEP_MIN = 5;
+const STEP_RING_RADIUS = 54;
+const STEP_RING_CIRCUMFERENCE = 2 * Math.PI * STEP_RING_RADIUS;
 const SNOOZE_MS = 5 * 60_000;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
@@ -273,7 +276,7 @@ export function SessionTimer({
         </button>
       )}
 
-      {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
+      {state === "WORK" && !hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
         <NudgeCard
           big={nudgeStage === 2}
           overtimeMs={overtimeMs}
@@ -283,7 +286,7 @@ export function SessionTimer({
         />
       )}
 
-      {!hasReacted && nudgeStage === 3 && (
+      {state === "WORK" && !hasReacted && nudgeStage === 3 && (
         <NudgeModal
           overtimeMs={overtimeMs}
           onAccept={() => reactToNudge("BREAK_ACCEPTED")}
@@ -654,6 +657,19 @@ function BreakScreen({
 
   useEffect(() => cancelSpeech, [cancelSpeech]);
 
+  // Leiser Übergangston bei jedem Schrittwechsel (Husin, 14.09.: die
+  // Aktivitäten wirkten trotz Sprachausgabe noch zu statisch, "alle 20 bis
+  // 60 Sekunden nur eine Anweisung"). Nicht beim allerersten Schritt -
+  // die Aktivitätswahl selbst war schon die Bestätigung.
+  const prevStepIndexRef = useRef(currentStepIndex);
+  useEffect(() => {
+    if (!activity) return;
+    if (currentStepIndex !== prevStepIndexRef.current) {
+      prevStepIndexRef.current = currentStepIndex;
+      if (!allStepsDone) playNudgeSound(0.25, "water-drop");
+    }
+  }, [activity, currentStepIndex, allStepsDone]);
+
   function toggleSpeech() {
     const next = !speechEnabled;
     setSpeechEnabled(next);
@@ -661,27 +677,61 @@ function BreakScreen({
     enqueueEvent(sessionId, "SPEECH_TOGGLED", { cycle, payload: { enabled: next } });
   }
 
+  const activityStepActive = Boolean(activity) && !allStepsDone && !breakDone;
+  const stepDurationMs = activity ? (stepDurations[currentStepIndex] ?? 0) * 1000 : 0;
+  const stepFraction =
+    stepDurationMs > 0 && stepRemainingMs !== null
+      ? Math.max(0, Math.min(1, stepRemainingMs / stepDurationMs))
+      : 0;
+
   return (
     <div className="relative z-10 flex flex-col items-center gap-5 text-center">
-      {remainingMs !== null && (
-        <div className="flex flex-col items-center gap-5">
+      {activityStepActive && activity ? (
+        <div className="flex flex-col items-center gap-4">
           <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:border-white/15 dark:text-neutral-500">
-            Pause · Runde {cycle}
+            {activity.label} · Schritt {currentStepIndex + 1} von {activity.steps.length}
           </span>
-          <div className="rounded-3xl border border-black/5 px-14 py-10 dark:border-white/10">
-            <span className="text-7xl font-extralight tabular-nums text-neutral-500 dark:text-neutral-400">
-              {formatRemaining(remainingMs)}
+
+          <div className="relative flex h-40 w-40 items-center justify-center">
+            <svg viewBox="0 0 120 120" className="h-40 w-40 -rotate-90">
+              <circle
+                cx="60"
+                cy="60"
+                r={STEP_RING_RADIUS}
+                fill="none"
+                strokeWidth="6"
+                className="stroke-black/10 dark:stroke-white/10"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r={STEP_RING_RADIUS}
+                fill="none"
+                strokeWidth="6"
+                strokeLinecap="round"
+                className="stroke-neutral-500 dark:stroke-neutral-400"
+                style={{
+                  strokeDasharray: STEP_RING_CIRCUMFERENCE,
+                  strokeDashoffset: STEP_RING_CIRCUMFERENCE * (1 - stepFraction),
+                  transition: "stroke-dashoffset 1s linear",
+                }}
+              />
+            </svg>
+            <span className="absolute text-3xl font-extralight tabular-nums text-neutral-500 dark:text-neutral-400">
+              {stepRemainingMs !== null ? Math.ceil(stepRemainingMs / 1000) : ""}
             </span>
           </div>
-        </div>
-      )}
 
-      {activity && !allStepsDone && !breakDone && (
-        <div className="max-w-xs space-y-2">
-          <p className="text-sm">{activity.steps[currentStepIndex]?.instruction}</p>
-          {stepRemainingMs !== null && (
-            <p className="text-xs opacity-50">{formatRemaining(stepRemainingMs)}</p>
+          <p className="max-w-xs text-base font-medium">
+            {activity.steps[currentStepIndex]?.instruction}
+          </p>
+
+          {remainingMs !== null && (
+            <p className="text-xs opacity-40">
+              Pause insgesamt noch {formatRemaining(remainingMs)}
+            </p>
           )}
+
           {speechSupported && (
             <button
               type="button"
@@ -692,6 +742,19 @@ function BreakScreen({
             </button>
           )}
         </div>
+      ) : (
+        remainingMs !== null && (
+          <div className="flex flex-col items-center gap-5">
+            <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:border-white/15 dark:text-neutral-500">
+              Pause · Runde {cycle}
+            </span>
+            <div className="rounded-3xl border border-black/5 px-14 py-10 dark:border-white/10">
+              <span className="text-7xl font-extralight tabular-nums text-neutral-500 dark:text-neutral-400">
+                {formatRemaining(remainingMs)}
+              </span>
+            </div>
+          </div>
+        )
       )}
 
       {readyToContinue && (

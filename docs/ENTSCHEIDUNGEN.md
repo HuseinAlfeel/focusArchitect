@@ -498,3 +498,48 @@ Bildschirme.
 **Bezug:** Rein optisch, keine Text- oder Verhaltensänderung. Dashboard, Vorbefragung und Nachbefragung
 haben denselben Farbfleck ergänzt bekommen, obwohl nicht explizit genannt - für echte Einheitlichkeit über
 den gesamten sichtbaren Ablauf.
+
+## 14.09.2026 Alter Pausenhinweis erschien nach einem Reload während Pause/Kurzfeedback wieder
+
+**Entscheidung:** `NudgeCard`/`NudgeModal` werden jetzt nur noch gerendert, wenn `state === "WORK"` ist,
+nicht mehr nur abhängig von `!hasReacted`.
+**Begründung:** Husin bekam nach "Sitzung beenden am Ende einer Pause" einen widersprüchlichen Bildschirm:
+"Pause vorbei." mit dem "Sitzung starten"-Knopf UND gleichzeitig die Hinweis-Karte "Zeit für eine Pause" mit
+"Seit Rundenende: +0:24". Ursache: `hasReacted` (und der Bezugspunkt der Eskalation, `nudgeEndsAt`) sind
+gewöhnlicher React-State in `SessionTimer`, nicht Teil des in `sessionStorage` gesicherten Rundenzustands -
+nach einem Reload/Remount fallen sie auf ihren Ausgangswert zurück (`hasReacted = false`), während der
+eigentliche Rundenzustand (z. B. "BREAK") korrekt aus `sessionStorage` wiederhergestellt wird. Traf das
+Remount auf einen Moment, in dem die alte Rundenendzeit schon eine Weile zurücklag, interpretierte die
+Hinweis-Logik das fälschlich als "Stufe 1/2 erreicht" - obwohl man sich längst in einer ganz anderen Phase
+befand. Die Daten selbst waren nicht betroffen: `useNudgeSoundSchedule`/`useNudgeStageLogging` hatten schon
+vorher ein `state === "WORK"`-Gate, nur die beiden sichtbaren Komponenten nicht.
+**Bezug:** Vermutlich durch den Hydration-Fix vom selben Tag erst richtig auffällig geworden - vorher wurde
+der betroffene Teilbaum bei einem Hydration-Mismatch ohnehin verworfen und neu aufgebaut, was den falschen
+Zwischenzustand meist nur sehr kurz sichtbar machte.
+**Getestet:** Per Playwright - Pause bis nach ihrem Ende laufen lassen, danach Seite neu laden; vorher
+erschien die Hinweis-Karte trotz "Pause vorbei.", jetzt nicht mehr.
+
+## 14.09.2026 Pausenaktivitäten wirkten zu passiv, jetzt mit Ring und Übergangston
+
+**Entscheidung:** Während eines Anleitungsschritts zeigt die Pause jetzt eine eigene Ansicht: eine
+Beschriftung "{Aktivität} · Schritt X von Y", einen Ring, der die Restzeit des aktuellen Schritts sichtbar
+abzählt (SVG, `stroke-dashoffset`), die Anleitung selbst größer und prominenter, und die verbleibende
+Gesamtpausenzeit nur noch als kleine Zeile darunter - vorher war es umgekehrt (große Pausenuhr dominant, die
+eigentliche Anleitung ein kleiner Nebensatz mit eigenem kleinen Timer). Bei jedem Schrittwechsel zusätzlich
+ein leiser Übergangston (`playNudgeSound(0.25, "water-drop")`, dieselbe Tonbibliothek wie beim
+Pausenhinweis). Nach dem letzten Schritt erscheint wieder die normale große Pausenuhr.
+**Begründung:** Husins Befund nach eigenem Test aller drei Aktivitäten: "alle 20 bis 59 Sekunden nur eine
+Anweisung" fühle sich trotz Sprachausgabe passiv und langweilig an. Beim Nachvollziehen bestätigt: die
+visuelle Hierarchie war verkehrt - das auffälligste Element am Bildschirm (die große Zahl) war die
+Gesamtpausenzeit, nicht der laufende Schritt, und zwischen den Schritten änderte sich nur ein Satz Text ohne
+jedes Fortschritts- oder Wechselsignal.
+**Alternative:** Ein Knopf zum manuellen Weiterschalten je Schritt. Verworfen - die Übungen (z. B. "20
+Sekunden in die Ferne schauen") funktionieren nur, wenn die Zeit wirklich abläuft, ein Skip würde den
+gesundheitlichen Zweck der Übung untergraben. Die Interaktivität kommt stattdessen aus reicherem Feedback
+während der ohnehin nötigen Wartezeit (Ring, Ton, Fortschrittszählung), nicht aus mehr Kontrolle.
+**Bezug:** "Keine Aktivität" bleibt unverändert (einfach die normale Pausenuhr, wie von Husin bestätigt kein
+Verbesserungsbedarf). Inhalt und Dauer der einzelnen Übungsschritte (`activities.ts`) unverändert, nur wie
+sie während des Wartens dargestellt werden.
+**Getestet:** Alle drei Aktivitäten einmal komplett per Playwright durchlaufen (Ring, Schrittzählung,
+Tonaufruf ohne Fehler, korrekter Rücksprung zur normalen Pausenuhr nach dem letzten Schritt) und per
+Screenshot mit der vorherigen Fassung verglichen.

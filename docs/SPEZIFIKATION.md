@@ -254,6 +254,14 @@ Auswahl wird protokolliert. Die Option „keine" muss gleichwertig aussehen, nic
 
 Ruhiger Bildschirm mit Restzeit. Falls eine Aktivität gewählt wurde: schrittweise Anleitung, ein Schritt pro Bildschirm, automatisch weiter.
 
+**Eigene Schrittansicht während einer Aktivität** (ergänzt 14.09.): Solange ein Schritt läuft, ersetzt eine
+eigene Ansicht die große Pausenuhr - vorher blieb die große Restzeit der Gesamtpause im Vordergrund und die
+eigentliche Anleitung war nur ein kleiner Nebensatz darunter, obwohl gerade die Anleitung die Aufmerksamkeit
+verdient. Jetzt: Beschriftung "{Aktivität} · Schritt X von Y", ein Ring, der den aktuellen Schritt sichtbar
+abzählt, die Anleitung selbst größer, und die Gesamtpausenzeit nur noch als kleine Zeile darunter. Bei jedem
+Schrittwechsel ein leiser Übergangston (`water-drop`, dieselbe Tonbibliothek wie beim Pausenhinweis). Nach
+dem letzten Schritt erscheint wieder die normale, große Pausenuhr für die restliche Pausenzeit.
+
 **Sprachausgabe für die Anleitung** (ergänzt 14.09.): Bei „Augenentlastung" schaut man bewusst vom Bildschirm weg - ein reiner Anleitungstext lässt sich in dem Moment nicht lesen, bei „Nacken und Schultern" abgeschwächt genauso. Jeder Schritt wird deshalb einmal per `speechSynthesis` (Web Speech API, keine externe Bibliothek/kein Dienst) vorgelesen: deutsche Stimme falls verfügbar, sonst Standardstimme, Sprechgeschwindigkeit leicht reduziert (`rate` 0.9). Schalter „Sprachausgabe: an/aus" direkt bei der Anleitung, Voreinstellung an, protokolliert als `SPEECH_TOGGLED` mit `{ enabled }`. Ist `speechSynthesis` nicht verfügbar, erscheint kein Fehler, nur der Text wie zuvor. Ausschließlich hier - nicht in der Arbeitsphase, nicht beim Pausenhinweis.
 
 **Die Pausenzeit hat Vorrang vor der Aktivität** (Änderung 26.08.): dauert die gewählte Aktivität länger als die Pause (z. B. beim Testen mit kurzen Pausenzeiten, oder wenn das Kurzfeedback die Pause selbst nicht betrifft, aber die Aktivität-Presets fix sind), blockiert das nicht den Weiterknopf — die Aktivitätsanzeige wird einfach ausgeblendet, sobald die Pausenzeit abgelaufen ist, die Aktivität endet quasi mit der Pause. Vorher musste die Aktivität immer erst zu Ende laufen, auch wenn die Pause selbst schon lange vorbei war.
