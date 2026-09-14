@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type RoundState = "WORK" | "NUDGE" | "ACTIVITY_CHOICE" | "BREAK" | "FEEDBACK";
 
@@ -86,6 +86,15 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
  * leicht verzögert, nicht synchron. Ohne diese Ausnahme würde ein Reload
  * genau in diesem kurzen Fenster den Browser auf den (dann veralteten)
  * Serverstand zurücksetzen, obwohl die neue Runde längst begonnen hatte.
+ *
+ * Hydration (Husin, 14.09.): Der allererste Render MUSS auf Server und
+ * Client identisch aussehen, sonst wirft React einen Hydration-Mismatch und
+ * verwirft den Teilbaum. sessionStorage gibt es aber nur im Browser - der
+ * Ausgangszustand hier ist deshalb IMMER der Server-Fallback (WORK), und der
+ * eigentliche gespeicherte Stand (z.B. mitten in einer Pause, nach einem
+ * Reload) wird erst in einem Effect nachgeladen, der erst nach dem Hydrieren
+ * läuft. Kurz sichtbarer "Sprung" von WORK zum echten Stand ist der Preis
+ * dafür, aber unauffällig (ein Frame) und ohne Konsolenfehler.
  */
 export function useRoundTimer(
   sessionId: string,
@@ -93,14 +102,27 @@ export function useRoundTimer(
   fallbackState: RoundState,
   fallbackEndsAt: number
 ) {
-  const [round, setRoundState] = useState<PersistedRound>(() => {
+  const [round, setRoundState] = useState<PersistedRound>(() => ({
+    cycle: serverCycle,
+    state: fallbackState,
+    endsAt: fallbackEndsAt,
+    activityId: null,
+    pendingWorkMin: null,
+    initialFallbackEndsAt: fallbackEndsAt,
+  }));
+
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+
     const persisted = readPersistedRound(sessionId);
+    if (!persisted) return;
 
-    if (persisted && persisted.cycle > serverCycle) {
-      return persisted;
-    }
-
-    if (persisted && persisted.cycle === serverCycle) {
+    let restored: PersistedRound | null = null;
+    if (persisted.cycle > serverCycle) {
+      restored = persisted;
+    } else if (persisted.cycle === serverCycle) {
       const stillAtFreshStart =
         persisted.state === fallbackState &&
         persisted.endsAt === persisted.initialFallbackEndsAt;
@@ -108,19 +130,18 @@ export function useRoundTimer(
         stillAtFreshStart && persisted.initialFallbackEndsAt !== fallbackEndsAt;
 
       if (!dbChangedSinceThen) {
-        return persisted;
+        restored = persisted;
       }
     }
 
-    return {
-      cycle: serverCycle,
-      state: fallbackState,
-      endsAt: fallbackEndsAt,
-      activityId: null,
-      pendingWorkMin: null,
-      initialFallbackEndsAt: fallbackEndsAt,
-    };
-  });
+    if (restored) {
+      // Bewusst erst hier, nicht im useState-Initializer: sessionStorage
+      // gibt es nur im Browser, ein Restore vor der Hydration wäre genau
+      // der Hydration-Mismatch, den dieser Effect vermeiden soll.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRoundState(restored);
+    }
+  }, [sessionId, serverCycle, fallbackState, fallbackEndsAt]);
 
   useEffect(() => {
     writePersistedRound(sessionId, round);

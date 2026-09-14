@@ -33,21 +33,11 @@ export default async function StudyPage() {
     redirect("/study/pre");
   }
 
+  // Läuft die Sitzung schon, gibt es hier nichts zu entscheiden - direkt
+  // weiter zum Timer, kein Klick über eine Zwischenseite (Husin, 14.09.:
+  // genau das fiel nach "Sitzung fortsetzen" unangenehm auf).
   if (session.startedAt && !session.endedAt) {
-    return (
-      <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
-        <div className="space-y-1">
-          <p className="text-sm opacity-70">
-            Sitzung gestartet um {session.startedAt.toLocaleString("de-DE")}
-            {session.taskDescription ? ` — „${session.taskDescription}“` : ""}
-          </p>
-          <Link href="/study/session" className="text-sm underline">
-            Zur Sitzung
-          </Link>
-        </div>
-        <LogoutButton />
-      </main>
-    );
+    redirect("/study/session");
   }
 
   if (session.endedAt && !session.finalizedAt) {

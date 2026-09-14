@@ -35,13 +35,6 @@ export default async function PostSurveyPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-1 flex-col justify-center gap-6 px-4 py-12">
-      <div>
-        <h1 className="text-xl font-medium">Nachbefragung</h1>
-        <p className="mt-2 text-sm opacity-80">
-          Ein paar letzte Fragen, dann bist du fertig.
-        </p>
-      </div>
-
       <PostSurveyForm sessionId={session.id} />
     </main>
   );

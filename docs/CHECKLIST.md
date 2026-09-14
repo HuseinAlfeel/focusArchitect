@@ -247,6 +247,9 @@ npm install -D @types/bcryptjs
 - [ ] Bei Erfolg direkt zu `/study/session`, nicht zurück zum Dashboard (Änderung 14.09.: vorher ein
       zusätzlicher Klick über die Hub-Seite nötig)
 - [ ] Ereignisse `SESSION_STARTED`, `CYCLE_STARTED`, `WORK_STARTED`
+- [ ] Läuft die Sitzung schon (auch nach „Sitzung fortsetzen"), leitet `/study` genauso direkt zu
+      `/study/session` weiter (Änderung 14.09.) - vorher zeigte auch das noch eine eigene Zwischenseite mit
+      Textlink statt Knopf, gerade nach dem Reopen unangenehm aufgefallen
 
 ### F4. Timer-Logik (1 Tag, kritisch)
 
@@ -254,6 +257,11 @@ npm install -D @types/bcryptjs
 - [ ] **Zielzeitpunkt speichern, nicht Restzeit hochzählen** (sonst zerstört Browser-Drosselung deine Messung)
 - [ ] Zielzeitpunkt in `sessionStorage` sichern, damit ein Reload die Runde nicht zerstört
 - [ ] Rundenzustand: `WORK | NUDGE | ACTIVITY_CHOICE | BREAK | FEEDBACK`
+- [ ] Wiederherstellen aus `sessionStorage` erst in einem `useEffect`, nicht im `useState`-Initializer
+      (Änderung 14.09.) - sessionStorage gibt es nur im Browser, ein Lesen davon schon beim allerersten
+      Render erzeugt einen Hydration-Mismatch, sobald der gespeicherte Stand vom Server-Fallback abweicht
+      (z.B. Reload mitten in einer Pause). Erster Render zeigt kurz den Server-Fallback, danach übernimmt der
+      Effect den echten Stand
 
 **Testen:**
 - [ ] Tab 5 Minuten in den Hintergrund legen, zurückkommen: Anzeige stimmt sofort
@@ -343,7 +351,11 @@ npm install -D @types/bcryptjs
 
 ### F9. Nachbefragung und Abschluss (halber Tag)
 
-- [ ] Seite `/study/post` mit N1 bis N19, plus N20 (Bedienoberfläche, Änderung 12.09.) vor N17-N19
+- [ ] Seite `/study/post`, drei Seiten statt einer langen (Änderung 14.09.): (1) N1/N2/N16/N17, (2) N3-N15 mit
+      einmaliger Instruktion + Legende und schlichter Trennlinie, (3) N19/N18/N20 als optionale Freitexte.
+      Dezenter Fortschritt „Schritt X von 3" oben, keine zusätzlichen wertenden Zwischenüberschriften
+- [ ] Je Seite `page_load_timestamp`/`page_submit_timestamp` mitgeführt (`answers.pageTimings`), im Export
+      als `postPage1Seconds` bis `postPage3Seconds` - zur Erkennung von Blindklickern
 - [ ] `POST /api/survey` mit `phase: "POST"`
 - [ ] `PATCH /api/session/:id/end`, Ereignisse `SESSION_ENDED`, `SURVEY_POST_SUBMITTED`
 - [ ] Abschlussseite: Dank, deine Kontaktadresse für Rückfragen und Löschwünsche

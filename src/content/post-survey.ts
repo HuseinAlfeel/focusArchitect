@@ -1,5 +1,7 @@
 // Items N1-N19 aus docs/SPEZIFIKATION.md, Abschnitt [10] Nachbefragung
 // (finale Fassung vom 24.08. mit Holly abgestimmt, ersetzt die alte N1-N10-Version).
+// Seit 14.09. auf drei Seiten aufgeteilt (siehe post-survey-form.tsx), am
+// Wortlaut und an den Pflichtfeldern selbst ändert das nichts.
 //
 // N1-N2: Zustand nach der Sitzung, Vergleichswert sind seit 12.09. nicht mehr
 // die typischen V4/V5 aus der Vorbefragung, sondern focusAtStart/restedAtStart
@@ -9,9 +11,9 @@
 // Beide Skalen sind wortgleich aus der Vorlage übernommen, inklusive Tippfehler
 // in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem") - so im
 // Original, bei validierten Skalen wird der Wortlaut nicht "korrigiert".
-// N16-N19: Vergleich zur gewohnten Arbeitsweise plus Freitext.
-// N20: Feedback zur Bedienoberfläche (ergänzt 12.09., Prioritaet 2 aus der
-// Betreuungsbesprechung), steht vor N17-N19 im Formular.
+// N16: Vergleich zur gewohnten Arbeitsweise, N17 (Warum) steht direkt darunter
+// auf derselben Seite. N18-N20: abschließendes Feedback auf der letzten Seite,
+// in dieser Reihenfolge: was funktionierte, was störte, Bedienoberfläche.
 //
 // Pflichtfelder: N1-N16 (alle Skalen + Vergleichsfrage). N17-N20 sind Freitext
 // und dürfen leer bleiben.
@@ -111,15 +113,18 @@ export const postSurveyComparisonItem = {
   ],
 } as const;
 
-export const postSurveyTextItems = [
+export const postSurveyComparisonReasonItem = {
+  id: "N17",
+  question: "Warum? (optional)",
+} as const;
+
+export const postSurveyClosingTextItems = [
+  { id: "N19", question: "Was hat am besten funktioniert?" },
+  { id: "N18", question: "Was hat dich am meisten gestört?" },
   {
     id: "N20",
-    question:
-      "Wie hat dir die Bedienoberfläche gefallen? Was würdest du daran ändern? (optional)",
+    question: "Wie hat dir die Bedienoberfläche gefallen? Was würdest du daran ändern?",
   },
-  { id: "N17", question: "Warum? (optional)" },
-  { id: "N18", question: "Was hat dich am meisten gestört? (optional)" },
-  { id: "N19", question: "Was hat am besten funktioniert? (optional)" },
 ] as const;
 
 export const requiredPostSurveyIds = [

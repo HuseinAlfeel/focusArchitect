@@ -266,6 +266,14 @@ Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, da
 
 **Finale Fassung vom 24.08., mit Holly abgestimmt** (ersetzt die vorherige N1-N10-Version vollständig). Vier Blöcke: Zustand nach der Sitzung, wahrgenommene Überzeugungskraft (etablierte Skala), wahrgenommene Aufdringlichkeit (etablierte Skala), Vergleich plus Freitext.
 
+**Auf drei Seiten aufgeteilt (Änderung 14.09.):** Reduziert die kognitive Last, ohne den Wortlaut oder die Reihenfolge der validierten Skalen anzutasten. Dezenter Fortschritt oben ("Schritt X von 3"), keine zusätzlichen wertenden Zwischenüberschriften (kein Priming).
+
+- **Seite 1** ("Sitzung beendet! Wie geht es dir jetzt?"): N1, N2, N16 (Vergleich), direkt darunter N17 ("Warum?"). Knopf „Weiter".
+- **Seite 2** ("Bewertung des Systems"): einmal die Instruktion „Wie sehr stimmst du den folgenden Aussagen zu?" mit vollständiger Legende, N3-N11, eine schlichte graue Trennlinie ohne Text, N12-N15. Knöpfe „Zurück" / „Weiter".
+- **Seite 3** ("Noch ein kurzes Feedback zum Schluss (Optional)"): N19, N18, N20 als drei einzelne Freitextfelder, in dieser Reihenfolge. Knöpfe „Zurück" / „Befragung abschließen".
+
+Antworten bleiben beim Vor-/Zurückblättern erhalten (Client-Zustand), gespeichert wird weiterhin erst am Ende als eine `SurveyResponse`. Zusätzlich pro Seite `page_load_timestamp`/`page_submit_timestamp` (`answers.pageTimings`), für die Auswertung als `postPage1Seconds`/`postPage2Seconds`/`postPage3Seconds` in `participants.csv` - damit lassen sich Blindklicker (auffällig kurze Lesezeit) erkennen.
+
 | # | Frage | Format |
 |---|---|---|
 | N1 | Wie konzentriert warst du in dieser Sitzung? | Skala 1–7 (gar nicht … sehr) |
@@ -291,7 +299,7 @@ Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, da
 
 \* Zustimmungsskala 1–7: 1 = Stimme überhaupt nicht zu · 2 = Stimme nicht zu · 3 = Stimme eher nicht zu · 4 = Neutral · 5 = Stimme eher zu · 6 = Stimme zu · 7 = Stimme voll und ganz zu
 
-N3-N11 sind die Skala "wahrgenommene Überzeugungskraft" (Persuasiveness), N12-N15 die Skala "wahrgenommene Aufdringlichkeit" (Intrusiveness) - beide wortgleich übernommen, inklusive Tippfehler in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem"). N1/N2 vergleichst du gegen die Sitzungsstart-Werte focusAtStart/restedAtStart [4], nicht mehr gegen die alten V4/V5 der Vorbefragung. N20 kam am 12.09. dazu (Prioritaet 2 aus der Betreuungsbesprechung), steht im Formular vor N17-N19. Pflichtfelder: N1-N16. N17-N20 dürfen leer bleiben.
+N3-N11 sind die Skala "wahrgenommene Überzeugungskraft" (Persuasiveness), N12-N15 die Skala "wahrgenommene Aufdringlichkeit" (Intrusiveness) - beide wortgleich übernommen, inklusive Tippfehler in N4 ("diesem Assistenzsystems" statt "diesem Assistenzsystem"). N1/N2 vergleichst du gegen die Sitzungsstart-Werte focusAtStart/restedAtStart [4], nicht mehr gegen die alten V4/V5 der Vorbefragung. N20 kam am 12.09. dazu (Prioritaet 2 aus der Betreuungsbesprechung), steht seit der Drei-Seiten-Aufteilung vom 14.09. auf Seite 3 zusammen mit N18/N19. Pflichtfelder: N1-N16. N17-N20 dürfen leer bleiben.
 
 ### [11] Abschluss
 

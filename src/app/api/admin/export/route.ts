@@ -8,7 +8,8 @@ import {
   postSurveyPersuasivenessItems,
   postSurveyIntrusivenessItems,
   postSurveyComparisonItem,
-  postSurveyTextItems,
+  postSurveyComparisonReasonItem,
+  postSurveyClosingTextItems,
 } from "@/content/post-survey";
 
 const PRE_IDS = preSurveyItems.map((item) => item.id);
@@ -17,8 +18,14 @@ const POST_IDS = [
   ...postSurveyPersuasivenessItems.map((item) => item.id),
   ...postSurveyIntrusivenessItems.map((item) => item.id),
   postSurveyComparisonItem.id,
-  ...postSurveyTextItems.map((item) => item.id),
+  postSurveyComparisonReasonItem.id,
+  ...postSurveyClosingTextItems.map((item) => item.id),
 ];
+// Lesezeit je Nachbefragungs-Seite (Husin, 14.09.): Differenz aus
+// page_load_timestamp/page_submit_timestamp, in `answers.pageTimings`
+// gespeichert (siehe /api/survey) - hier fuer die Auswertung als eigene
+// Sekunden-Spalten aufbereitet, um Blindklicker zu erkennen.
+const POST_PAGE_TIMING_COLUMNS = ["postPage1Seconds", "postPage2Seconds", "postPage3Seconds"];
 
 export async function GET(request: NextRequest) {
   const participant = await getCurrentParticipant();
@@ -84,6 +91,21 @@ async function participantsCsv() {
     };
     for (const id of PRE_IDS) row[id] = preAnswers[id];
     for (const id of POST_IDS) row[id] = postAnswers[id];
+
+    const pageTimings = postAnswers.pageTimings as
+      | Record<string, { loadedAt?: string; submittedAt?: string }>
+      | undefined;
+    for (const [index, column] of POST_PAGE_TIMING_COLUMNS.entries()) {
+      const timing = pageTimings?.[String(index + 1)];
+      row[column] =
+        timing?.loadedAt && timing?.submittedAt
+          ? Math.round(
+              (new Date(timing.submittedAt).getTime() - new Date(timing.loadedAt).getTime()) /
+                1000
+            )
+          : null;
+    }
+
     return row;
   });
 
@@ -102,6 +124,7 @@ async function participantsCsv() {
     "focusAtStart",
     ...PRE_IDS,
     ...POST_IDS,
+    ...POST_PAGE_TIMING_COLUMNS,
   ];
 
   return toCsv(columns, rows);

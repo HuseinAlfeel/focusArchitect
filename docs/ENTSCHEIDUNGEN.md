@@ -433,3 +433,53 @@ und erst ab dem zweiten Aufruf stand die eigentlich gewünschte, bessere Stimme 
 **Entscheidung:** Der Knopf in der Vorbefragung heißt jetzt nur noch "Zurück", ohne das 🔙-Emoji davor.
 **Begründung:** Husin fand es kindisch wirkend - das Emoji zeigt in den meisten Emoji-Schriftarten zusätzlich
 den englischen Schriftzug "BACK" mit an, was neben dem deutschen "Zurück" unpassend aussah.
+
+## 14.09.2026 Hydration-Fehler nach Reload mitten in einer Pause
+
+**Entscheidung:** `useRoundTimer.ts` startet den allerersten Render (Server UND Client) immer mit dem
+Server-Fallback (Runde WORK) und liest `sessionStorage` erst in einem `useEffect` nach dem Hydrieren, statt
+direkt im `useState`-Initializer.
+**Begründung:** Husin bekam beim Reload eines `/study/session`-Tabs mitten in einer Pause einen React-
+Hydration-Fehler ("server rendered HTML didn't match the client"). Ursache: `useRoundTimer` las
+`sessionStorage` bisher direkt im `useState`-Initializer - der läuft aber beim allerersten Render sowohl auf
+dem Server (kein `sessionStorage`, also immer der Fallback "WORK") als auch beim Hydrieren im Browser (dort
+schon echtes `sessionStorage`, z.B. mit Stand "BREAK"). Genau der von React selbst genannte Klassiker
+`if (typeof window !== 'undefined')`. React erkannte den Unterschied, verwarf den betroffenen Teilbaum und
+baute ihn neu auf - funktional passierte nichts Schlimmes, aber sichtbar als Fehler und nicht sauber.
+**Bezug:** Rein technischer Bugfix, das eigentliche Verhalten (Reload verliert den Rundenstand nicht) bleibt
+wie in den früheren Einträgen zu `useRoundTimer` beschrieben.
+**Getestet:** Per Playwright - Runde per "Pause jetzt starten" in den BREAK-Zustand gebracht, Seite neu
+geladen, keine Hydration-Fehler mehr in der Konsole (vorher reproduzierbar der exakt gemeldete Fehler).
+
+## 14.09.2026 "Sitzung fortsetzen" führte auf eine hässliche Zwischenseite
+
+**Entscheidung:** Läuft die Sitzung bereits (`startedAt` gesetzt, `endedAt` noch leer), leitet `/study` jetzt
+direkt zu `/study/session` weiter (`redirect()`), statt eine eigene Info-Seite mit Textlink "Zur Sitzung" zu
+zeigen.
+**Begründung:** Husin fiel das nach "Sitzung fortsetzen" (Reopen) unangenehm auf: erst der
+Bestätigungsdialog zum Beenden, dann diese zusätzliche, spärliche Zwischenseite mit einem Link statt einem
+Knopf, bevor man wirklich zurück im Timer war - zu viele Schritte für "ich will einfach weiterarbeiten".
+**Bezug:** Gleiche Logik wie beim Dashboard (12./14.09.): gibt es an dieser Stelle nur einen sinnvollen
+nächsten Schritt, wird direkt dorthin weitergeleitet statt eine Zwischenseite mit einem Klick zu zeigen.
+Betrifft nicht nur den Reopen-Fall, sondern jeden Login während einer laufenden Sitzung.
+
+## 14.09.2026 Nachbefragung auf drei Seiten aufgeteilt, mit Lesezeit-Messung
+
+**Entscheidung:** `/study/post` ist jetzt ein Drei-Schritte-Formular in einer Komponente (Client-Zustand,
+wie schon bei der Vorbefragung): (1) N1/N2/N16 plus direkt darunter N17, (2) die validierten Skalen N3-N15
+mit einer einzigen Instruktion+Legende und einer schlichten grauen Trennlinie ohne Text zwischen den beiden
+Skalen, (3) N19/N18/N20 als optionale Freitexte in dieser Reihenfolge. Dezenter Fortschritt "Schritt X von
+3" oben auf jeder Seite. Wortlaut und Reihenfolge der neun PPS- und vier Obtrusiveness-Items unverändert.
+Zusätzlich wird je Seite `page_load_timestamp`/`page_submit_timestamp` erfasst (`answers.pageTimings`,
+gleiche `SurveyResponse` wie bisher) und im Export als `postPage1Seconds` bis `postPage3Seconds` in
+`participants.csv` aufbereitet (Differenz in Sekunden).
+**Begründung:** Husins Vorgabe - kognitive Last durch Paging reduzieren, ohne methodische Standards zu
+verletzen (keine wertenden Zwischenüberschriften, kein Priming). Die Lesezeit je Seite soll später helfen,
+Blindklicker (Leute, die ohne zu lesen durchklicken) als Ausreißer zu erkennen.
+**Bezug:** N17 gehörte bisher zu den gesammelten Freitextfeldern am Ende, steht jetzt inhaltlich direkt bei
+der Vergleichsfrage N16, zu der es sich äußert. Ändert nichts an den IDs, Pflichtfeldern oder am
+Datenmodell - nur an Seitenaufteilung und Reihenfolge im Formular.
+**Getestet:** Per Playwright, kompletter Durchlauf mit allen drei Seiten - Pflichtfeld-Validierung je Seite,
+Antworten bleiben beim Zurückblättern erhalten, N19/N18/N20 in der vorgegebenen Reihenfolge, `POST
+/api/survey` und `PATCH .../finalize` liefern beide 200, `pageTimings` korrekt in der Datenbank, neue
+Export-Spalten in `participants.csv` vorhanden und korrekt berechnet.
