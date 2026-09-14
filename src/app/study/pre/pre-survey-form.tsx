@@ -7,6 +7,7 @@ import {
   preSurveyStep2Items,
   preSurveyBlockTitles,
 } from "@/content/pre-survey";
+import { onboardingIntroContent } from "@/content/onboarding-intro";
 
 type PreSurveyItem =
   | (typeof preSurveyStep1Items)[number]
@@ -197,9 +198,15 @@ function SurveyItemField({
   );
 }
 
+function StepProgress({ step }: { step: 1 | 2 | 3 }) {
+  return (
+    <p className="text-xs uppercase tracking-wide opacity-50">Schritt {step} von 3</p>
+  );
+}
+
 export function PreSurveyForm() {
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -247,10 +254,38 @@ export function PreSurveyForm() {
     router.refresh();
   }
 
+  if (step === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <StepProgress step={1} />
+          <h1 className="text-xl font-medium">{onboardingIntroContent.title}</h1>
+        </div>
+
+        <div className="space-y-3">
+          {onboardingIntroContent.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="text-sm opacity-80">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="w-full rounded bg-neutral-800 px-3 py-2 text-sm text-white transition-opacity dark:bg-neutral-100 dark:text-neutral-900"
+        >
+          {onboardingIntroContent.buttonLabel}
+        </button>
+      </div>
+    );
+  }
+
   if (step === 1) {
     return (
       <div className="space-y-8">
-        <div>
+        <div className="space-y-2">
+          <StepProgress step={2} />
           <h1 className="text-xl font-medium">
             Willkommen! Ein paar Angaben zu deinem Arbeitsalltag.
           </h1>
@@ -279,7 +314,8 @@ export function PreSurveyForm() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="space-y-2">
+        <StepProgress step={3} />
         <h1 className="text-xl font-medium">Noch dein Pausenverhalten.</h1>
       </div>
 

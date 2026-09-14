@@ -88,12 +88,13 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
 > pro Person mitberichtet werden, gehört als Punkt in die Limitationen. Gesamtdauer steht als `durationMin`
 > in `participants.csv` (berechnet aus `endedAt - startedAt`, nicht redundant in der DB gespeichert).
 
-> **Onboarding auf drei Bildschirme verdichtet (Änderung 14.09.):** [3] und [4] sind jetzt genau drei
-> aufeinanderfolgende Bildschirme ohne Zwischenklick: Vorbefragung Teil 1 (Block A), Vorbefragung Teil 2
-> (Block B+C+D) und ein kombinierter Dashboard-/Sitzungsstart-Bildschirm. Die vorher leere
-> "Eingeloggt als..."-Zwischenseite ist komplett weg - nach Login und Einwilligung geht es ohne Klick direkt
-> weiter. Der kombinierte dritte Bildschirm ist ab jetzt auch die normale Startseite (`/study`) für jeden
-> weiteren Login, solange die Sitzung noch nicht gestartet ist. Details siehe [3] und [4].
+> **Onboarding verdichtet (Änderung 14.09.):** [3] und [4] sind jetzt aufeinanderfolgende Bildschirme ohne
+> Zwischenklick: ein kurzer Erklärschritt "So funktioniert die App" (ergänzt, da die Durchführung
+> ortsunabhängig und unbegleitet ist), Vorbefragung Teil 1 (Block A), Vorbefragung Teil 2 (Block B+C+D) und
+> ein kombinierter Dashboard-/Sitzungsstart-Bildschirm. Die vorher leere "Eingeloggt als..."-Zwischenseite ist
+> komplett weg - nach Login und Einwilligung geht es ohne Klick direkt weiter. Der kombinierte letzte
+> Bildschirm ist ab jetzt auch die normale Startseite (`/study`) für jeden weiteren Login, solange die
+> Sitzung noch nicht gestartet ist. Details siehe [3] und [4].
 
 ### [1] Login
 
@@ -134,6 +135,15 @@ Angaben zu deinem Arbeitsalltag."), Block B+C+D zusammen der zweite ("Noch dein 
 aus Schritt 1 bleiben beim Zurückgehen erhalten (reiner Client-Zustand, noch kein Datenbank-Schreiben). Erst
 am Ende von Schritt 2 ("Profil speichern & Weiter") wird alles zusammen als eine `SurveyResponse` gespeichert
 - am Datenmodell ändert das nichts, nur an der Aufteilung im Formular.
+
+**Davor ein Erklärschritt "So funktioniert die App" (ergänzt 14.09.):** Die Durchführung ist
+ortsunabhängig und unbegleitet - Teilnehmende bekommen nur Link und Zugangsdaten, niemand erklärt vor Ort,
+wie die App bedient wird. Die Einwilligung sagt WARUM (Studienzweck), aber nicht WIE. Deshalb jetzt ein
+kurzer, rein informativer Schritt 0 vor Block A (`onboarding-intro.ts`, bewusst getrennt vom mit der
+Betreuung abgestimmten Einwilligungstext): Rundenprinzip, Pausenhinweis, dass man auch selbst eine Pause
+starten kann, und dass man jederzeit über "Sitzung beenden" aufhören kann. Kein Pflichtfeld, nur ein
+"Los geht's"-Knopf. Zusammen mit den beiden Fragebogen-Schritten jetzt "Schritt X von 3" oben auf jeder
+Seite.
 
 **Block A - Person und Tätigkeit**
 

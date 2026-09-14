@@ -221,9 +221,11 @@ npm install -D @types/bcryptjs
 
 ### F2. Vorbefragung (halber Tag)
 
-- [ ] Seite `/study/pre`, zwei Schritte in einer Client-Komponente (Änderung 14.09., kein Datenbank-Schreiben
-      zwischen den Schritten): Schritt 1 = Block A (Person/Tätigkeit), Schritt 2 = Block B (tatsächliches
-      Pausenverhalten) + C (Einstellung) + D (nur noch Erschöpfung, "typische Konzentration" gestrichen)
+- [ ] Seite `/study/pre`, drei Schritte in einer Client-Komponente (Änderung 14.09., kein Datenbank-Schreiben
+      vor dem Ende): Schritt 0 = reiner Info-Text "So funktioniert die App" (`onboarding-intro.ts`, für die
+      unbegleitete/ortsunabhängige Durchführung - keine Validierung, nur "Los geht's"), Schritt 1 = Block A
+      (Person/Tätigkeit), Schritt 2 = Block B (tatsächliches Pausenverhalten) + C (Einstellung) + D (nur noch
+      Erschöpfung, "typische Konzentration" gestrichen). "Schritt X von 3" oben auf jeder Seite
 - [ ] Schritt 1: Knopf „Weiter (1/2)". Schritt 2: „Zurück" (Antworten aus Schritt 1 bleiben erhalten) und
       „Profil speichern & Weiter" - erst hier wird tatsächlich gespeichert
 - [ ] Skalen als anklickbare Buttons 1 bis 7, nicht als Slider (Slider verleiten zur Mitte)

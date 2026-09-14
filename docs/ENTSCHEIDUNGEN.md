@@ -543,3 +543,20 @@ sie während des Wartens dargestellt werden.
 **Getestet:** Alle drei Aktivitäten einmal komplett per Playwright durchlaufen (Ring, Schrittzählung,
 Tonaufruf ohne Fehler, korrekter Rücksprung zur normalen Pausenuhr nach dem letzten Schritt) und per
 Screenshot mit der vorherigen Fassung verglichen.
+
+## 14.09.2026 Kurze Erklärung "So funktioniert die App" vor der Vorbefragung
+
+**Entscheidung:** Neuer Schritt 0 vor der Vorbefragung (`onboarding-intro.ts`), rein informativ: Rundenprinzip
+(Arbeiten in Runden, leiser Hinweis am Rundenende, kann verschoben/übersprungen werden), dass man auch selbst
+eine Pause starten kann, dass nach jeder Pause kurz nach dem Zeitpunkt gefragt wird, und dass man jederzeit
+über "Sitzung beenden" aufhören kann. Nur ein "Los geht's"-Knopf, keine Pflichtfelder. Bewusst als eigener
+Schritt und nicht als Zusatz im Einwilligungstext - der ist mit der Betreuung abgestimmt und bleibt
+unangetastet, hier geht es nicht um Rechte/Zweck, sondern reine Bedienung. "Schritt X von 3" jetzt oben auf
+allen drei Vorbefragungs-Seiten (vorher nur "Willkommen..." und "Noch dein Pausenverhalten." ohne Zählung).
+**Begründung:** Husins Befund - die Durchführung ist ortsunabhängig und unbegleitet, Teilnehmende bekommen
+nur Link und Zugangsdaten per Nachricht, niemand erklärt vor Ort, wie die App bedient wird. Die Einwilligung
+beantwortet nur "warum", nicht "wie".
+**Bezug:** Rein zusätzlicher Inhalt, ändert nichts an Einwilligung, Datenmodell oder den bestehenden zwei
+Vorbefragungs-Schritten - die zählen jetzt nur als Schritt 2 und 3 statt 1 und 2.
+**Getestet:** Per Playwright - Schritt erscheint nach der Einwilligung mit korrekter Schrittzählung, "Los
+geht's" führt zu Block A weiter, dort korrekt "Schritt 2 von 3".
