@@ -129,19 +129,37 @@ async function cyclesCsv() {
       if (event.cycle !== null) cycleNumbers.add(event.cycle);
     }
 
+    // Wird sequenziell mitgefuehrt statt je Runde aus der vorherigen
+    // CycleFeedback abgeleitet: bei einer selbst gestarteten Pause gibt es
+    // kein CycleFeedback fuer diese Runde (siehe BREAK_SELF_INITIATED oben),
+    // die naechste Runde laeuft aber trotzdem mit dem unveraenderten Wert
+    // weiter - der Tracker haelt das fest, ohne bei fehlendem Feedback auf
+    // null zurueckzufallen.
+    let workMinTracker = session.initialWorkMin;
+
     for (const cycle of [...cycleNumbers].sort((a, b) => a - b)) {
       const cycleEvents = session.events.filter((e) => e.cycle === cycle);
+      const workMin = workMinTracker;
       const workStarted = cycleEvents.find((e) => e.type === "WORK_STARTED");
+      // BREAK_SELF_INITIATED zaehlt hier auch als "Reaktion", obwohl es keine
+      // Reaktion auf einen Systemhinweis ist (kein NUDGE_STAGE_* davor) -
+      // reactionType bekommt dafuer den eigenen Wert "SELF_INITIATED" statt
+      // des rohen Ereignistyps, die bestehenden Werte bleiben unveraendert.
       const reaction = cycleEvents.find(
-        (e) => e.type === "BREAK_ACCEPTED" || e.type === "BREAK_SKIPPED"
+        (e) =>
+          e.type === "BREAK_ACCEPTED" ||
+          e.type === "BREAK_SKIPPED" ||
+          e.type === "BREAK_SELF_INITIATED"
       );
       const activitySelected = cycleEvents.find((e) => e.type === "ACTIVITY_SELECTED");
       const activitySkipped = cycleEvents.find((e) => e.type === "ACTIVITY_SKIPPED");
       const feedback = session.cycles.find((f) => f.cycle === cycle);
-      const previousFeedback = session.cycles.find((f) => f.cycle === cycle - 1);
+      if (feedback?.newWorkMin != null) workMinTracker = feedback.newWorkMin;
 
+      const reactionType =
+        reaction?.type === "BREAK_SELF_INITIATED" ? "SELF_INITIATED" : reaction?.type ?? null;
       const reactionPayload = reaction?.payload as
-        | { stage?: number; secondsAfterEnd?: number }
+        | { stage?: number; secondsAfterEnd?: number; secondsIntoWork?: number }
         | null;
       const activityPayload = activitySelected?.payload as { activity?: string } | null;
 
@@ -168,11 +186,12 @@ async function cyclesCsv() {
         code: session.participant.code,
         sessionId: session.id,
         cycle,
-        workMin: cycle === 1 ? session.initialWorkMin : previousFeedback?.newWorkMin ?? null,
+        workMin,
         workStartedAt: workStarted?.at ?? null,
-        reactionType: reaction?.type ?? null,
+        reactionType,
         reactionStage: reactionPayload?.stage ?? null,
         reactionSecondsAfterEnd: reactionPayload?.secondsAfterEnd ?? null,
+        reactionSecondsIntoWork: reactionPayload?.secondsIntoWork ?? null,
         reactionAt: reaction?.at ?? null,
         nudgeStage1At: nudgeStage1?.at ?? null,
         firstTabVisibleAfterNudge: firstTabVisibleAfterNudge?.at ?? null,
@@ -200,6 +219,7 @@ async function cyclesCsv() {
     "reactionType",
     "reactionStage",
     "reactionSecondsAfterEnd",
+    "reactionSecondsIntoWork",
     "reactionAt",
     "nudgeStage1At",
     "firstTabVisibleAfterNudge",

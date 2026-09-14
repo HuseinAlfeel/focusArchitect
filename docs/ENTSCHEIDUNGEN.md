@@ -347,3 +347,18 @@ das nie so gesagt, diese Zuschreibung war schlicht falsch.
 ein eigenes Fenster im Stil des Pausenhinweises statt `window.confirm()`.
 **Begründung:** Der Knopf unten links überlappte in der lokalen Entwicklung mit dem Next.js-Dev-Icon; der
 native Browser-Dialog wirkte "hässlich und primitiv" (Husin).
+
+## 14.09.2026 Pause manuell starten, ohne auf den Hinweis zu warten
+
+**Entscheidung:** Neuer, zurückhaltender Knopf „Pause jetzt starten" unten rechts, sichtbar solange die
+Arbeitsphase läuft und noch kein Hinweis erschienen ist. Beendet die Runde sofort und führt direkt zur
+Aktivitätsauswahl - kein Kurzfeedback, keine Intervallanpassung für diese Runde, die nächste läuft mit dem
+bisherigen Wert weiter. Neues Ereignis `BREAK_SELF_INITIATED` mit
+`payload: { cycleNumber, secondsIntoWork }`. In `cycles.csv` über `reactionType: "SELF_INITIATED"` sichtbar
+(neuer Wert, bestehende Werte unverändert) plus eigener Spalte `reactionSecondsIntoWork`.
+**Begründung:** Husins Vorgabe - Nutzende sollen eine Pause auch aus eigenem Antrieb beginnen können, nicht
+nur als Reaktion auf den Systemhinweis.
+**Bezug:** Kein Kurzfeedback in diesem Fall, weil es nichts zu bewerten gibt ("war der Zeitpunkt passend"
+bezieht sich auf den *Hinweis*, den es hier nicht gab). Die `workMin`-Spalte in `cycles.csv` wird dafür
+jetzt fortlaufend mitgeführt statt je Runde nur aus dem direkt vorherigen `CycleFeedback` abgeleitet - sonst
+stünde die Arbeitszeit der Runde nach einer selbst gestarteten Pause fälschlich leer da.

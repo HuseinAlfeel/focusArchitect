@@ -263,6 +263,10 @@ npm install -D @types/bcryptjs
 - [ ] Knopf „Sitzung beenden" oben rechts, klar erkennbar, aber nicht dominant (Änderung 12.09.: erst
       Textlink, dann Knopf unten links hinter dem Next.js-Dev-Icon). Rückfrage über ein eigenes
       Bestätigungsfenster statt des nativen Browser-Dialogs
+- [ ] Knopf „Pause jetzt starten" unten rechts, genauso zurückhaltend (ergänzt 14.09.), nur sichtbar vor dem
+      Pausenhinweis. Beendet die Runde sofort, direkt weiter zur Aktivitätsauswahl — kein Kurzfeedback, keine
+      Intervallanpassung für diese Runde. Ereignis `BREAK_SELF_INITIATED` mit
+      `payload: { cycleNumber, secondsIntoWork }`, in `cycles.csv` über `reactionType: "SELF_INITIATED"` sichtbar
 - [ ] Page Visibility API: `TAB_HIDDEN` und `TAB_VISIBLE` protokollieren
 - [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
       sichtbarem Tab, keine Inhalte. Einschränkung dokumentieren: misst Interaktion mit der App, nicht die
@@ -300,6 +304,10 @@ npm install -D @types/bcryptjs
 > Pausenhinweis**, noch vor Aktivitätsauswahl und Pause — nicht danach. Die Frage "war der Zeitpunkt passend"
 > bewertet die gerade zu Ende gegangene Arbeitsphase, das lässt sich direkt danach am zuverlässigsten beantworten.
 > Die hier entschiedene neue Arbeitszeit wird erst nach der Pause tatsächlich angewendet (F7 folgt danach).
+>
+> **Ausnahme (ergänzt 14.09.):** Bei selbst gestarteter Pause (`BREAK_SELF_INITIATED`, siehe F5) entfällt
+> dieser Schritt komplett — es gab keinen Systemhinweis, den man bewerten könnte. Direkt weiter zur
+> Aktivitätsauswahl, die nächste Runde läuft unverändert mit der bisherigen Arbeitszeit.
 
 - [ ] Drei Knöpfe: zu früh / passend / zu spät
 - [ ] Bei zu früh oder zu spät: Zähler in 5-Minuten-Schritten, frei nach oben oder unten

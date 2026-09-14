@@ -136,6 +136,26 @@ export function SessionTimer({
     }
   }
 
+  // Eigene Entscheidung statt Reaktion auf einen Systemhinweis: kein Stufe
+  // (kein `nudgeStage`), also gibt es auch nichts, was das Kurzfeedback "war
+  // der Zeitpunkt passend?" sinnvoll bewerten könnte - deshalb direkt zur
+  // Aktivitätsauswahl, ohne FEEDBACK-Zustand. pendingWorkMin bleibt dabei
+  // unangetastet (null, siehe useRoundTimer), die nächste Runde läuft damit
+  // automatisch mit dem bisherigen Wert weiter.
+  async function initiateBreakSelf() {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    try {
+      const workStartedAt = endsAt - currentWorkMin * 60_000;
+      const secondsIntoWork = Math.round((Date.now() - workStartedAt) / 1000);
+      await logEvent("BREAK_SELF_INITIATED", { cycleNumber: cycle, secondsIntoWork });
+      setHasReacted(true);
+      setRound("ACTIVITY_CHOICE", Date.now());
+    } finally {
+      setIsTransitioning(false);
+    }
+  }
+
   // Gemeinsamer Startpunkt für die nächste Arbeitsrunde - genutzt sowohl
   // wenn eine echte Pause zu Ende geht (fromBreak: true, "Sitzung starten"
   // in BreakScreen) als auch wenn die Pause ganz übersprungen wurde
@@ -235,6 +255,17 @@ export function SessionTimer({
             </p>
           )}
         </div>
+      )}
+
+      {state === "WORK" && (nudgeStage === null || nudgeStage === 0) && (
+        <button
+          type="button"
+          onClick={initiateBreakSelf}
+          disabled={isTransitioning}
+          className="fixed bottom-4 right-4 z-10 rounded border border-black/15 px-3 py-1.5 text-xs text-neutral-500 hover:border-black/30 disabled:opacity-40 dark:border-white/20 dark:text-neutral-400 dark:hover:border-white/30"
+        >
+          Pause jetzt starten
+        </button>
       )}
 
       {!hasReacted && (nudgeStage === 1 || nudgeStage === 2) && (
