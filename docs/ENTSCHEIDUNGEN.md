@@ -759,3 +759,35 @@ festgesteckt. Im Playwright-Durchlauf aufgefallen, weil nach dem Absenden die UR
 Danach beide Wege durchgeklickt (P02, Testdaten entfernt): bei Nein sind Anzahl-Frage und B3 weg, B4 da,
 Absenden geht durch, gespeichert wird `"B2": {"yes": false}` ohne B3; bei Ja erscheinen beide Anschlussfragen
 und landen vollständig im Datensatz.
+
+## 17.09.2026 Deployment auf Vercel + Neon statt Hetzner
+
+**Entscheidung:** Die Studie läuft auf Vercel (App, Region Frankfurt) mit Neon als Postgres (Region
+Frankfurt). Der fertige Hetzner-Weg (Dockerfile, docker-compose.yml, Caddyfile) bleibt vollständig im Repo
+und in CHECKLIST.md I1-I5 dokumentiert, nur eben ungenutzt. Einzige nötige Codeänderung: `npm run build`
+heißt jetzt `prisma generate && next build`.
+**Begründung:** Husins Vorgabe - "ich will die app live haben für die leute". Ein eigener Server kostet vor
+der Studie Zeit, die er nicht hat: SSH, Firewall, Systemupdates, Zertifikate. Bei Vercel genügt ein
+`git push`. Für zehn Teilnehmende reicht der kostenlose Tarif, und wenn später Zeit ist, kann er auf den
+schon gebauten Hetzner-Stack umziehen, ohne dass etwas verloren wäre.
+**Zur Einwilligung:** Dort steht "Die Daten werden auf einem Server in Deutschland gespeichert". Das bleibt
+korrekt, **solange bei Neon die Region Frankfurt gewählt wird** - die Daten liegen dann physisch in
+Deutschland. Der Unterschied zu vorher ist der Anbieter (Vercel Inc. und Neon sind US-Firmen, Hetzner ist
+deutsch), nicht der Speicherort. Husin hat entschieden, das nicht vorher mit der Betreuung abzustimmen; der
+Einwilligungstext selbst wurde deshalb **nicht** angefasst (CLAUDE.md: Einwilligungstexte werden mit der
+Betreuung abgestimmt, nicht eigenmächtig geändert) - er musste auch nicht, weil die Zusage mit
+Frankfurt-Region weiter zutrifft. Falls die Ethik-Einreichung ausdrücklich Hetzner nennt, ist das ein Punkt
+für eine kurze Mail an Holly, kein technisches Problem.
+**Warum `prisma generate` in den Build muss:** Der Client wird nach `src/generated/prisma` erzeugt, und der
+Ordner liegt bewusst nicht im Git. Der Dockerfile-Weg hatte dafür eine eigene `RUN npx prisma generate`-Zeile,
+Vercel hat die nicht - ohne die Änderung bricht der Build dort mit "Cannot find module '@/generated/prisma'"
+ab. Das wäre beim ersten Deploy-Versuch aufgefallen, kostet aber unnötig Nerven.
+**Warum Migration und Seed nicht bei Vercel laufen:** `prisma/seed.ts` liest `credentials.local.json` mit den
+echten Teilnehmer-Passwörtern. Die Datei soll auf keinen fremden Server, deshalb laufen `migrate deploy` und
+`db seed` von Husins Laptop gegen die **direkte** Neon-Verbindung. Vercel selbst bekommt nur den
+**gepoolten** String, weil jede Serverless-Funktion sonst eine eigene DB-Verbindung aufmacht und das
+Verbindungslimit sprengt.
+**Getestet:** `npm run build` läuft durch. Zusätzlich die Vercel-Situation nachgestellt, indem
+`src/generated/prisma` gelöscht und neu gebaut wurde - `prisma generate` erzeugt den Client (ohne
+DB-Verbindung, braucht also beim Build keine Datenbank), danach kompiliert Next fehlerfrei. Das eigentliche
+Deployment steht noch aus, die Schritte stehen in CHECKLIST.md I0.

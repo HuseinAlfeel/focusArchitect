@@ -455,11 +455,69 @@ npm install -D @types/bcryptjs
 
 ---
 
-## PHASE I: Deployment auf Hetzner
+## PHASE I: Deployment
 
-*Aufwand: 1 Tag*
+**Entscheidung 17.09.: die Studie läuft auf Vercel + Neon, nicht auf Hetzner.** Husins Begründung: er will die
+App jetzt live haben, und ein eigener Server kostet Zeit, die vor der Studie fehlt. Der komplette
+Hetzner-Stack (I1–I5 unten) bleibt gebaut und getestet im Repo stehen - falls er später doch umziehen will,
+ist nichts davon verloren. Wichtig für die Einwilligung ("Die Daten werden auf einem Server in Deutschland
+gespeichert"): bei Neon **muss** die Region Frankfurt gewählt werden, dann liegen die Daten weiter in
+Deutschland und der Satz bleibt korrekt.
 
-### I1. Dockerfile
+### I0. Vercel + Neon (der Weg, der jetzt benutzt wird)
+
+Die App ist ein normales Next.js-Projekt ohne `output: "standalone"` - Vercel braucht keine Sonderbehandlung.
+Eine einzige Anpassung war nötig: `npm run build` heißt jetzt `prisma generate && next build`, weil der
+Prisma-Client nach `src/generated/prisma` erzeugt wird und diese Ordner bewusst nicht im Git liegen (ohne das
+bricht der Build bei Vercel mit "Cannot find module '@/generated/prisma'" ab). Lokal getestet, indem
+`src/generated/prisma` gelöscht und neu gebaut wurde - genau die Situation, die Vercel vorfindet.
+
+- [ ] **Datenbank anlegen:** auf neon.com ein Projekt erstellen, Postgres 16, **Region Frankfurt
+      (eu-central-1)**. Neon zeigt danach zwei Verbindungsstrings an:
+      - den **gepoolten** (Host enthält `-pooler`) → der gehört zu Vercel
+      - den **direkten** (ohne `-pooler`) → den brauchst du lokal für Migration und Seed
+      Grund für die Unterscheidung: Vercel-Funktionen starten und sterben laufend, jede würde eine eigene
+      DB-Verbindung aufmachen und das Verbindungslimit sprengen. Der Pooler bündelt das. Migrationen wiederum
+      mögen den Pooler nicht, die laufen über die direkte Verbindung.
+- [ ] **Migration und Seed von deinem Laptop aus** (nicht bei Vercel, denn `prisma/seed.ts` braucht
+      `credentials.local.json` mit den echten Teilnehmer-Passwörtern - die soll nie auf einen fremden Server):
+      ```
+      # in der Powershell, mit dem DIREKTEN String:
+      $env:DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require"
+      npx prisma migrate deploy
+      npx prisma db seed
+      ```
+      Danach einmal prüfen: `npx prisma studio` zeigt die zwölf Accounts.
+- [ ] **Projekt bei Vercel verbinden:** vercel.com → "Add New Project" → das GitHub-Repo `focusArchitect`
+      auswählen. Framework wird automatisch als Next.js erkannt, Build-Command nicht anfassen.
+- [ ] **Region auf Frankfurt stellen:** Vercel → Projekt → Settings → Functions → Region `Frankfurt (fra1)`.
+      Sonst laufen die Funktionen in den USA, auch wenn die Datenbank in Frankfurt steht.
+- [ ] **Umgebungsvariablen bei Vercel setzen** (Settings → Environment Variables, für Production):
+      - `DATABASE_URL` = der **gepoolte** Neon-String
+      - `SESSION_SECRET` = langer Zufallsstring, **ein anderer als lokal** (`openssl rand -base64 32`)
+      Kein `DB_PASSWORD` nötig, das gilt nur für den Docker-Weg.
+- [ ] **Deployen** (passiert automatisch beim nächsten `git push`), dann die Live-URL öffnen und mit `PILOT`
+      einmal komplett durchlaufen: Login → Einwilligung → Vorbefragung → Sitzung → Pause → Nachbefragung
+- [ ] **Export von der Live-URL ziehen** und in Excel öffnen (siehe PHASE J) - erst damit ist bewiesen, dass
+      die Daten auch wirklich rauskommen
+- [ ] **Datensicherung einrichten** (siehe PHASE K): nach jeder Teilnehmer-Sitzung einen Dump ziehen.
+      Mit dem direkten Neon-String, und weil Docker sowieso da ist, geht das ohne lokale
+      Postgres-Installation:
+      ```
+      docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > dump_2026-09-18.sql
+      ```
+      Neon macht zwar eigene Backups, aber ein eigener Dump auf deiner Platte ist das, was dich rettet, wenn
+      am Account etwas schiefgeht. Teilnehmende kann man nicht nachbestellen.
+
+**Was bei Vercel anders ist als auf einem eigenen Server, damit es später nicht überrascht:**
+- Es gibt keinen Container, in den man sich einloggt. Alles, was sonst `docker compose exec app ...` wäre
+  (Migration, Seed, Dump), läuft von deinem Laptop aus gegen den direkten Verbindungsstring.
+- Schema-Änderungen werden **nicht** automatisch mitdeployt. Wenn sich `prisma/schema.prisma` ändert: erst
+  `npx prisma migrate deploy` von lokal, dann pushen. Für die Studie ist das Schema eingefroren, also
+  einmalig.
+- Caddy, HTTPS, Zertifikate, Firewall, Systemupdates: fällt alles weg, macht Vercel.
+
+### I1. Dockerfile (Hetzner-Weg, gebaut und getestet, aktuell nicht in Benutzung)
 
 **Kein `output: 'standalone'` (Abweichung 14.09., bewusst)** - der ursprüngliche Plan hier. Grund: der
 Seed-Befehl (`npx prisma db seed`) braucht das Prisma-CLI, `tsx` und die Quelldateien unter `src/` zur
@@ -548,7 +606,14 @@ Für **jede** der zehn Personen:
 - [ ] Kurze Einweisung (5 Min, Nachricht oder Anruf): Was passiert, dass sie an ihrer echten Arbeit arbeiten sollen, dass sie jederzeit abbrechen können
 - [ ] Während der Sitzung erreichbar bleiben
 - [ ] Danach kurz nachfragen, ob technisch alles lief
-- [ ] **Sofort danach Backup ziehen**
+- [ ] **Sofort danach Backup ziehen.** Auf dem Vercel/Neon-Weg von deinem Laptop aus, mit dem DIREKTEN
+      Neon-String (Docker ist schon da, du brauchst kein lokales Postgres):
+      ```
+      docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > dump_P03_2026-09-20.sql
+      ```
+      Dateiname mit Teilnehmer-Code und Datum, und die Datei an einen zweiten Ort kopieren (Cloud oder
+      zweite Platte). Neon hat eigene Backups, aber die retten dich nicht, wenn am Account selbst etwas
+      schiefgeht. **Nach der siebten Person kannst du niemanden nachbestellen.**
 - [ ] Kurze Notiz für dich: Auffälligkeiten, Bemerkungen, technische Probleme
 
 Nach allen zehn:
