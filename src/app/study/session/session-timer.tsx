@@ -226,11 +226,23 @@ export function SessionTimer({
     await startNextRound(pendingWorkMin ?? currentWorkMin, true);
   }
 
+  // Der Hintergrund wandert seit 17.09. nicht nur einmal ins Waermere,
+  // sondern mit jeder erreichten Stufe eine Nuance weiter (Beige -> gedaempftes
+  // Bernstein -> gedaempftes Terrakotta, siehe globals.css) - vorher blieb er ab
+  // Stufe 0 konstant, die Betreuung wollte die zunehmende Ueberschreitung auch
+  // im Hintergrund sichtbar machen, nicht nur ueber Groesse/Position der Karte.
+  const nudgeBackgroundVar =
+    nudgeStage === 3
+      ? "var(--background-nudge-3)"
+      : nudgeStage === 2
+        ? "var(--background-nudge-2)"
+        : "var(--background-nudge-1)";
+
   return (
     <main
       className="flex min-h-screen flex-1 flex-col items-center justify-center gap-4 px-4"
       style={{
-        backgroundColor: isNudging ? "var(--background-nudge)" : "var(--background)",
+        backgroundColor: isNudging ? nudgeBackgroundVar : "var(--background)",
         transition: "background-color 60s ease",
       }}
     >
@@ -252,7 +264,13 @@ export function SessionTimer({
           </span>
           {!isSnoozeActive && remainingMs !== null && (
             <div className="rounded-3xl border border-black/5 px-14 py-10 dark:border-white/10">
-              <span className="text-7xl font-extralight tabular-nums text-neutral-500 dark:text-neutral-400">
+              <span
+                className="text-7xl font-extralight tabular-nums"
+                style={{
+                  color: nudgeStage === 0 ? "var(--foreground-nudge)" : "var(--foreground-timer)",
+                  transition: "color 60s ease",
+                }}
+              >
                 {formatRemaining(remainingMs)}
               </span>
             </div>
@@ -335,10 +353,16 @@ function NudgeCard({
   onSkip: () => void;
   onSnooze: () => void;
 }) {
+  // animate-nudge-card-in spielt nur einmal beim ersten Einblenden (Mount bei
+  // Stufe 1) - beim Wachsen zu "big" (Stufe 2) bleibt die Klasse zwar
+  // bestehen, ein nicht-infinites keyframe triggert aber nicht erneut, nur
+  // transition-all sorgt hier fuer das weiche Wachsen/Ruecken nach innen
+  // (Betreuung, 17.09.: Onset nach Hillstrom/Yantis nur beim ersten
+  // Erscheinen, danach soll es wie ein kontinuierliches Zunehmen wirken).
   return (
     <div
-      className={`fixed bottom-6 right-6 rounded-lg border border-black/10 bg-white/95 shadow-sm dark:border-white/15 dark:bg-neutral-900/95 ${
-        big ? "w-72 p-5 animate-nudge-pulse" : "w-60 p-4"
+      className={`animate-nudge-card-in fixed rounded-lg border border-black/10 bg-white/95 shadow-sm transition-all duration-500 ease-out dark:border-white/15 dark:bg-neutral-900/95 ${
+        big ? "bottom-8 right-8 w-72 p-5 animate-nudge-pulse" : "bottom-6 right-6 w-60 p-4"
       }`}
     >
       {overtimeMs !== null && (

@@ -52,16 +52,18 @@ Wenn eine vorgeschlagene Funktion nichts misst und nicht Teil der Intervention i
 
 8. **Der Pausenhinweis eskaliert sanft, niemals aggressiv.** Kein Rot, keine Ausrufezeichen, keine schnellen Animationen. Vier Stufen, jede protokolliert.
 
+9. **Immer heller Modus, nie automatisch dunkel.** `prefers-color-scheme: dark` würde die visuelle Gestaltung unkontrolliert je nach Systemeinstellung der Teilnehmenden verändern - bei einer Studie über genau diese Gestaltung eine Störvariable. In `globals.css` per `@custom-variant dark (&:where(.dark, .dark *))` deaktiviert, `color-scheme: light` gesetzt.
+
 ---
 
 ## Der abgestufte Hinweis (Kernfunktion)
 
 | Stufe | Zeitpunkt | Gestaltung |
 |---|---|---|
-| 0 | T minus 2 Min | Hintergrund wandert über CSS-Transition (60s) minimal ins Wärmere |
-| 1 | 0:00 | Farbe vollendet, kleine ruhige Karte unten rechts, optional ein leiser Ton |
-| 2 | +2 Min | Karte etwas größer, sehr langsames Pulsieren |
-| 3 | +5 Min | Ruhiges zentriertes Fenster, drei Optionen (Pause starten / Noch 5 Minuten / Überspringen) |
+| 0 | T minus 2 Min | Hintergrund wandert über CSS-Transition (60s) nach Beige, Zifferfarbe des Timers zieht mit |
+| 1 | 0:00 | Weiter Beige, kleine ruhige Karte unten rechts mit kurzer Einblendbewegung, ein leiser Ton |
+| 2 | +2 Min | Hintergrund wandert weiter zu gedämpftem Bernstein, Karte größer, rückt näher zur Mitte, sanftes Pulsieren |
+| 3 | +5 Min | Hintergrund wandert weiter zu gedämpftem Terrakotta, ruhiges zentriertes Fenster, drei Optionen (Pause starten / Noch 5 Minuten / Überspringen) |
 
 Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden. Das ist das wichtigste Ergebnis der Arbeit.
 

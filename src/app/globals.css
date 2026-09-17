@@ -1,10 +1,30 @@
 @import "tailwindcss";
 
+/* Dark Mode bewusst abgeschaltet (Betreuung, 17.09.): `dark:`-Klassen kommen
+   in Tailwind v4 ohne dieses Override automatisch aus der
+   Systemeinstellung `prefers-color-scheme` - unkontrolliert bei einer Studie
+   ueber visuelle Gestaltung. Die `dark:`-Klassen bleiben im Markup stehen
+   (kein mechanischer Umbau ueber 12 Dateien), dieser Variant matcht nur
+   nirgends mehr etwas, weil nie eine `.dark`-Klasse gesetzt wird. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
-  /* Stufe 0 des Pausenhinweises: Hintergrund wandert minimal ins Waermere. */
-  --background-nudge: #fdf3e6;
+  /* Farbtimer des Pausenhinweises. Bis 17.09. gab es nur einen einzigen
+     Zielwert fuer alle vier Stufen; die Betreuung wollte, dass der
+     Hintergrund mit steigender Ueberschreitung sichtbar weiterwandert:
+     Stufe 0/1 Beige, Stufe 2 gedaempftes Bernstein, Stufe 3 gedaempftes
+     Terrakotta - jede Stufe eine Nuance waermer, nie grell/rot. */
+  --background-nudge-1: #fdf3e6;
+  --background-nudge-2: #f6ddb8;
+  --background-nudge-3: #efc9a8;
+  /* Zifferfarbe des Timers waehrend Stufe 0 (Betreuung, 17.09.): wandert mit
+     dem Hintergrund mit, damit die Veraenderung genau dort auffaellt, wo
+     man ohnehin gelegentlich hinschaut (die Restzeit), statt nur am Rand. */
+  --foreground-timer: #737373;
+  --foreground-nudge: #8a6f52;
   /* Sehr dezenter Farbakzent hinter Arbeits-/Pausenbildschirm (siehe
      .phase-glow) - unterscheidet die beiden Phasen zusaetzlich zur
      Textbeschriftung, ohne Kontrast oder Aufmerksamkeit zu erhoehen. */
@@ -22,17 +42,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --background-nudge: #1c150e;
-    --glow-work: rgba(90, 120, 160, 0.12);
-    --glow-break: rgba(120, 150, 100, 0.12);
-    --glow-neutral: rgba(130, 130, 170, 0.12);
-  }
 }
 
 body {
@@ -55,6 +64,25 @@ body {
 
 .animate-nudge-pulse {
   animation: nudge-pulse 4s ease-in-out infinite;
+}
+
+/* Onset beim ersten Erscheinen der Hinweis-Karte (Betreuung, 17.09., nach
+   Hillstrom/Yantis: ein bewegter Reiz wird eher bemerkt als ein
+   schlagartig da stehender). Nur die Einblendung selbst, kurz genug um
+   nicht wie eine eigene Ablenkung zu wirken. */
+@keyframes nudge-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-nudge-card-in {
+  animation: nudge-card-in 400ms ease-out;
 }
 
 /* Ambienter Farbfleck hinter dem Arbeits-/Pausenbildschirm (Betreuung,
@@ -104,5 +132,13 @@ body {
   .phase-glow {
     animation: none;
     opacity: 0.8;
+  }
+
+  .animate-nudge-card-in {
+    animation: none;
+  }
+
+  .animate-nudge-pulse {
+    animation: none;
   }
 }

@@ -290,13 +290,21 @@ npm install -D @types/bcryptjs
 - [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
       sichtbarem Tab, keine Inhalte. Einschränkung dokumentieren: misst Interaktion mit der App, nicht die
       echte Arbeitsaktivität außerhalb des Tabs (siehe SPEZIFIKATION.md 4)
+- [x] Immer heller Modus, unabhängig von der Systemeinstellung (Regel 9, Befund der Betreuung 17.09.):
+      `@custom-variant dark (&:where(.dark, .dark *))` in `globals.css` deaktiviert `prefers-color-scheme`-
+      basiertes Dark Mode, `color-scheme: light` gesetzt. Verifiziert per Playwright mit erzwungener
+      `colorScheme: "dark"`-Emulation - App bleibt hell
 
 ### F6. Der abgestufte Hinweis (1 Tag, das Herzstück)
 
-- [ ] **Stufe 0** bei T minus 2 Min: Hintergrund wandert über CSS-Transition (Dauer 60s) minimal ins Wärmere
-- [ ] **Stufe 1** bei 0:00: Farbe vollendet, kleine ruhige Karte unten rechts, optional ein einzelner leiser Ton
-- [ ] **Stufe 2** bei plus 2 Min: Karte etwas größer, sehr langsames Pulsieren
-- [ ] **Stufe 3** bei plus 5 Min: ruhiges zentriertes Fenster, drei Optionen. Kein Rot, kein Ausrufezeichen
+- [x] **Stufe 0** bei T minus 2 Min: Hintergrund wandert über CSS-Transition (Dauer 60s) nach Beige, Zifferfarbe
+      des Timers zieht mit (Betreuung, 17.09.)
+- [x] **Stufe 1** bei 0:00: weiter Beige, kleine ruhige Karte unten rechts mit kurzer Einblendbewegung (~400ms,
+      `.animate-nudge-card-in`), ein einzelner leiser Ton
+- [x] **Stufe 2** bei plus 2 Min: Hintergrund wandert weiter zu gedämpftem Bernstein, Karte etwas größer, rückt
+      näher zur Mitte (weiche `transition`, kein Sprung), sehr langsames Pulsieren
+- [x] **Stufe 3** bei plus 5 Min: Hintergrund wandert weiter zu gedämpftem Terrakotta, ruhiges zentriertes
+      Fenster, drei Optionen. Kein Rot, kein Ausrufezeichen
 - [ ] Jede erreichte Stufe protokollieren: `NUDGE_STAGE_0` bis `NUDGE_STAGE_3`, jeweils mit
       `payload: { tabVisibleAtNudge }` (Änderung 25.08., ergibt zusammen mit `TAB_VISIBLE` die Reaktionslatenz
       im Export)
@@ -317,6 +325,14 @@ npm install -D @types/bcryptjs
       danach keine Wiederholung — protokolliert als `NUDGE_SOUND_PLAYED`. Verifiziert per Playwright
       (`page.clock`, alle vier Stufen und weit darüber hinaus durchlaufen): genau drei Ereignisse, keins bei
       Stufe 0, keins wiederholt nach Stufe 3
+- [x] Feinabstimmung der drei Töne (`nudgeSound.ts`, Befund der Betreuung 17.09.): weicher Einsatz (~50ms
+      Anstieg statt abrupt) und mittlerer Frequenzbereich (ca. 500–900 Hz statt teils darunter/schriller) für
+      `soft-sine`/`soft-bell`/`rising-sweep`. Eskalation weiterhin über Klangfülle, nicht Lautstärke. Zum
+      Anhören/Kalibrieren: `/admin/sound-check`
+- [x] Karte blendet bei Stufe 1 einmalig per CSS-Keyframe ein (~400ms, `.animate-nudge-card-in` in
+      `globals.css`) statt schlagartig dazustehen (Onset nach Hillstrom/Yantis, Befund der Betreuung 17.09.);
+      das Wachsen zu Stufe 2 läuft über eine weiche `transition` statt eines Sprungs, dabei rückt die Karte auch
+      sichtbar näher zur Mitte (`bottom-6/right-6` → `bottom-8/right-8`)
 - [ ] Hinweis-Karte/-Modal nur bei `state === "WORK"` rendern, nicht nur bei `!hasReacted` (Bugfix 14.09.) —
       sonst kann nach einem Reload mitten in Pause/Kurzfeedback/Aktivitätsauswahl der alte Hinweis der
       vorherigen Runde wieder aufscheinen, weil `hasReacted` (anders als der Rundenzustand) nicht in

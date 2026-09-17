@@ -141,7 +141,10 @@ ortsunabhängig und unbegleitet - Teilnehmende bekommen nur Link und Zugangsdate
 wie die App bedient wird. Die Einwilligung sagt WARUM (Studienzweck), aber nicht WIE. Deshalb jetzt ein
 kurzer, rein informativer Schritt 0 vor Block A (`onboarding-intro.ts`, bewusst getrennt vom mit der
 Betreuung abgestimmten Einwilligungstext): Rundenprinzip, Pausenhinweis, dass man auch selbst eine Pause
-starten kann, und dass man jederzeit über "Sitzung beenden" aufhören kann. Kein Pflichtfeld, nur ein
+starten kann, und dass man jederzeit über "Sitzung beenden" aufhören kann. Ergänzt am 17.09. (Befund der
+Betreuung): der Hinweis, das Fenster mit der App sichtbar zu lassen - z. B. auf einem Viertel bis einem
+Drittel des Bildschirms daneben oder auf einem zweiten Bildschirm -, weil man den sich wandelnden
+Hintergrund sonst gar nicht im Augenwinkel mitbekommt. Kein Pflichtfeld, nur ein
 "Los geht's"-Knopf. Zusammen mit den beiden Fragebogen-Schritten jetzt "Schritt X von 3" oben auf jeder
 Seite.
 
@@ -221,10 +224,12 @@ Geschwindigkeitsrückmeldung im Auto (nicht die Tankanzeige) - die Rückmeldung 
 
 | Stufe | Zeitpunkt | Gestaltung |
 |---|---|---|
-| **0** | 2 Min vor Ende | Hintergrundfarbe wandert sehr langsam um wenige Prozent ins Wärmere. Bewusst kaum bewusst wahrnehmbar. |
-| **1** | bei 0:00 | Farbe vollendet, dazu eine kleine ruhige Karte unten rechts: „Zeit für eine Pause". Optional ein sehr leiser einzelner Ton. Kein Modal, Arbeit bleibt möglich. |
-| **2** | +2 Min ohne Reaktion | Karte wird etwas größer, sanftes langsames Pulsieren. Immer noch am Rand. |
-| **3** | +5 Min ohne Reaktion | Ruhiges zentriertes Fenster mit drei Optionen: „Pause starten", „Noch 5 Minuten" oder „Überspringen". Kein Rot, keine Ausrufezeichen. |
+| **0** | 2 Min vor Ende | Hintergrund wandert langsam von Weiß nach Beige, dabei zieht die Zifferfarbe des Timers mit (Betreuung, 17.09.: der Wechsel fällt so genau dort auf, wo man ohnehin gelegentlich hinschaut - die Restzeit). Bewusst kaum bewusst wahrnehmbar. |
+| **1** | bei 0:00 | Hintergrund bleibt Beige, dazu eine kleine ruhige Karte unten rechts mit kurzer Einblendbewegung (~400ms, Onset nach Hillstrom/Yantis): „Zeit für eine Pause". Ein sehr leiser einzelner Ton. Kein Modal, Arbeit bleibt möglich. |
+| **2** | +2 Min ohne Reaktion | Hintergrund wandert weiter zu gedämpftem Bernstein. Karte wächst, rückt spürbar näher zur Bildschirmmitte, sanftes langsames Pulsieren. Immer noch am Rand. |
+| **3** | +5 Min ohne Reaktion | Hintergrund wandert weiter zu gedämpftem Terrakotta. Ruhiges zentriertes Fenster mit drei Optionen: „Pause starten", „Noch 5 Minuten" oder „Überspringen". Kein Rot, keine Ausrufezeichen. |
+
+**Hintergrundfarbe eskaliert seit 17.09. mit (Betreuung):** Bis dahin gab es nur einen einzigen Zielton ab Stufe 0, der über alle vier Stufen konstant blieb. Jetzt wandert er mit jeder erreichten Stufe eine Nuance weiter - Beige (Stufe 0/1), gedämpftes Bernstein (Stufe 2), gedämpftes Terrakotta (Stufe 3) - dasselbe Ampelschema wie die Auto-Analogie, aber gedämpft: „Auffallen statt erschrecken" bleibt das Prinzip, kein reines Rot.
 
 **Jede erreichte Stufe wird protokolliert, ebenso die Stufe, bei der reagiert wurde.** Das ist eines deiner wertvollsten Ergebnisse: Bei welcher Stufe reagieren Menschen tatsächlich? Reicht Stufe 1? Braucht es Stufe 3? Das ist ein echter Befund, den du in der Diskussion auswerten kannst.
 
@@ -232,7 +237,7 @@ Optionen für Nutzende bei jeder Stufe: Pause starten, Noch 5 Minuten oder über
 
 Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist) — sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
 
-> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (30–60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen, direkt an die vier Stufen gekoppelt statt nach eigenem Zeitplan: **ein Ton je erreichter Stufe**, Stufe 0 bleibt tonlos (der Übergang soll kaum bewusst wahrnehmbar bleiben, ein Ton dort wäre eine hörbare Vorwarnung), Stufe 1 ein leiser Sinuston, Stufe 2 ein etwas deutlicherer Glockenton, Stufe 3 ein klarer aufsteigender Ton — danach keine Wiederholung mehr, die Eskalation läuft über Deutlichkeit, nicht über Wiederholung. Protokolliert als `NUDGE_SOUND_PLAYED` (Befund der Betreuung, 17.09.).
+> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Die Karte blendet beim ersten Erscheinen (Stufe 1) einmalig per CSS-Keyframe ein (~400ms), das Wachsen zu Stufe 2 läuft über eine weiche `transition` statt eines Sprungs. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen, direkt an die vier Stufen gekoppelt statt nach eigenem Zeitplan: **ein Ton je erreichter Stufe**, Stufe 0 bleibt tonlos (der Übergang soll kaum bewusst wahrnehmbar bleiben, ein Ton dort wäre eine hörbare Vorwarnung), Stufe 1 ein leiser Sinuston, Stufe 2 ein etwas deutlicherer Glockenton, Stufe 3 ein klarer aufsteigender Ton — danach keine Wiederholung mehr, die Eskalation läuft über Deutlichkeit, nicht über Wiederholung. Protokolliert als `NUDGE_SOUND_PLAYED` (Befund der Betreuung, 17.09.). Alle drei Töne mit weichem Einsatz (~50ms Anstieg, nichts beginnt schlagartig) und im mittleren Frequenzbereich (ca. 500–900 Hz) statt schrill hoch - Feinabstimmung ebenfalls Befund der Betreuung, 17.09., zum Anhören/Kalibrieren gibt es `/admin/sound-check`.
 
 ### [7] Kurzfeedback und Anpassung
 

@@ -89,7 +89,7 @@ const CHARACTERS: Record<
   "soft-sine": (ctx, intensity) => {
     const now = ctx.currentTime;
     playTone(ctx, now, {
-      frequency: 440,
+      frequency: 560,
       duration: 0.5 + intensity * 0.4,
       peakGain: 0.012 + intensity * 0.08,
       attack: 0.15,
@@ -100,14 +100,16 @@ const CHARACTERS: Record<
     const now = ctx.currentTime;
     const duration = 0.5 + intensity * 0.3;
     playTone(ctx, now, {
-      frequency: 480,
+      frequency: 680,
       duration,
       peakGain: 0.015 + intensity * 0.12,
+      attack: 0.05,
     });
     playTone(ctx, now, {
-      frequency: 480 * 2.4,
+      frequency: 680 * 2.4,
       duration: duration * 0.6,
       peakGain: (0.015 + intensity * 0.12) * 0.25,
+      attack: 0.05,
     });
   },
 
@@ -176,11 +178,11 @@ const CHARACTERS: Record<
   "rising-sweep": (ctx, intensity) => {
     const now = ctx.currentTime;
     playTone(ctx, now, {
-      frequency: 350,
-      endFrequency: 700,
+      frequency: 550,
+      endFrequency: 880,
       duration: 0.25 + intensity * 0.1,
       peakGain: 0.02 + intensity * 0.12,
-      attack: 0.02,
+      attack: 0.05,
     });
   },
 };

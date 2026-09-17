@@ -645,3 +645,45 @@ laufende Intervalle (200ms/1000ms), bei einem einzigen großen Sprung über viel
 die simulierte Uhr offenbar Wiederholungen. Mit echter Zeit reproduzierbar korrekt. Die selbst gestartete Pause
 end-zu-Ende durchgeklickt (P01, Testdaten danach entfernt): "Pause jetzt starten" → Kurzfeedback erscheint →
 "Passend" → Aktivitätsauswahl → Pause, wie vorgesehen.
+
+## 17.09.2026 Pausenhinweis: Hintergrund eskaliert mit, Karte blendet ein, Töne feinabgestimmt, Dark Mode aus
+
+**Entscheidung:** Konkreter Gestaltungsvorschlag der Betreuung umgesetzt, vier Teile:
+1. Der Hintergrund bleibt ab Stufe 0 nicht mehr konstant, sondern wandert mit jeder Stufe eine Nuance weiter:
+   Beige (Stufe 0/1) → gedämpftes Bernstein (Stufe 2) → gedämpftes Terrakotta (Stufe 3), neue CSS-Variablen
+   `--background-nudge-1/2/3` in `globals.css`. Bei Stufe 0 zieht zusätzlich die Zifferfarbe des Timers mit
+   (`--foreground-nudge`) - der Wechsel fällt so genau dort auf, wo man ohnehin gelegentlich hinschaut.
+2. Die Hinweis-Karte blendet bei Stufe 1 einmalig per CSS-Keyframe ein (`.animate-nudge-card-in`, ~400ms,
+   Onset nach Hillstrom/Yantis: ein bewegter Reiz wird eher bemerkt als ein schlagartig dastehender). Das
+   Wachsen zu Stufe 2 läuft über eine weiche `transition` statt eines Sprungs, dabei rückt die Karte auch
+   sichtbar näher zur Mitte.
+3. Die drei Töne (`soft-sine`/`soft-bell`/`rising-sweep` in `nudgeSound.ts`) feinabgestimmt: weicherer Einsatz
+   (Attack von 12–20ms auf 50ms angehoben, nichts beginnt mehr abrupt) und Grundfrequenzen in den mittleren
+   Bereich verschoben (440/480/350–700 Hz → 560/680/550–880 Hz), damit nichts schrill/hoch klingt. Eskalation
+   bleibt über Klangfülle, nicht Lautstärke - Intensitäten unverändert.
+4. Dark Mode abgeschaltet: `@custom-variant dark (&:where(.dark, .dark *))` in `globals.css` sorgt dafür, dass
+   `dark:`-Klassen nirgends mehr matchen (nie eine `.dark`-Klasse gesetzt), `color-scheme: light` ergänzt. Die
+   frühere `@media (prefers-color-scheme: dark)`-Variable-Definition ist entfernt.
+**Begründung:** Die Betreuung fand die bisherige Umsetzung im Kern richtig, aber unvollständig gegen das
+"Onset-Problem": eine Karte, die schlagartig da ist, und ein Hintergrund, der nach Stufe 0 nicht mehr
+weiterwandert, lassen sich leicht übersehen. Die drei Änderungen zusammen (mitwandernde Farbe am Punkt der
+Aufmerksamkeit, Bewegung beim Erscheinen, weiterlaufende Hintergrundeskalation) adressieren das, ohne von
+"auffallen statt erschrecken" abzuweichen - deshalb gedämpfte Farben, kein reines Rot, keine schnelle Animation.
+Bei den Tönen: ein abrupter Einsatz wirkt erschreckend, das widerspricht demselben Prinzip; zu tiefe oder zu
+hohe Frequenzen wirken dumpf bzw. schrill statt klar wahrnehmbar. Dark Mode ist bei einer Studie über visuelle
+Gestaltung eine unkontrollierte Variable - ein Teilnehmender mit dunkler Systemeinstellung hätte sonst eine
+andere Version der untersuchten Gestaltung gesehen als der Rest, ohne dass das irgendwo auffällt.
+**Bezug:** SPEZIFIKATION.md Abschnitt [6] (Tabelle und technischer Hinweis), CLAUDE.md (Regel 9 neu, Tabelle
+"Der abgestufte Hinweis" aktualisiert), CHECKLIST.md F5/F6. Zusätzlich `onboarding-intro.ts` um einen Hinweis
+ergänzt, das Fenster mit der App sichtbar zu lassen (ein Viertel bis ein Drittel des Bildschirms daneben, oder
+ein zweiter Bildschirm) - eine mitwandernde Hintergrundfarbe nützt nichts, wenn das Fenster ohnehin komplett
+verdeckt ist.
+**Getestet:** Per Playwright alle vier Stufen durchlaufen und die tatsächlich gesetzten Zielwerte geprüft
+(Hintergrund- und Zifferfarbe als CSS-Variable, nicht der zwischenzeitlich animierte Pixelwert, da die
+60-Sekunden-Transition über die echte Bildschirm-Framerate läuft, nicht über die von `page.clock` simulierte
+Uhr): Stufe 0 setzt Hintergrund auf `--background-nudge-1` und Ziffernfarbe auf `--foreground-nudge`, Stufe 1
+bleibt bei `--background-nudge-1` mit `.animate-nudge-card-in` auf der frisch gemounteten Karte, Stufe 2 auf
+`--background-nudge-2` mit gewachsener/verschobener Karte, Stufe 3 auf `--background-nudge-3` mit dem Modal.
+Zusätzlich mit erzwungener `colorScheme: "dark"`-Emulation getestet (simuliert dunkle Systemeinstellung): App
+bleibt durchgehend bei `color-scheme: light`, keine dark-Werte übernommen. `tsc`/`lint` sauber, Testdaten
+danach entfernt.
