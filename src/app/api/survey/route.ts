@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Phase } from "@/generated/prisma/enums";
-import { preSurveyItems } from "@/content/pre-survey";
+import { preSurveyItems, isPreSurveyItemVisible } from "@/content/pre-survey";
 import { requiredPostSurveyIds } from "@/content/post-survey";
 
 export async function POST(request: NextRequest) {
@@ -26,7 +26,11 @@ export async function POST(request: NextRequest) {
 
   if (phase === Phase.PRE) {
     const answered = answers as Record<string, unknown>;
-    const missing = preSurveyItems.filter((item) => !(item.id in answered));
+    // Bedingte Fragen (siehe isPreSurveyItemVisible) nur verlangen, wenn sie
+    // bei diesen Antworten ueberhaupt gestellt wurden.
+    const missing = preSurveyItems.filter(
+      (item) => isPreSurveyItemVisible(item, answered) && !(item.id in answered)
+    );
     if (missing.length > 0) {
       return NextResponse.json(
         { error: `Fehlende Antworten: ${missing.map((item) => item.id).join(", ")}` },

@@ -6,6 +6,7 @@ import {
   preSurveyStep1Items,
   preSurveyStep2Items,
   preSurveyBlockTitles,
+  isPreSurveyItemVisible,
 } from "@/content/pre-survey";
 import { onboardingIntroContent } from "@/content/onboarding-intro";
 
@@ -213,7 +214,19 @@ export function PreSurveyForm() {
   const [triedStep, setTriedStep] = useState<1 | 2 | null>(null);
 
   function setAnswer(id: string, value: AnswerValue) {
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+    setAnswers((prev) => {
+      const next = { ...prev, [id]: value };
+      // Wird eine abhaengige Frage durch diese Antwort verborgen, ihre schon
+      // gegebene Antwort wieder verwerfen - sonst landet im Datensatz eine
+      // Antwort auf eine Frage, die beim Absenden gar nicht sichtbar war
+      // (B2 erst mit Ja beantwortet, B3 gefuellt, dann B2 auf Nein geaendert).
+      for (const item of preSurveyStep2Items) {
+        if ("showIf" in item && item.showIf.id === id && !isPreSurveyItemVisible(item, next)) {
+          delete next[item.id];
+        }
+      }
+      return next;
+    });
   }
 
   function handleNext() {
@@ -226,7 +239,9 @@ export function PreSurveyForm() {
 
   async function handleSubmit() {
     setTriedStep(2);
-    const allAnswered = preSurveyStep2Items.every((item) => isAnswered(item, answers[item.id]));
+    const allAnswered = preSurveyStep2Items
+      .filter((item) => isPreSurveyItemVisible(item, answers))
+      .every((item) => isAnswered(item, answers[item.id]));
     if (!allAnswered) return;
 
     setSubmitting(true);
@@ -319,15 +334,17 @@ export function PreSurveyForm() {
         <h1 className="text-xl font-medium">Noch dein Pausenverhalten.</h1>
       </div>
 
-      {preSurveyStep2Items.map((item) => (
-        <SurveyItemField
-          key={item.id}
-          item={item}
-          value={answers[item.id]}
-          onChange={(value) => setAnswer(item.id, value)}
-          showMissing={triedStep === 2}
-        />
-      ))}
+      {preSurveyStep2Items
+        .filter((item) => isPreSurveyItemVisible(item, answers))
+        .map((item) => (
+          <SurveyItemField
+            key={item.id}
+            item={item}
+            value={answers[item.id]}
+            onChange={(value) => setAnswer(item.id, value)}
+            showMissing={triedStep === 2}
+          />
+        ))}
 
       {error && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">

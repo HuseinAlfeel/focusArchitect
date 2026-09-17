@@ -715,3 +715,47 @@ Anleitung wurde durch das Schrittende abgeschnitten (mindestens 3 Sekunden Puffe
 Zusätzlich den kompletten Ablauf von "Nacken und Schultern" (jetzt 7 statt 5 Schritte) per Playwright
 durchlaufen (P01, Testdaten danach entfernt): korrekte Reihenfolge und Beschriftung "Schritt X von 7", nach
 dem letzten Schritt korrekt zurück zur normalen, großen Pausenuhr.
+
+## 17.09.2026 Visuelle Eskalation war praktisch unsichtbar - Farben und Übergänge nachgeschärft
+
+**Entscheidung:** Farbstufen des Pausenhinweises von `#fdf3e6`/`#f6ddb8`/`#efc9a8` auf
+`#f6e7cd`/`#f0cd94`/`#dd9b6c` angehoben, Zifferfarbe bei Stufe 0 von `#8a6f52` auf `#9a6b3f`. Die
+60-Sekunden-Transition gilt nur noch für Stufe 0 (dort laut Spezifikation absichtlich unmerklich), ab Stufe 1
+sind es 15 Sekunden.
+**Begründung:** Husin hat die Eskalation live getestet und gemeldet: "ich sehe NUR weiß ... auch nach dem Ende
+vom Timer". Nachgemessen am gerenderten Bildschirm hatte er recht: Stufe 1 landete nach 60 Sekunden bei
+`rgb(253,243,230)`, also 2/12/25 RGB-Punkte neben Weiß, und lag 10 Sekunden nach dem Stufenwechsel noch bei
+`rgb(255,253,251)`. Auf einem Laptop-Display, ohne Weiß daneben als Vergleich, ist das nichts. Der Vorschlag
+der Betreuung war ausdrücklich, dass der Hintergrund nach 0:00 *weiterwandert* - mit so schwachen Abständen
+konnte das nicht ankommen.
+**Mein Fehler dabei, offen dokumentiert:** Ich hatte die erste Fassung am selben Tag "verifiziert", aber nur
+geprüft, dass der richtige *Zielwert* (`var(--background-nudge-2)` usw.) gesetzt wird - nicht, ob man die
+Farbe sieht. Den Unterschied hatte ich sogar selbst bemerkt (die 60-Sekunden-Transition läuft über die echte
+Bildwiederholrate, nicht über die von `page.clock` simulierte Uhr) und bin ihm trotzdem ausgewichen, statt
+echte Zeit abzuwarten. Bei Gestaltungsänderungen ist der gesetzte Zielwert kein Nachweis - es zählt die
+gemessene, gerenderte Farbe.
+**Bezug:** SPEZIFIKATION.md Abschnitt [6], CHECKLIST.md F6, `globals.css`, `session-timer.tsx`.
+**Getestet:** Diesmal ohne `page.clock`, mit Sitzungen, deren `startedAt` so in der Vergangenheit liegt, dass
+die Seite direkt in der jeweiligen Stufe startet, und mit Messung der tatsächlich gerenderten
+`backgroundColor` über echte Zeit plus Screenshots: Stufe 0 wandert über 60s nach `rgb(246,231,205)` und die
+Ziffern stehen auf `rgb(154,107,63)`, Stufe 1 erreicht `rgb(246,231,205)`, Stufe 2 `rgb(240,205,148)`,
+Stufe 3 `rgb(221,155,108)` - jeweils innerhalb von etwa 15 Sekunden und auf dem Screenshot klar erkennbar.
+
+## 17.09.2026 Vorbefragung: B3 (Hilfsmittel) hängt jetzt an B2 (machst du bewusst Pausen)
+
+**Entscheidung:** B3 "Nutzt du Hilfsmittel für Pausen" erscheint nur noch, wenn B2 "Machst du bei solcher
+Arbeit bewusst Pausen?" mit Ja beantwortet wurde (neues Feld `showIf` in `pre-survey.ts`). B4 "Beschreibe
+kurz, wie du Pausen machst" bleibt in beiden Fällen sichtbar. Wird eine Frage durch ein "Nein" verborgen,
+nachdem sie schon beantwortet war, wird die Antwort verworfen statt mitgeschickt.
+**Begründung:** Husins Hinweis - wer keine bewussten Pausen macht, wurde trotzdem gefragt, ob er Hilfsmittel
+*für Pausen* nutzt. Das wirkte wie eine verdrehte Logik und liefert keine verwertbare Antwort. B4 soll
+bewusst bleiben, weil auch "ich mache keine festen Pausen" eine Antwort ist, die man auswerten kann.
+**Bezug:** SPEZIFIKATION.md Abschnitt [3] Block B, CHECKLIST.md F2.
+**Getestet, und dabei einen zweiten Fehler gefunden:** Die Sichtbarkeitsregel liegt jetzt als
+`isPreSurveyItemVisible` in `pre-survey.ts` und wird von Formular **und** `POST /api/survey` benutzt. Im
+ersten Versuch hatte ich sie nur im Formular, worauf die Server-Prüfung ("Fehlende Antworten") die
+Vorbefragung mit "Nein" bei B2 komplett abgewiesen hat - die Teilnehmenden wären an dieser Stelle
+festgesteckt. Im Playwright-Durchlauf aufgefallen, weil nach dem Absenden die URL auf `/study/pre` blieb.
+Danach beide Wege durchgeklickt (P02, Testdaten entfernt): bei Nein sind Anzahl-Frage und B3 weg, B4 da,
+Absenden geht durch, gespeichert wird `"B2": {"yes": false}` ohne B3; bei Ja erscheinen beide Anschlussfragen
+und landen vollständig im Datensatz.

@@ -11,8 +11,16 @@
 // raus, Husins Vorgabe beim Onboarding-Umbau am 14.09. - Erschoepfung allein
 // reicht als Baseline-Trait.
 //
-// B2 und B3 haben eine bedingte Anschlussfrage (nur bei "ja" sichtbar). Bei
-// "nein" wird das Anschlussfeld leer mitgespeichert, nicht weggelassen.
+// B2 und B3 haben eine bedingte Anschlussfrage (nur bei "ja" sichtbar).
+//
+// B3 selbst haengt zusaetzlich an B2 (`showIf`, ergaenzt 17.09. auf Husins
+// Hinweis): wer bei "Machst du bewusst Pausen?" mit Nein antwortet, wurde
+// vorher trotzdem gefragt, ob er Hilfsmittel FUER Pausen nutzt - das ergibt
+// keinen Sinn und wirkte wie eine verdrehte Logik. B4 ("Beschreibe kurz, wie
+// du Pausen machst") bleibt bewusst in beiden Faellen sichtbar: auch ein
+// "ich mache keine" ist eine verwertbare Antwort. Verborgene Fragen werden
+// nicht mitgespeichert - die Spalte bleibt im Export leer, und weil B2 in
+// derselben Zeile steht, ist eindeutig erkennbar warum.
 
 export const preSurveyStep1Items = [
   {
@@ -91,6 +99,7 @@ export const preSurveyStep2Items = [
     id: "B3",
     type: "yesno",
     question: "Nutzt du Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)?",
+    showIf: { id: "B2", yes: true },
     followUp: {
       type: "text",
       question: "Welche, und wie regelmäßig nutzt du sie?",
@@ -118,6 +127,25 @@ export const preSurveyStep2Items = [
 ] as const;
 
 export const preSurveyItems = [...preSurveyStep1Items, ...preSurveyStep2Items] as const;
+
+/**
+ * Ist diese Frage bei den bisherigen Antworten ueberhaupt sichtbar? Bewusst
+ * hier und nicht im Formular, weil die Regel an zwei Stellen gelten muss:
+ * das Formular blendet die Frage aus und verlangt sie nicht als Pflichtfeld,
+ * und `POST /api/survey` darf eine fehlende, gar nicht gestellte Antwort
+ * nicht als "Fehlende Antworten" abweisen. Lagen die beiden Stellen
+ * auseinander, liess sich die Vorbefragung mit "Nein" bei B2 nicht mehr
+ * absenden - genau das ist beim Umbau am 17.09. passiert und im Test
+ * aufgefallen.
+ */
+export function isPreSurveyItemVisible(
+  item: { id: string; showIf?: { id: string; yes: boolean } },
+  answers: Record<string, unknown>
+): boolean {
+  if (!item.showIf) return true;
+  const controlling = answers[item.showIf.id] as { yes?: unknown } | undefined;
+  return controlling?.yes === item.showIf.yes;
+}
 
 // Ueberschriften vor dem jeweils ersten Item eines Unterblocks innerhalb von
 // Schritt 2 (siehe Rendering in pre-survey-form.tsx). Schritt 1 ist selbst

@@ -238,12 +238,20 @@ export function SessionTimer({
         ? "var(--background-nudge-2)"
         : "var(--background-nudge-1)";
 
+  // Nur Stufe 0 soll unmerklich einschleichen (60s, so in der Spezifikation).
+  // Ab Stufe 1 ist die Farbe ein Hinweis, der ankommen soll - mit 60s auch
+  // hier war der Wechsel faktisch unsichtbar: gemessen lag der Bildschirm
+  // 10 Sekunden nach Stufenwechsel noch bei rgb(255,253,251), also Weiss
+  // (Husin, 17.09.: "die Farben aendern sich nicht"). 15s bleibt ruhig, ist
+  // aber als Veraenderung wahrnehmbar.
+  const nudgeTransitionSeconds = nudgeStage === 0 ? 60 : 15;
+
   return (
     <main
       className="flex min-h-screen flex-1 flex-col items-center justify-center gap-4 px-4"
       style={{
         backgroundColor: isNudging ? nudgeBackgroundVar : "var(--background)",
-        transition: "background-color 60s ease",
+        transition: `background-color ${nudgeTransitionSeconds}s ease`,
       }}
     >
       {(state === "WORK" || state === "BREAK") && !isNudging && (

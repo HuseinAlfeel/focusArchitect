@@ -165,8 +165,8 @@ Seite.
 |---|---|---|
 | B1 | Wie lange arbeitest du üblicherweise am Stück am Bildschirm, ohne Pause? | Auswahl: <30min / 30–60 / 60–120 / >120 |
 | B2 | Machst du bei solcher Arbeit bewusst Pausen? | Ja/Nein, bei Ja: „Wie viele bewusste Pausen machst du an einem typischen Arbeitstag?" (Zahl) |
-| B3 | Nutzt du Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)? | Ja/Nein, bei Ja: „Welche, und wie regelmäßig nutzt du sie?" (Freitext) |
-| B4 | Beschreibe kurz, wie du Pausen machst. | Freitext |
+| B3 | Nutzt du Hilfsmittel für Pausen (z. B. Timer, Pomodoro-App)? | **Nur bei B2 = Ja.** Ja/Nein, bei Ja: „Welche, und wie regelmäßig nutzt du sie?" (Freitext) |
+| B4 | Beschreibe kurz, wie du Pausen machst. | Freitext, immer sichtbar |
 
 **Block C - Einstellung**
 
@@ -185,8 +185,16 @@ verlässlichere Vergleichswert für die Nachbefragung wird jetzt direkt vor der 
 frühere Frage nach der typischen Konzentration (D2) ist seit 14.09. ersatzlos gestrichen (Husins Vorgabe) -
 Erschöpfung allein reicht als Baseline-Trait, `focusAtStart` aus [4] deckt Konzentration bereits situativ ab.
 
-Bei B2 und B3 erscheint die Anschlussfrage nur bei „Ja". Bei „Nein" wird das Anschlussfeld leer
-mitgespeichert, nicht übersprungen.
+Bei B2 und B3 erscheint die jeweilige Anschlussfrage nur bei „Ja".
+
+**B3 hängt zusätzlich an B2 (Änderung 17.09., Husins Hinweis):** Wer bei „Machst du bewusst Pausen?" mit Nein
+antwortet, wurde vorher trotzdem gefragt, ob er *Hilfsmittel für Pausen* nutzt - das ergibt keinen Sinn und
+wirkte wie eine verdrehte Logik. Jetzt erscheinen bei Nein weder die Anzahl-Frage noch B3. B4 („Beschreibe
+kurz, wie du Pausen machst") bleibt bewusst in beiden Fällen sichtbar: auch „ich mache keine" ist eine
+verwertbare Antwort. Eine nicht gestellte Frage wird nicht mitgespeichert - die Spalte bleibt im Export leer,
+und weil B2 in derselben Zeile steht, ist eindeutig erkennbar warum. Die Regel steht als
+`isPreSurveyItemVisible` in `pre-survey.ts` und wird von Formular **und** `POST /api/survey` benutzt: die
+Server-Prüfung darf eine nie gestellte Frage nicht als fehlende Antwort abweisen.
 
 ### [4] Sitzungsstart
 
@@ -229,7 +237,9 @@ Geschwindigkeitsrückmeldung im Auto (nicht die Tankanzeige) - die Rückmeldung 
 | **2** | +2 Min ohne Reaktion | Hintergrund wandert weiter zu gedämpftem Bernstein. Karte wächst, rückt spürbar näher zur Bildschirmmitte, sanftes langsames Pulsieren. Immer noch am Rand. |
 | **3** | +5 Min ohne Reaktion | Hintergrund wandert weiter zu gedämpftem Terrakotta. Ruhiges zentriertes Fenster mit drei Optionen: „Pause starten", „Noch 5 Minuten" oder „Überspringen". Kein Rot, keine Ausrufezeichen. |
 
-**Hintergrundfarbe eskaliert seit 17.09. mit (Betreuung):** Bis dahin gab es nur einen einzigen Zielton ab Stufe 0, der über alle vier Stufen konstant blieb. Jetzt wandert er mit jeder erreichten Stufe eine Nuance weiter - Beige (Stufe 0/1), gedämpftes Bernstein (Stufe 2), gedämpftes Terrakotta (Stufe 3) - dasselbe Ampelschema wie die Auto-Analogie, aber gedämpft: „Auffallen statt erschrecken" bleibt das Prinzip, kein reines Rot.
+**Hintergrundfarbe eskaliert seit 17.09. mit (Betreuung):** Bis dahin gab es nur einen einzigen Zielton ab Stufe 0, der über alle vier Stufen konstant blieb. Jetzt wandert er mit jeder erreichten Stufe eine Nuance weiter - Beige `#f6e7cd` (Stufe 0/1), gedämpftes Bernstein `#f0cd94` (Stufe 2), gedämpftes Terrakotta `#dd9b6c` (Stufe 3) - dasselbe Ampelschema wie die Auto-Analogie, aber gedämpft: „Auffallen statt erschrecken" bleibt das Prinzip, kein reines Rot.
+
+> **Nachgeschärft am 17.09., nachdem Husin die Eskalation live getestet hat:** Die erste Fassung war mit `#fdf3e6`/`#f6ddb8`/`#efc9a8` und 60-Sekunden-Übergängen auf **allen** Stufen praktisch unsichtbar - Husins Rückmeldung war „ich sehe NUR weiß". Nachgemessen am gerenderten Bildschirm: Stufe 1 landete nach 60 Sekunden bei `rgb(253,243,230)`, also 2/12/25 RGB-Punkte neben Weiß, und lag 10 Sekunden nach dem Stufenwechsel noch bei `rgb(255,253,251)`. Zwei Korrekturen: deutlich kräftigere Farbstufen (siehe oben) und der 60-Sekunden-Übergang gilt nur noch für **Stufe 0**, wo er laut Spezifikation absichtlich unmerklich sein soll. Ab Stufe 1 sind es 15 Sekunden - die Farbe ist dort ein Hinweis, der ankommen soll. Gemessen erreicht Stufe 1 jetzt `rgb(246,231,205)`, Stufe 2 `rgb(240,205,148)` und Stufe 3 `rgb(221,155,108)`, jeweils innerhalb von etwa 15 Sekunden. **Lehre daraus für künftige Gestaltungsänderungen:** Es reicht nicht zu prüfen, dass der richtige Zielwert gesetzt wird - es muss am gerenderten Bild geprüft werden, ob man die Änderung auch sieht.
 
 **Jede erreichte Stufe wird protokolliert, ebenso die Stufe, bei der reagiert wurde.** Das ist eines deiner wertvollsten Ergebnisse: Bei welcher Stufe reagieren Menschen tatsächlich? Reicht Stufe 1? Braucht es Stufe 3? Das ist ein echter Befund, den du in der Diskussion auswerten kannst.
 

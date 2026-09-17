@@ -229,7 +229,12 @@ npm install -D @types/bcryptjs
 - [ ] Schritt 1: Knopf „Weiter (1/2)". Schritt 2: „Zurück" (Antworten aus Schritt 1 bleiben erhalten) und
       „Profil speichern & Weiter" - erst hier wird tatsächlich gespeichert
 - [ ] Skalen als anklickbare Buttons 1 bis 7, nicht als Slider (Slider verleiten zur Mitte)
-- [ ] Anschlussfragen bei B2/B3 nur sichtbar bei „Ja", bei „Nein" Feld leer mitspeichern statt überspringen
+- [x] Anschlussfragen bei B2/B3 nur sichtbar bei „Ja". B3 selbst ist zusätzlich an B2 gekoppelt (`showIf`,
+      Änderung 17.09.): bei „Nein" auf „Machst du bewusst Pausen?" entfallen Anzahl-Frage und B3 komplett,
+      B4 („Beschreibe kurz, wie du Pausen machst") bleibt in beiden Fällen sichtbar. Nicht gestellte Fragen
+      werden nicht mitgespeichert (Spalte im Export leer). Regel liegt als `isPreSurveyItemVisible` in
+      `pre-survey.ts` und gilt für Formular **und** `POST /api/survey` — lagen die beiden auseinander, liess
+      sich die Vorbefragung mit „Nein" gar nicht mehr absenden (genau das im Test aufgefallen)
 - [ ] Validierung: alle Pflichtfelder des jeweiligen Schritts ausgefüllt
 - [ ] `POST /api/survey` mit `phase: "PRE"` (beide Schritte zusammen als eine Antwort)
 - [ ] Ereignis `SURVEY_PRE_SUBMITTED`
@@ -297,8 +302,13 @@ npm install -D @types/bcryptjs
 
 ### F6. Der abgestufte Hinweis (1 Tag, das Herzstück)
 
-- [x] **Stufe 0** bei T minus 2 Min: Hintergrund wandert über CSS-Transition (Dauer 60s) nach Beige, Zifferfarbe
-      des Timers zieht mit (Betreuung, 17.09.)
+- [x] **Stufe 0** bei T minus 2 Min: Hintergrund wandert über CSS-Transition (Dauer 60s) nach Beige `#f6e7cd`,
+      Zifferfarbe des Timers zieht mit (Betreuung, 17.09.)
+- [x] Farben und Übergangsdauern nachgeschärft (17.09., nach Husins Live-Test „ich sehe NUR weiß"): erste
+      Fassung lag nur 2/12/25 RGB-Punkte neben Weiß und brauchte auf jeder Stufe 60s — gemessen 10s nach
+      Stufenwechsel noch `rgb(255,253,251)`. Jetzt kräftigere Stufen und 60s nur noch für Stufe 0, ab Stufe 1
+      15s. **Nicht nur den gesetzten Zielwert prüfen, sondern die gerenderte Farbe messen** — genau daran ist
+      die erste Prüfung vorbeigelaufen
 - [x] **Stufe 1** bei 0:00: weiter Beige, kleine ruhige Karte unten rechts mit kurzer Einblendbewegung (~400ms,
       `.animate-nudge-card-in`), ein einzelner leiser Ton
 - [x] **Stufe 2** bei plus 2 Min: Hintergrund wandert weiter zu gedämpftem Bernstein, Karte etwas größer, rückt
