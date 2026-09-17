@@ -687,3 +687,31 @@ bleibt bei `--background-nudge-1` mit `.animate-nudge-card-in` auf der frisch ge
 Zusätzlich mit erzwungener `colorScheme: "dark"`-Emulation getestet (simuliert dunkle Systemeinstellung): App
 bleibt durchgehend bei `color-scheme: light`, keine dark-Werte übernommen. `tsc`/`lint` sauber, Testdaten
 danach entfernt.
+
+## 17.09.2026 Taktung der Pausenaktivitäten komplett überarbeitet
+
+**Entscheidung:** Alle drei Aktivitäten in `activities.ts` neu getaktet. Vorher dauerten einzelne Schritte
+30-90 Sekunden bei einem einzigen kurzen Satz am Anfang - bei „Aufstehen und bewegen" etwa: "Steh auf und geh
+ein paar Schritte..." (ca. 5 Sekunden Sprechzeit), dann 90 Sekunden Schrittdauer, also rund 85 Sekunden reine
+Stille, ohne dass der Satz das ankündigt. Jetzt gilt konsequent für jeden Schritt: die Ansage nennt immer die
+eigene Dauer oder Wiederholzahl ("... 15 Sekunden lang ...", "Wiederhole das dreimal"), und kein Schritt lässt
+mehr als rund 15 Sekunden Stille nach dem letzten gesprochenen Wort. Jede Aktivität endet zusätzlich mit einem
+kurzen Abschlusssatz ("Gut gemacht, ..."), statt mitten im Ablauf aufzuhören. Dadurch insgesamt kürzer:
+Augenentlastung ca. 1:08 (vorher grob mit "2 Min" beziffert, tatsächlich waren es auch vorher nur 60s reiner
+Schrittzeit), Nacken/Schultern ca. 1:38 (vorher grob "3 Min"), Aufstehen/Bewegen ca. 1:33 (vorher grob
+"5 Min").
+**Begründung:** Husin hat das zweimal gemeldet - zuerst grob, dann konkret an "Aufstehen und bewegen"
+festgemacht: "ein Satz und danach 80 Sekunden Stille" wirkt unbegleitet nicht wie eine unterstützte Übung,
+sondern wie ein Hänger oder Bug. Ohne Live-Anleitung muss die App selbst die ganze "Anwesenheit" tragen - ein
+Satz, der die eigene Dauer nennt, macht die folgende Stille erwartbar statt beunruhigend. Ein besser
+getaktetes, kürzeres Programm ist einer schlecht getakteten, länger wirkenden Version vorzuziehen - die reine
+Pausenzeit (`initialBreakMin`) ist davon unabhängig, nach dem letzten Schritt übernimmt ohnehin wieder die
+normale Pausenuhr für den Rest der Pause.
+**Bezug:** SPEZIFIKATION.md Abschnitt [8]/[9], CHECKLIST.md F7, `src/content/activities.ts`.
+**Getestet:** Sprechzeit jeder einzelnen neuen Anleitung per echter `speechSynthesis`-Wiedergabe in Chromium
+gemessen (nicht nur per Wortzahl geschätzt) und gegen die jeweilige Schrittdauer geprüft - größte verbliebene
+Stille nach einem Satz: 16,5 Sekunden (Augenentlastung, dritte Wiederholung), alle anderen darunter, keine
+Anleitung wurde durch das Schrittende abgeschnitten (mindestens 3 Sekunden Puffer nach Sprechende überall).
+Zusätzlich den kompletten Ablauf von "Nacken und Schultern" (jetzt 7 statt 5 Schritte) per Playwright
+durchlaufen (P01, Testdaten danach entfernt): korrekte Reihenfolge und Beschriftung "Schritt X von 7", nach
+dem letzten Schritt korrekt zurück zur normalen, großen Pausenuhr.

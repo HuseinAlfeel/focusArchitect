@@ -372,6 +372,14 @@ npm install -D @types/bcryptjs
 - [ ] Jeder Anleitungsschritt einmal per `speechSynthesis` vorgelesen (ergänzt 14.09., `useSpeech.ts`) —
       deutsche Stimme falls verfügbar, `rate` 0.9, Schalter „Sprachausgabe an/aus" (Vorgabe an),
       `SPEECH_TOGGLED`-Ereignis, kein Fehler falls die API fehlt. Nur hier, nicht in Arbeitsphase/Pausenhinweis
+- [x] Taktung aller Schritte überarbeitet (`activities.ts`, Husin hat's zweimal gemeldet, 17.09.): vorher ein
+      Satz und danach 30-85 Sekunden reine Stille pro Schritt, unbegleitet wirkte das wie ein Hänger statt
+      einer unterstützten Übung. Jetzt nennt jede Ansage die eigene Dauer/Wiederholzahl, kein Schritt lässt
+      mehr als ~15s Stille nach dem letzten Wort, jede Aktivität endet mit einem kurzen Abschlusssatz statt
+      abrupt aufzuhören. Dadurch kürzer als ursprünglich geplant (Augen ~1 Min, Nacken/Bewegen je ~1,5 Min
+      statt 2/3/5 Min) - Sprechzeiten real per `speechSynthesis` gemessen, nicht geschätzt. Per Playwright
+      Schritt für Schritt durchlaufen (P01, Testdaten danach entfernt): korrekte Anzahl/Reihenfolge der
+      Schritte, danach normale Pausenuhr
 - [x] Bei 9, 8, 7 … 1 ein Klopf-Ton, bei 0 ein klares Signal ("Pause vorbei") — vorher endete die Pause
       komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (Husin, 09.08.). Der Klopf-Ton war anfangs
       deutlich leiser als das Endsignal, dadurch kaum zu hören (Husin, 26.08. und erneut 17.09.) — jetzt auf

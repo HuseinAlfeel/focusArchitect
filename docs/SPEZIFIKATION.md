@@ -260,9 +260,9 @@ Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
 
 Drei bis vier kurze Vorschläge plus die Option „keine Aktivität":
 
-- **Augenentlastung (2 Min):** 20 Sekunden auf etwas in etwa 6 Metern Entfernung schauen, dreimal wiederholen
-- **Nacken und Schultern (3 Min):** angeleitete Dehnung, Schritt für Schritt
-- **Aufstehen und bewegen (5 Min):** kurzer Gang, Schultern kreisen
+- **Augenentlastung (gut 1 Min):** 20 Sekunden auf etwas in etwa 6 Metern Entfernung schauen, dreimal wiederholen
+- **Nacken und Schultern (gut 1,5 Min):** angeleitete Dehnung, Schritt für Schritt
+- **Aufstehen und bewegen (gut 1,5 Min):** kurzer Gang, Schultern kreisen
 - **Keine Aktivität, einfach Pause**
 
 Auswahl wird protokolliert. Die Option „keine" muss gleichwertig aussehen, nicht wie die schlechte Wahl, sonst verzerrst du deine Daten.
@@ -280,6 +280,8 @@ Schrittwechsel ein leiser Übergangston (`water-drop`, dieselbe Tonbibliothek wi
 dem letzten Schritt erscheint wieder die normale, große Pausenuhr für die restliche Pausenzeit.
 
 **Sprachausgabe für die Anleitung** (ergänzt 14.09.): Bei „Augenentlastung" schaut man bewusst vom Bildschirm weg - ein reiner Anleitungstext lässt sich in dem Moment nicht lesen, bei „Nacken und Schultern" abgeschwächt genauso. Jeder Schritt wird deshalb einmal per `speechSynthesis` (Web Speech API, keine externe Bibliothek/kein Dienst) vorgelesen: deutsche Stimme falls verfügbar, sonst Standardstimme, Sprechgeschwindigkeit leicht reduziert (`rate` 0.9). Schalter „Sprachausgabe: an/aus" direkt bei der Anleitung, Voreinstellung an, protokolliert als `SPEECH_TOGGLED` mit `{ enabled }`. Ist `speechSynthesis` nicht verfügbar, erscheint kein Fehler, nur der Text wie zuvor. Ausschließlich hier - nicht in der Arbeitsphase, nicht beim Pausenhinweis.
+
+**Taktung der Schritte überarbeitet (17.09., Husin hat das zweimal gemeldet):** Ursprünglich dauerten einzelne Schritte 30-90 Sekunden bei einem einzigen kurzen Satz am Anfang - bei „Aufstehen und bewegen" etwa ein Satz, dann rund 85 Sekunden reine Stille. Unbegleitet wirkt das nicht wie eine unterstützte Übung, sondern wie ein Hänger. Jetzt gilt für jeden Schritt in `activities.ts`: die Ansage nennt immer die eigene Dauer oder Wiederholzahl (man weiß also, wie lange die Stille dauert, statt zu raten), und kein Schritt lässt mehr als rund 15 Sekunden Stille nach dem letzten gesprochenen Wort - lieber mehr, kürzere Schritte als wenige, lange. Jede Aktivität endet außerdem mit einem kurzen, spürbar abschließenden Satz statt einfach mitten im Ablauf aufzuhören. Dadurch sind alle drei Aktivitäten insgesamt kürzer als ursprünglich grob geplant (siehe [8]) - bewusst, ein gut getaktetes 1,5-Minuten-Programm ist besser als ein schlecht getaktetes 5-Minuten-Programm. Die tatsächlichen Sprechzeiten wurden per echter `speechSynthesis`-Wiedergabe gemessen, nicht nur geschätzt.
 
 **Die Pausenzeit hat Vorrang vor der Aktivität** (Änderung 26.08.): dauert die gewählte Aktivität länger als die Pause (z. B. beim Testen mit kurzen Pausenzeiten, oder wenn das Kurzfeedback die Pause selbst nicht betrifft, aber die Aktivität-Presets fix sind), blockiert das nicht den Weiterknopf — die Aktivitätsanzeige wird einfach ausgeblendet, sobald die Pausenzeit abgelaufen ist, die Aktivität endet quasi mit der Pause. Vorher musste die Aktivität immer erst zu Ende laufen, auch wenn die Pause selbst schon lange vorbei war.
 
