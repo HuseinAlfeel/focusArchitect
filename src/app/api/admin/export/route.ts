@@ -153,11 +153,12 @@ async function cyclesCsv() {
     }
 
     // Wird sequenziell mitgefuehrt statt je Runde aus der vorherigen
-    // CycleFeedback abgeleitet: bei einer selbst gestarteten Pause gibt es
-    // kein CycleFeedback fuer diese Runde (siehe BREAK_SELF_INITIATED oben),
-    // die naechste Runde laeuft aber trotzdem mit dem unveraenderten Wert
-    // weiter - der Tracker haelt das fest, ohne bei fehlendem Feedback auf
-    // null zurueckzufallen.
+    // CycleFeedback abgeleitet: falls doch einmal eine Runde ohne
+    // CycleFeedback endet, laeuft die naechste Runde trotzdem mit dem
+    // unveraenderten Wert weiter - der Tracker haelt das fest, ohne bei
+    // fehlendem Feedback auf null zurueckzufallen. Seit 17.09. bekommt auch
+    // eine selbst gestartete Pause (BREAK_SELF_INITIATED) ein CycleFeedback
+    // wie jede andere Runde, siehe SPEZIFIKATION.md [7].
     let workMinTracker = session.initialWorkMin;
 
     for (const cycle of [...cycleNumbers].sort((a, b) => a - b)) {

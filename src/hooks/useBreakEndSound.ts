@@ -3,13 +3,16 @@
 import { useEffect, useRef } from "react";
 import { playNudgeSound } from "@/lib/nudgeSound";
 
-const COUNTDOWN_SECONDS = 10;
+const COUNTDOWN_SECONDS = 9;
 
 /**
- * Kündigt das Ende der Pause akustisch an: in den letzten 10 Sekunden ein
- * leiser Klopf-Ton pro Sekunde ("soft-mallet"), bei 0 ein klares, deutliches
+ * Kündigt das Ende der Pause akustisch an: bei 9, 8, 7 ... 1 je ein
+ * deutlich hörbarer Klopf-Ton ("soft-mallet"), bei 0 ein klares, lautes
  * Signal ("double-chime") - vorher gab es hier gar keinen Ton, das Ende der
- * Pause ging komplett unbemerkt vorbei.
+ * Pause ging komplett unbemerkt vorbei. Der Klopf-Ton war zuerst deutlich
+ * leiser als das Endsignal (Intensität 0.4 statt 0.9) - Husin hat ihn davor
+ * zweimal (26.08. und 17.09.) als "gar nicht da" gemeldet, gehört wurde nur
+ * das laute Endsignal. Jetzt beide auf derselben Lautstärkeebene.
  *
  * Der 200ms-Takt reicht im Vordergrund locker, um jede einzelne Sekunde zu
  * treffen - aber ein gedrosselter Hintergrund-Tab (Husin ist ja meistens
@@ -42,7 +45,7 @@ export function useBreakEndSound(breakEndsAt: number, active: boolean) {
       const secondsLeft = Math.ceil(remainingMs / 1000);
       if (secondsLeft <= COUNTDOWN_SECONDS && !firedRef.current.has(secondsLeft)) {
         firedRef.current.add(secondsLeft);
-        playNudgeSound(0.4, "soft-mallet");
+        playNudgeSound(0.9, "soft-mallet");
       }
     }
 

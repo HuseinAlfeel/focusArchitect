@@ -140,12 +140,12 @@ export function SessionTimer({
     }
   }
 
-  // Eigene Entscheidung statt Reaktion auf einen Systemhinweis: kein Stufe
-  // (kein `nudgeStage`), also gibt es auch nichts, was das Kurzfeedback "war
-  // der Zeitpunkt passend?" sinnvoll bewerten könnte - deshalb direkt zur
-  // Aktivitätsauswahl, ohne FEEDBACK-Zustand. pendingWorkMin bleibt dabei
-  // unangetastet (null, siehe useRoundTimer), die nächste Runde läuft damit
-  // automatisch mit dem bisherigen Wert weiter.
+  // Eigene Entscheidung statt Reaktion auf einen Systemhinweis, aber genau
+  // deshalb (Husin, 17.09.) trotzdem durchs Kurzfeedback: "War der Zeitpunkt
+  // passend?" beantwortet sich hier nicht von selbst nur weil die
+  // Entscheidung freiwillig war - eine Antwort wie "Zu früh" kann genauso
+  // in eine kürzere nächste Runde münden wie beim Reagieren auf den
+  // Systemhinweis.
   async function initiateBreakSelf() {
     if (isTransitioning) return;
     setIsTransitioning(true);
@@ -154,7 +154,7 @@ export function SessionTimer({
       const secondsIntoWork = Math.round((Date.now() - workStartedAt) / 1000);
       await logEvent("BREAK_SELF_INITIATED", { cycleNumber: cycle, secondsIntoWork });
       setHasReacted(true);
-      setRound("ACTIVITY_CHOICE", Date.now());
+      setRound("FEEDBACK", Date.now());
     } finally {
       setIsTransitioning(false);
     }

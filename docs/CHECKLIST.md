@@ -282,9 +282,9 @@ npm install -D @types/bcryptjs
 - [ ] Knopf „Sitzung beenden" oben rechts, klar erkennbar, aber nicht dominant (Änderung 12.09.: erst
       Textlink, dann Knopf unten links hinter dem Next.js-Dev-Icon). Rückfrage über ein eigenes
       Bestätigungsfenster statt des nativen Browser-Dialogs
-- [ ] Knopf „Pause jetzt starten" unten rechts, genauso zurückhaltend (ergänzt 14.09.), nur sichtbar vor dem
-      Pausenhinweis. Beendet die Runde sofort, direkt weiter zur Aktivitätsauswahl — kein Kurzfeedback, keine
-      Intervallanpassung für diese Runde. Ereignis `BREAK_SELF_INITIATED` mit
+- [x] Knopf „Pause jetzt starten" unten rechts, genauso zurückhaltend (ergänzt 14.09.), nur sichtbar vor dem
+      Pausenhinweis. Beendet die Runde sofort, danach wie bei jeder Runde das Kurzfeedback (seit 17.09., davor
+      übersprungen), erst dann weiter zur Aktivitätsauswahl. Ereignis `BREAK_SELF_INITIATED` mit
       `payload: { cycleNumber, secondsIntoWork }`, in `cycles.csv` über `reactionType: "SELF_INITIATED"` sichtbar
 - [ ] Page Visibility API: `TAB_HIDDEN` und `TAB_VISIBLE` protokollieren
 - [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
@@ -331,9 +331,10 @@ npm install -D @types/bcryptjs
 > bewertet die gerade zu Ende gegangene Arbeitsphase, das lässt sich direkt danach am zuverlässigsten beantworten.
 > Die hier entschiedene neue Arbeitszeit wird erst nach der Pause tatsächlich angewendet (F7 folgt danach).
 >
-> **Ausnahme (ergänzt 14.09.):** Bei selbst gestarteter Pause (`BREAK_SELF_INITIATED`, siehe F5) entfällt
-> dieser Schritt komplett — es gab keinen Systemhinweis, den man bewerten könnte. Direkt weiter zur
-> Aktivitätsauswahl, die nächste Runde läuft unverändert mit der bisherigen Arbeitszeit.
+> **Selbst gestartete Pause (ergänzt 14.09., korrigiert 17.09.):** Auch bei `BREAK_SELF_INITIATED` (siehe F5)
+> kommt dieser Schritt jetzt genauso — bis 17.09. entfiel er hier, weil es keinen Systemhinweis gab, den man
+> bewerten könnte, aber eine freiwillig früh beendete Runde kann genauso "Zu früh" sein und soll genauso die
+> nächste Rundenlänge beeinflussen können.
 
 - [ ] Drei Knöpfe: zu früh / passend / zu spät
 - [ ] Bei zu früh oder zu spät: Zähler in 5-Minuten-Schritten, frei nach oben oder unten
@@ -355,8 +356,11 @@ npm install -D @types/bcryptjs
 - [ ] Jeder Anleitungsschritt einmal per `speechSynthesis` vorgelesen (ergänzt 14.09., `useSpeech.ts`) —
       deutsche Stimme falls verfügbar, `rate` 0.9, Schalter „Sprachausgabe an/aus" (Vorgabe an),
       `SPEECH_TOGGLED`-Ereignis, kein Fehler falls die API fehlt. Nur hier, nicht in Arbeitsphase/Pausenhinweis
-- [ ] Letzte 10 Sekunden der Pause: leiser Klopf-Countdown, bei 0 ein klares Signal ("Pause vorbei") — vorher
-      endete die Pause komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (Husin, 09.08.)
+- [x] Bei 9, 8, 7 … 1 ein Klopf-Ton, bei 0 ein klares Signal ("Pause vorbei") — vorher endete die Pause
+      komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (Husin, 09.08.). Der Klopf-Ton war anfangs
+      deutlich leiser als das Endsignal, dadurch kaum zu hören (Husin, 26.08. und erneut 17.09.) — jetzt auf
+      derselben Lautstärke, verifiziert per Playwright (unmockierte Echtzeit-Pause, `page.clock` würde bei
+      zwei parallelen Intervallen Ticks verschlucken): genau neun Klopftöne plus Endsignal, im Sekundenabstand
 - [ ] Am Ende **kein** automatischer Rücksprung, sondern Knopf „Sitzung starten" (die im F8-Kurzfeedback
       entschiedene Arbeitszeit für die nächste Runde wird hier angewendet)
 - [ ] `BREAK_STARTED`, `BREAK_ENDED`

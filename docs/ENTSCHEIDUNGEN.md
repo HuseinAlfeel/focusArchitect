@@ -614,3 +614,34 @@ Projektdateien war die Analogie nie falsch dokumentiert, das war ein reiner Fehl
 vier Stufen und deutlich darüber hinaus durchlaufen, danach per `psql` geprüft: genau drei
 `NUDGE_SOUND_PLAYED`-Ereignisse insgesamt, bei Stufe 1/2/3, keins bei Stufe 0, keine Wiederholung nach
 Stufe 3.
+
+## 17.09.2026 Pausenende-Countdown lauter, Kurzfeedback jetzt auch nach selbst gestarteter Pause
+
+**Entscheidung:** Zwei getrennte Korrekturen, beide von Husin gemeldet:
+1. `useBreakEndSound.ts`: die Klopftöne der letzten Sekunden vor Pausenende liefen bisher mit Intensität 0.4,
+   das Endsignal (`double-chime`) mit 0.9 - reichlich leiser, dadurch praktisch unhörbar neben dem lauten
+   Endsignal. Jetzt beide auf 0.9. Zusätzlich `COUNTDOWN_SECONDS` von 10 auf 9 korrigiert, damit die Klopftöne
+   wirklich bei 9 beginnen und nicht bei 10.
+2. `session-timer.tsx`, `initiateBreakSelf`: eine selbst gestartete Pause ("Pause jetzt starten") sprang bisher
+   direkt zur Aktivitätsauswahl, ohne das Kurzfeedback ("War der Zeitpunkt der Pause passend?") zu zeigen -
+   Begründung war, es gäbe keinen Systemhinweis, den man bewerten könnte. Jetzt läuft sie stattdessen wie jede
+   andere Runde erst durchs Kurzfeedback (`setRound("FEEDBACK", ...)` statt `setRound("ACTIVITY_CHOICE", ...)`),
+   keine neue Komponente nötig, die bestehende `FeedbackScreen`/`handleFeedbackSubmitted`-Logik greift
+   unverändert.
+**Begründung:** Husin hat den leisen Countdown zweimal gemeldet (schon am 26.08., dann erneut heute) - er hört
+nur das laute Endsignal, nicht die Klopftöne davor, das Gegenteil vom beabsichtigten "beep beep runterzählen".
+Beim Kurzfeedback wollte er die Frage auch nach einer freiwillig beendeten Runde gestellt haben: eine Antwort
+wie "Zu früh" ist genauso aussagekräftig, egal ob die Runde durch den Systemhinweis oder aus eigenem Antrieb
+endete, und soll genauso die nächste Rundenlänge beeinflussen können.
+**Bezug:** SPEZIFIKATION.md Abschnitt [9] (Countdown) und [7]/[BREAK_SELF_INITIATED] (Kurzfeedback-Ausnahme
+entfernt), CHECKLIST.md F5/F7/F9, `src/app/api/admin/export/route.ts` (Kommentar zu `workMinTracker`
+korrigiert - CycleFeedback existiert jetzt auch für selbst gestartete Pausen, die Export-Logik selbst brauchte
+keine Änderung, sie liest ohnehin generisch über die Rundennummer).
+**Getestet:** Countdown-Ton per Playwright ohne `page.clock` (echte 1-Minuten-Pause, reale Zeit) verifiziert,
+mit einem Patch auf `OscillatorNode.prototype.start` mitgeschnitten: genau neun Klopftöne im Sekundenabstand
+(9 bis 1) plus die zwei Töne des Endsignals - exakt wie beabsichtigt. Mit `page.clock` und großen
+`fastForward`-Sprüngen kam anfangs fälschlich gar kein Ton an - lag am Test, nicht am Code: zwei parallel
+laufende Intervalle (200ms/1000ms), bei einem einzigen großen Sprung über viele fällige Ticks hinweg verschluckt
+die simulierte Uhr offenbar Wiederholungen. Mit echter Zeit reproduzierbar korrekt. Die selbst gestartete Pause
+end-zu-Ende durchgeklickt (P01, Testdaten danach entfernt): "Pause jetzt starten" → Kurzfeedback erscheint →
+"Passend" → Aktivitätsauswahl → Pause, wie vorgesehen.
