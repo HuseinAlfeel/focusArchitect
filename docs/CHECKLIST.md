@@ -311,9 +311,12 @@ npm install -D @types/bcryptjs
 - [ ] Zusätzlich zur Ton-Eskalation: solange nicht reagiert wurde, zeigt die Hinweis-Karte/das Modal eine
       **Überzeit**-Anzeige (`+MM:SS`, seit wann der Zielzeitpunkt überschritten ist), damit die Anzeige nach
       Ablauf nicht einfach leer bleibt (steht seit 25.08. direkt in der Karte, vorher separat und vom Modal verdeckt)
-- [ ] Eigene Ton-Eskalation (mit Husin abgestimmt, Zeitplan siehe `useNudgeSoundSchedule.ts`): −30s/0s/+1min/
-      +2min/+3min sanfter Sinuston steigender Lautstärke, ab +4min pulsierender Ton jede weitere Minute —
-      protokolliert als `NUDGE_SOUND_PLAYED`
+- [x] Ton-Eskalation direkt an die vier Stufen gekoppelt (`useNudgeStageSound.ts`, Befund der Betreuung 17.09.,
+      ersetzt den vorherigen eigenen Zeitplan in `useNudgeSoundSchedule.ts`): ein Ton je erreichter Stufe, Stufe 0
+      tonlos, Stufe 1 leiser Sinuston, Stufe 2 etwas deutlicherer Glockenton, Stufe 3 klarer aufsteigender Ton,
+      danach keine Wiederholung — protokolliert als `NUDGE_SOUND_PLAYED`. Verifiziert per Playwright
+      (`page.clock`, alle vier Stufen und weit darüber hinaus durchlaufen): genau drei Ereignisse, keins bei
+      Stufe 0, keins wiederholt nach Stufe 3
 - [ ] Hinweis-Karte/-Modal nur bei `state === "WORK"` rendern, nicht nur bei `!hasReacted` (Bugfix 14.09.) —
       sonst kann nach einem Reload mitten in Pause/Kurzfeedback/Aktivitätsauswahl der alte Hinweis der
       vorherigen Runde wieder aufscheinen, weil `hasReacted` (anders als der Rundenzustand) nicht in

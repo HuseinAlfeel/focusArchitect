@@ -594,3 +594,23 @@ allerersten Versuch, den Stack lokal hochzufahren, bevor die isolierte Test-Env-
 bemerkt und mit der korrekten `DATABASE_URL` (aus `docker-compose.dev.yml` rekonstruiert) sowie einem neuen
 `SESSION_SECRET` wiederhergestellt. Einzige Auswirkung: bestehende Login-Cookies in deinem Browser sind
 ungültig geworden, einmal neu einloggen genügt.
+
+## 17.09.2026 Ton-Eskalation an die vier Stufen gekoppelt
+
+**Entscheidung:** Die bisherige eigene Ton-Zeitschiene (`useNudgeSoundSchedule.ts`, sieben und mehr Töne über
+die ganze Sequenz, ab einem Punkt jede Minute wiederholt) ersetzt durch `useNudgeStageSound.ts`: genau ein Ton
+je erreichter Stufe, direkt an `useNudgeStage` gekoppelt statt an einen eigenen Zeitplan. Stufe 0 bleibt
+tonlos, Stufe 1 ein leiser Sinuston, Stufe 2 ein etwas deutlicherer Glockenton, Stufe 3 ein klarer
+aufsteigender Ton. Danach keine Wiederholung mehr.
+**Begründung:** Befund der Betreuung nach Durchsicht der Eskalationslogik - sieben Töne in einer Sequenz waren
+mehr, als die Eskalation eigentlich braucht, und ein Ton bei Stufe 0 hätte aus dem kaum bewusst wahrnehmbaren
+Übergang eine hörbare Vorwarnung gemacht. Die Eskalation soll über Deutlichkeit laufen, nicht über
+Wiederholung - passt zur Auto-Analogie: das ist die abgestufte Geschwindigkeitsrückmeldung im Auto, nicht die
+Tankanzeige.
+**Bezug:** SPEZIFIKATION.md Abschnitt [6], CHECKLIST.md F6. Korrigiert dabei auch eine falsche Formulierung
+der Auto-Analogie in einem früheren Chat-Bericht von mir (dort stand fälschlich "Tankwarnung") - in den
+Projektdateien war die Analogie nie falsch dokumentiert, das war ein reiner Fehler in meiner Zusammenfassung.
+**Getestet:** Per Playwright (`page.clock`, isolierte Test-Session außerhalb der echten Teilnehmerdaten) alle
+vier Stufen und deutlich darüber hinaus durchlaufen, danach per `psql` geprüft: genau drei
+`NUDGE_SOUND_PLAYED`-Ereignisse insgesamt, bei Stufe 1/2/3, keins bei Stufe 0, keine Wiederholung nach
+Stufe 3.

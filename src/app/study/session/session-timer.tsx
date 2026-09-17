@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCountdown, formatRemaining, formatRemainingMinutes } from "@/hooks/useCountdown";
 import { useRoundTimer } from "@/hooks/useRoundTimer";
 import { useTabVisibilityLogging } from "@/hooks/useTabVisibilityLogging";
-import { useNudgeSoundSchedule } from "@/hooks/useNudgeSoundSchedule";
+import { useNudgeStageSound } from "@/hooks/useNudgeStageSound";
 import { useNudgeStage } from "@/hooks/useNudgeStage";
 import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
@@ -87,7 +87,7 @@ export function SessionTimer({
 
   useTabVisibilityLogging(sessionId, cycle);
   useActivityTicks(sessionId, cycle);
-  useNudgeSoundSchedule(nudgeEndsAt, sessionId, state === "WORK" && !hasReacted);
+  useNudgeStageSound(nudgeStage, sessionId, state === "WORK" && !hasReacted);
   useNudgeStageLogging(sessionId, cycle, nudgeEndsAt, nudgeStage, state === "WORK" && !hasReacted);
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;

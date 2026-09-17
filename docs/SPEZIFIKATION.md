@@ -215,7 +215,9 @@ Erlaubte Interaktion: „Sitzung beenden" — eine klar erkennbare Schaltfläche
 
 ### [6] Der abgestufte Pausenhinweis
 
-Das ist deine Umsetzung der Auto-Analogie und **das Herzstück der Arbeit**. Vier Stufen:
+Das ist deine Umsetzung der Auto-Analogie und **das Herzstück der Arbeit**. Gemeint ist die abgestufte
+Geschwindigkeitsrückmeldung im Auto (nicht die Tankanzeige) - die Rückmeldung wird bei zunehmender
+Überschreitung stufenweise deutlicher, nicht schlagartig alarmierend. Vier Stufen:
 
 | Stufe | Zeitpunkt | Gestaltung |
 |---|---|---|
@@ -230,7 +232,7 @@ Optionen für Nutzende bei jeder Stufe: Pause starten, Noch 5 Minuten oder über
 
 Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist) — sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
 
-> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (30–60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen: eine eigene, mit Husin abgestimmte Ton-Eskalation (−30s/0s/+1min/+2min sanfter Sinuston, ab +3min pulsierender Ton jede weitere Minute), protokolliert als `NUDGE_SOUND_PLAYED`.
+> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (30–60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen, direkt an die vier Stufen gekoppelt statt nach eigenem Zeitplan: **ein Ton je erreichter Stufe**, Stufe 0 bleibt tonlos (der Übergang soll kaum bewusst wahrnehmbar bleiben, ein Ton dort wäre eine hörbare Vorwarnung), Stufe 1 ein leiser Sinuston, Stufe 2 ein etwas deutlicherer Glockenton, Stufe 3 ein klarer aufsteigender Ton — danach keine Wiederholung mehr, die Eskalation läuft über Deutlichkeit, nicht über Wiederholung. Protokolliert als `NUDGE_SOUND_PLAYED` (Befund der Betreuung, 17.09.).
 
 ### [7] Kurzfeedback und Anpassung
 
