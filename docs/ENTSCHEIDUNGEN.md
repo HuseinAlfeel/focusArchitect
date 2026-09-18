@@ -791,3 +791,53 @@ Verbindungslimit sprengt.
 `src/generated/prisma` gelöscht und neu gebaut wurde - `prisma generate` erzeugt den Client (ohne
 DB-Verbindung, braucht also beim Build keine Datenbank), danach kompiliert Next fehlerfrei. Das eigentliche
 Deployment steht noch aus, die Schritte stehen in CHECKLIST.md I0.
+
+## 18.09.2026 Datenverlust-Prüfung der ganzen App, zwei echte Funde behoben
+
+**Anlass:** Husin nach dem "Nein"-Fehler in der Vorbefragung: "ich will nicht jemandem Feedback oder Daten
+verlieren ... jeder Nutzer ist extrem wertvoll". Deshalb die App einmal gezielt darauf durchgesehen, wo
+Teilnehmerdaten verloren gehen, überschrieben oder falsch zugeordnet werden können.
+
+**Fund 1 (der schwerste): eine zweite Einwilligung legte eine zweite, leere Sitzung an.**
+`POST /api/session` hat bedingungslos eine neue Sitzung erzeugt, und `/study/consent` war nach dem Einwilligen
+weiterhin erreichbar - per Zurück-Taste, Reload oder Lesezeichen. Weil **alle** Seiten die Sitzung per
+`findFirst` mit `orderBy: createdAt desc` holen, hätte die App danach mit der neuen, leeren Sitzung
+weitergearbeitet: Vorbefragung, Ereignisse und Kurzfeedback der ersten Sitzung wären unsichtbar geworden, die
+Person hätte von vorn angefangen und die Nachbefragung wäre an der leeren Sitzung gelandet. Gelöscht wurde
+dabei nie etwas (die Daten lägen weiter in der Datenbank), aber im Export stünde diese Person als zwei kaputte
+Hälften - und genau eine Person fehlt dann in der Auswertung. Reproduziert, bevor repariert: zwei Aufrufe von
+`POST /api/session` ergaben zwei Sitzungszeilen.
+**Behoben in zwei Schichten:** `POST /api/session` gibt eine vorhandene Sitzung zurück, statt eine zweite
+anzulegen, und `/study/consent` leitet nach `/study` weiter, sobald eine Einwilligung vorliegt. Beides
+zusammen, weil die Seitenweiche allein einen wiederholten API-Aufruf nicht abfängt und die API-Prüfung allein
+den verwirrenden Einwilligungsbildschirm stehen lassen würde. Die Bedingung der Weiterleitung ist genau die
+Umkehrung der Weiche in `/study`, dadurch ist eine Weiterleitungsschleife ausgeschlossen (die wäre ihrerseits
+eine Blockade gewesen).
+
+**Fund 2: die Ereignis-Warteschlange konnte sich dauerhaft verstopfen und Ereignisse falsch zuordnen.**
+In `eventQueue.ts` brach `flush()` bei jeder nicht erfolgreichen Antwort ab und behielt den Stapel. Bei einer
+Antwort, die der Server **nie** annimmt (400 ungültig, 404 Sitzung gibt es nicht), hätte das ewig wiederholt -
+und alles, was dahinter in der Schlange steht, wäre nie gesendet worden, also der ganze Rest der Sitzung.
+Zusätzlich wurde die `sessionId` nur aus dem **ersten** Eintrag gelesen und auf den ganzen Stapel angewendet:
+lagen noch Reste einer älteren Sitzung in `localStorage` (harter Browser-Absturz, `sendBeacon` nicht
+durchgekommen), wären neue Ereignisse unter der alten Sitzung gelandet - stille Falschzuordnung, die im Export
+gar nicht auffällt und damit schlimmer ist als ein Verlust.
+**Behoben:** Ein Stapel enthält nur noch Ereignisse derselben Sitzung, und ein dauerhaft abgelehnter Stapel
+(400/404) wird verworfen, statt alles dahinter zu blockieren - das rettet mehr Daten, als ihn zu behalten.
+Netzwerkfehler, 401 (abgelaufenes Cookie) und 5xx bleiben liegen und werden weiter wiederholt, die können beim
+nächsten Versuch klappen. `flushWithBeacon` hatte denselben sessionId-Fehler und wurde mitkorrigiert.
+
+**Geprüft und in Ordnung (keine Änderung nötig):**
+- `prisma/seed.ts` arbeitet mit `upsert` und fasst nur `passwordHash`/`role` an - ein erneuter Seed-Lauf gegen
+  die Produktionsdatenbank löscht keine Sitzungen. Wichtig für den Vercel/Neon-Weg, wo der Seed von Hand läuft.
+- Nirgends im App-Code wird gelöscht (`delete`/`deleteMany` kommen nur im generierten Prisma-Client vor), und
+  keine Migration enthält `DROP`/`TRUNCATE`.
+- `end`, `reopen`, `finalize`, `start` setzen ausschließlich Zeitstempel und überschreiben nie Antworten.
+- Die Nachbefragung hat nicht denselben Fehler wie die Vorbefragung: Formular und Server prüfen beide gegen
+  dieselbe Liste `requiredPostSurveyIds`, die optionalen Freitextfelder stehen nicht darin.
+- Der Export filtert nichts: `findMany` ohne `where` über Sitzungen, Runden und Ereignisse. Auch eine
+  abgebrochene oder nie finalisierte Sitzung taucht auf, niemand verschwindet still aus den Daten.
+
+**Bekannt und bewusst so (kein Fehler, gehört in die Limitationen):** Bei einem harten Absturz des Browsers
+können bis zu 10 Sekunden Ereignisse fehlen - der reguläre Takt sendet alle 10s, beim normalen Schließen
+greift `sendBeacon`. Befragungsantworten sind davon nicht betroffen, die gehen direkt beim Absenden raus.

@@ -70,10 +70,25 @@ async function flush() {
     // sehen als der Browser, was useRoundTimer beim nächsten Reload zum
     // Zurückfallen auf den (dann veralteten) Serverstand verleiten kann.
     while (queue.length > 0) {
-      const batch = queue.slice(0, MAX_BATCH_SIZE);
-      const sessionId = batch[0].sessionId;
+      const sessionId = queue[0].sessionId;
+      // Nur Ereignisse derselben Sitzung in einen Stapel: der Server
+      // schreibt alle Ereignisse eines Aufrufs unter die eine mitgeschickte
+      // sessionId. Liegen noch Reste einer aelteren Sitzung in localStorage
+      // (harter Browser-Absturz, sendBeacon nicht durchgekommen) und kommen
+      // neue dazu, waeren die neuen sonst unter der alten Sitzung gelandet -
+      // stille Falschzuordnung, schlimmer als ein Verlust, weil sie im
+      // Export nicht auffaellt.
+      let end = 0;
+      while (
+        end < queue.length &&
+        end < MAX_BATCH_SIZE &&
+        queue[end].sessionId === sessionId
+      ) {
+        end++;
+      }
+      const batch = queue.slice(0, end);
 
-      let ok: boolean;
+      let status: number | null = null;
       try {
         const response = await fetch("/api/events", {
           method: "POST",
@@ -81,15 +96,30 @@ async function flush() {
           body: JSON.stringify({ sessionId, events: toWireEvents(batch) }),
           keepalive: true,
         });
-        ok = response.ok;
+        status = response.status;
       } catch {
-        ok = false;
+        status = null; // Netzwerkfehler, spaeter erneut versuchen
       }
 
-      if (!ok) break; // nächster Versuch beim nächsten Tick
+      if (status !== null && status >= 200 && status < 300) {
+        queue = queue.slice(batch.length);
+        writeStorage();
+        continue;
+      }
 
-      queue = queue.slice(batch.length);
-      writeStorage();
+      // 400 (ungueltig) und 404 (Sitzung gibt es nicht) nimmt der Server nie
+      // an - ewiges Wiederholen wuerde alles blockieren, was dahinter in der
+      // Schlange steht, und damit den Rest der Sitzung kosten. Diesen einen
+      // Stapel verwerfen und weitermachen rettet mehr Daten, als ihn zu
+      // behalten. Alles andere (Netzwerkfehler, 401 mit abgelaufenem Cookie,
+      // 5xx) kann beim naechsten Versuch klappen und bleibt liegen.
+      if (status === 400 || status === 404) {
+        queue = queue.slice(batch.length);
+        writeStorage();
+        continue;
+      }
+
+      break; // nächster Versuch beim nächsten Tick
     }
   } finally {
     flushing = false;
@@ -99,13 +129,22 @@ async function flush() {
 function flushWithBeacon() {
   if (queue.length === 0 || typeof navigator.sendBeacon !== "function") return;
 
-  const sessionId = queue[0].sessionId;
-
   // sendBeacon ist synchron/fire-and-forget, deshalb hier eine einfache
   // Schleife statt async - genauso in Batches von MAX_BATCH_SIZE, aus dem
-  // gleichen Grund wie in flush().
+  // gleichen Grund wie in flush(), und genauso nur eine Sitzung je Stapel
+  // (die sessionId wurde hier vorher einmal am Anfang gelesen und dann auf
+  // alle Stapel angewendet).
   while (queue.length > 0) {
-    const batch = queue.slice(0, MAX_BATCH_SIZE);
+    const sessionId = queue[0].sessionId;
+    let end = 0;
+    while (
+      end < queue.length &&
+      end < MAX_BATCH_SIZE &&
+      queue[end].sessionId === sessionId
+    ) {
+      end++;
+    }
+    const batch = queue.slice(0, end);
     const blob = new Blob(
       [JSON.stringify({ sessionId, events: toWireEvents(batch) })],
       { type: "application/json" }

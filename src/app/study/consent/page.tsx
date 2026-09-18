@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentParticipant } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { consentContent } from "@/content/consent";
 import { ConsentForm } from "./consent-form";
 
@@ -7,6 +8,20 @@ export default async function ConsentPage() {
   const participant = await getCurrentParticipant();
   if (!participant) {
     redirect("/login");
+  }
+
+  // Wer schon eingewilligt hat, sieht diesen Bildschirm nicht noch einmal -
+  // sonst laesst er sich per Zurueck-Taste erneut absenden. Zweite Haelfte
+  // derselben Absicherung wie in `POST /api/session` (siehe dort). Die
+  // Bedingung ist genau die Umkehrung der Weiche in `/study`, dadurch kann
+  // zwischen den beiden Seiten keine Weiterleitungsschleife entstehen.
+  const session = await prisma.session.findFirst({
+    where: { participantId: participant.sub },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (session?.consentAt) {
+    redirect("/study");
   }
 
   return (

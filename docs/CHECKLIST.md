@@ -209,6 +209,15 @@ npm install -D @types/bcryptjs
 
 *Aufwand: 4 bis 5 Tage. Der Kern.*
 
+> **Datenverlust-Prüfung 18.09.** Die ganze App einmal gezielt darauf durchgesehen, wo Teilnehmerdaten
+> verloren gehen oder falsch zugeordnet werden können - Details und Begründungen in ENTSCHEIDUNGEN.md.
+> Zwei echte Funde behoben: eine zweite Einwilligung legte eine zweite, leere Sitzung an (alle Seiten nehmen
+> per `orderBy: createdAt desc` die neueste, die erste wäre unsichtbar geworden), und die Ereignis-Queue
+> konnte sich an einem dauerhaft abgelehnten Stapel verstopfen bzw. Ereignisse der falschen Sitzung
+> zuordnen. Geprüft und in Ordnung: Seed (`upsert`, löscht nichts), kein `delete` im App-Code, keine
+> destruktive Migration, Lifecycle-Routen setzen nur Zeitstempel, Nachbefragung prüft client- und
+> serverseitig gegen dieselbe Liste, Export filtert nichts weg.
+
 ### F1. Einwilligung (halber Tag)
 
 - [ ] Seite `/study/consent` mit dem abgestimmten Text
