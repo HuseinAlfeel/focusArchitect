@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@/generated/prisma/enums";
 import { consentContent } from "@/content/consent";
 import { ConsentForm } from "./consent-form";
 
@@ -9,13 +8,6 @@ export default async function ConsentPage() {
   const participant = await getCurrentParticipant();
   if (!participant) {
     redirect("/login");
-  }
-
-  // Gleiche Absicherung wie in /study: das ADMIN-Konto soll keine
-  // Studiensitzung anlegen koennen, auch nicht ueber den direkten Aufruf
-  // dieser Seite.
-  if (participant.role === Role.ADMIN) {
-    redirect("/admin");
   }
 
   // Wer schon eingewilligt hat, sieht diesen Bildschirm nicht noch einmal -

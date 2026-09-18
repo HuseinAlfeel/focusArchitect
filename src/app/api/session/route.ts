@@ -1,11 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Role } from "@/generated/prisma/enums";
 
 export async function POST(request: NextRequest) {
   const participant = await getCurrentParticipant();
   if (!participant) {
     return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
+  }
+
+  // Zweiter Riegel neben der Weiche in src/app/study/layout.tsx: das
+  // ADMIN-Konto legt keine Studiensitzung an. Die Weiche schuetzt nur die
+  // Seiten, ein direkter Aufruf dieser Schnittstelle kaeme daran vorbei.
+  if (participant.role === Role.ADMIN) {
+    return NextResponse.json(
+      { error: "Das Admin-Konto nimmt nicht an der Studie teil." },
+      { status: 403 }
+    );
   }
 
   const body = await request.json().catch(() => null);

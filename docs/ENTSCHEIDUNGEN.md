@@ -1039,6 +1039,15 @@ Einwilligung. Beim ersten Ausprobieren in Produktion wurde die Einwilligung mit 
 durchgeklickt, dadurch stand ADMIN als ganz normale Teilnehmerzeile im Export. Das Konto ist zum Auswerten
 da, zum Ausprobieren des Ablaufs gibt es PILOT.
 
-**Getestet:** Als ADMIN führen `/study` und `/study/consent` beide mit 307 auf `/admin`, `/admin` selbst
-antwortet mit 200. Gegenprobe mit PILOT: kommt weiterhin normal auf die Einwilligung. Danach null Sitzungen
-in der Datenbank, der Test hat also keine angelegt.
+**Erster Versuch war unvollständig, nachgebessert am selben Tag:** Die Prüfung stand zuerst nur in
+`/study` und `/study/consent`. Unter `/study` liegen aber sechs Seiten, und `/study/pre` liess sich als ADMIN
+weiterhin direkt aufrufen. Aufgefallen ist das beim Nachprüfen in der Produktion, nicht mir. Jetzt liegt die
+Regel in `src/app/study/layout.tsx` und gilt damit automatisch für alles darunter, auch für Seiten, die
+später dazukommen. Die beiden Einzelprüfungen sind wieder raus, damit die Regel nur an einer Stelle steht.
+Zusätzlich lehnt `POST /api/session` das ADMIN-Konto mit 403 ab, denn eine Seitenweiche schützt nicht gegen
+einen direkten Aufruf der Schnittstelle.
+
+**Getestet:** Als ADMIN führen alle sechs Seiten (`/study`, `consent`, `pre`, `session`, `post`, `complete`)
+mit 307 auf `/admin`, der direkte Aufruf von `POST /api/session` antwortet mit 403. Gegenprobe mit PILOT:
+kommt weiterhin normal auf die Einwilligung. Danach null Sitzungen in der Datenbank, der Test hat also keine
+angelegt.
