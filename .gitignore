@@ -52,3 +52,11 @@ skills-lock.json
 .claude/
 .windsurf/
 .agents/
+
+# Datenbank-Sicherungen. Sie enthalten alle Teilnehmerdaten UND die
+# Passwort-Hashes der Accounts und duerfen nie ins Repo. Die Migrationen
+# unter prisma/migrations und das Reset-Skript unter scripts/ bleiben
+# ausdruecklich versioniert, deshalb wird hier nur der Projektstamm gesperrt.
+/*.sql
+/sicherung*.sql
+/dump*.sql
