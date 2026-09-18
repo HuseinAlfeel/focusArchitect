@@ -497,12 +497,19 @@ bricht der Build bei Vercel mit "Cannot find module '@/generated/prisma'" ab). L
 - [ ] **Migration und Seed von deinem Laptop aus** (nicht bei Vercel, denn `prisma/seed.ts` braucht
       `credentials.local.json` mit den echten Teilnehmer-Passwörtern - die soll nie auf einen fremden Server):
       ```
-      # in der Powershell, mit dem DIREKTEN String:
+      # NEUES Powershell-Fenster, mit dem DIREKTEN String:
       $env:DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require"
+
+      # Sicherheitsschritt: zeigt an, mit welcher Datenbank gesprochen wird
+      npx prisma migrate status
+
       npx prisma migrate deploy
       npx prisma db seed
       ```
-      Danach einmal prüfen: `npx prisma studio` zeigt die zwölf Accounts.
+      Die gesetzte Variable übersteuert die lokale `.env` (geprüft), aber genau deshalb vorher einmal
+      `migrate status` laufen lassen: die Ausgabe nennt den Host in Klartext. Steht dort `localhost`, ist die
+      Variable nicht angekommen, und Migration und Seed würden in die lokale Testdatenbank laufen statt nach
+      Neon. Danach prüfen: `npx prisma studio` zeigt die zwölf Accounts.
 - [ ] **Projekt bei Vercel verbinden:** vercel.com → "Add New Project" → das GitHub-Repo `focusArchitect`
       auswählen. Framework wird automatisch als Next.js erkannt, Build-Command nicht anfassen.
 - [ ] **Region auf Frankfurt stellen:** Vercel → Projekt → Settings → Functions → Region `Frankfurt (fra1)`.
