@@ -645,7 +645,16 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
       stillschweigend mitgerechnet.
 - [ ] **Fehlende Felder jetzt ergänzen.** Nach der Studie geht das nicht mehr.
 - [ ] Gefundene Fehler beheben
-- [ ] Testdaten aus der Datenbank löschen (oder als PILOT markiert lassen und bei der Auswertung ausschließen)
+- [ ] **Testdaten aus der Produktionsdatenbank löschen, bevor die echten Teilnehmenden anfangen.** Fertiges
+      Skript: `scripts/studiendaten-zuruecksetzen.sql`. Vorher eine Sicherung ziehen.
+      ```
+      docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > sicherung.sql
+      docker run --rm -i postgres:16 psql "DIREKTER_NEON_STRING" -v ON_ERROR_STOP=1 < scripts/studiendaten-zuruecksetzen.sql
+      ```
+      Das ist keine Kosmetik: eine Person hat genau eine Sitzung. Liegt für einen Code schon eine
+      Testsitzung mit Einwilligung und Vorbefragung vor, bekommt die echte Person genau diese Sitzung wieder
+      vorgesetzt. Sie sieht dann weder Einwilligung noch Vorbefragung, sondern landet direkt im laufenden
+      Timer der Testsitzung, und ihre Daten hängen an der alten Sitzung.
 - [ ] Frisches Backup ziehen
 
 > **Fertig, wenn:** Eine fremde Person kam ohne deine Hilfe durch den gesamten Ablauf.
