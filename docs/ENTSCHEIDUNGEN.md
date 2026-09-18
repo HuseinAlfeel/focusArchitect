@@ -904,3 +904,38 @@ hier.
 
 **Zu beachten:** Der Wert wirkt nur auf **neu angelegte** Sitzungen. Sitzungen, die schon existieren, haben
 ihre 25 gespeichert und behalten sie. Zum Testen also mit einem Code starten, der noch keine Sitzung hat.
+
+## 18.09.2026 Zwei gleichzeitig offene Fenster beschädigen die Daten, Gegenmaßnahme ist die Anweisung
+
+**Beobachtung:** Beim Testen war die App gleichzeitig in zwei Browsern für denselben Teilnehmer offen, in
+beiden wurde "Pause starten" geklickt. Ergebnis in den Daten von P01: jede Nudge-Stufe doppelt protokolliert
+(die Fenster liefen 4 Sekunden versetzt), zwei `BREAK_ACCEPTED`, zwei `BREAK_STARTED` und **zwei
+widersprechende Kurzfeedbacks für dieselbe Runde** (einmal minus 20 Minuten, einmal minus 5). Dazu über die
+ganze Sitzung doppelte `ACTIVITY_TICK`, was die Aktivitätswerte verdoppelt.
+
+**Warum das so ist:** Der Rundenzustand (WORK, FEEDBACK, ACTIVITY_CHOICE, BREAK) liegt je Tab im
+`sessionStorage`. Der Server kann daraus nur die Arbeitsrunde rekonstruieren, über das jüngste
+`WORK_STARTED`. Von einer laufenden Pause weiß er nichts. Ein zweites Fenster startet deshalb immer in der
+Arbeitsphase und steuert die Sitzung unabhängig weiter, beide Ereignisströme landen aber in derselben
+Sitzung. Dieselbe Ursache erklärt auch die doppelten `BREAK_STARTED` in älteren Testsitzungen (P05 Runde 2,
+P07 Runde 1): dort wurde mitten in einer Pause neu geladen.
+
+**Das eigentlich Gefährliche:** Der Export nimmt bei mehrdeutigen Runden den ersten Treffer
+(`cycleEvents.find(...)`, `session.cycles.find(...)`) und verwirft den Rest stillschweigend. Es kommt eine
+ganz normal aussehende Zeile heraus, in der nichts darauf hindeutet, dass es eine zweite, widersprüchliche
+Realität gab. Ein Fehler, den man am Ergebnis nicht sieht, ist schlimmer als einer, der kracht.
+
+**Entscheidung:** Kein technischer Zwang, sondern die Anweisung. Die erste Zeile im Hinweiskasten vor dem
+Start heißt jetzt "Die App läuft in genau einem Fenster, und das bleibt sichtbar", bestätigt per Pflichthäkchen.
+Dazu eine Prüfabfrage in PHASE J der Checkliste, die doppelt gesteuerte Runden findet.
+
+**Warum nicht spiegeln:** Damit zwei Fenster denselben Stand zeigen, müsste der Server die alleinige Wahrheit
+über den Rundenzustand werden und Änderungen aktiv an alle Fenster schicken, dazu käme Konfliktauflösung bei
+gleichzeitigen Klicks. Das ist eine andere Architektur und misst nichts, was diese Arbeit untersucht. Bei
+zehn Teilnehmenden mit je einer Sitzung steht der Aufwand in keinem Verhältnis.
+
+**Offen, falls der Probelauf zeigt, dass die Anweisung nicht reicht:** Ein serverseitiger Riegel wäre
+machbar, ohne die Architektur umzubauen. Die Sitzung merkt sich, welches Fenster sie zuletzt beansprucht hat,
+und ein Fenster, das den Anspruch verliert, zeigt statt der Sitzung nur noch den Hinweis "Diese Sitzung ist
+in einem anderen Fenster geöffnet". Schätzung rund eine halbe Stunde. Bewusst nicht vorab gebaut, weil es vor
+dem Einfrieren zusätzliche Fehlerfläche wäre und die Anweisung den realistischen Fall abdeckt.

@@ -610,6 +610,23 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?
 - [ ] Daten exportiert und geprüft: Ist alles drin, was du brauchst?
+- [ ] **Auf doppelt gesteuerte Sitzungen prüfen** (zwei Fenster gleichzeitig offen, oder Neuladen mitten in
+      einer Pause). Diese Abfrage muss leer bleiben, jede Zeile ist eine Runde, die zweimal gesteuert wurde:
+      ```sql
+      select p.code, e.cycle, e.type, count(*)
+      from "Event" e
+      join "Session" s on s.id = e."sessionId"
+      join "Participant" p on p.id = s."participantId"
+      where e.type in ('WORK_STARTED','NUDGE_STAGE_1','BREAK_ACCEPTED','BREAK_SKIPPED',
+                       'CYCLE_FEEDBACK_SUBMITTED','BREAK_STARTED')
+      group by p.code, e.cycle, e.type
+      having count(*) > 1
+      order by p.code, e.cycle, e.type;
+      ```
+      Kommt etwas zurück, ist die Zeile im Export für diese Person nicht verwertbar: bei mehrdeutigen Runden
+      nimmt der Export den ersten Treffer und verwirft den Rest stillschweigend, die Zeile sieht danach
+      völlig normal aus. Solche Sitzungen gehören wiederholt oder in den Limitationen benannt, nicht
+      stillschweigend mitgerechnet.
 - [ ] **Fehlende Felder jetzt ergänzen.** Nach der Studie geht das nicht mehr.
 - [ ] Gefundene Fehler beheben
 - [ ] Testdaten aus der Datenbank löschen (oder als PILOT markiert lassen und bei der Auswertung ausschließen)

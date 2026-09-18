@@ -21,10 +21,20 @@
 // etwas anderes gemessen als bei den uebrigen neun. Das Haekchen ist
 // Pflicht, der Startknopf bleibt ohne es gesperrt. Damit gilt fuer jede
 // gestartete Sitzung, dass die Bedingungen zur Kenntnis genommen wurden.
+//
+// "genau einem Fenster" steht seit 18.09. bewusst in der ersten Zeile.
+// Zwei gleichzeitig offene Fenster derselben Person steuern die Sitzung
+// unabhaengig voneinander: der Rundenzustand liegt je Tab im
+// sessionStorage, der Server bekommt aber beide Ereignisstroeme. Im Test
+// kamen so jede Nudge-Stufe doppelt, zwei BREAK_ACCEPTED und zwei
+// widersprechende Kurzfeedbacks fuer dieselbe Runde heraus. Der Export
+// nimmt bei mehrdeutigen Runden den ersten Treffer und verwirft den Rest
+// stillschweigend, die Zeile sieht danach voellig normal aus. Deshalb
+// steht es in der Anweisung und nicht nur in der Doku.
 export const sessionStartSetupHint = {
   title: "Kurz vor dem Start, bitte einmal prüfen:",
   points: [
-    "Das Fenster mit der App bleibt sichtbar, zum Beispiel auf einem Viertel bis einem Drittel des Bildschirms daneben oder auf einem zweiten Bildschirm.",
+    "Die App läuft in genau einem Fenster, und das bleibt sichtbar: zum Beispiel auf einem Viertel bis einem Drittel des Bildschirms daneben oder auf einem zweiten Bildschirm.",
     "Der Ton ist an und nicht stummgeschaltet.",
     "Du arbeitest an deiner eigenen, echten Aufgabe.",
   ],
