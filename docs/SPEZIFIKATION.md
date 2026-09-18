@@ -76,7 +76,7 @@ Falls du doch Vercel nimmst: **EU-Region wählen** (Frankfurt) und für die Date
 ```
 
 > **Reihenfolge am 09.08. geändert:** Kurzfeedback (ehemals [9]) kommt jetzt direkt nach der Reaktion auf den
-> Pausenhinweis, noch vor Aktivitätsauswahl und Pause — nicht danach. Begründung: Die Frage "war der Zeitpunkt
+> Pausenhinweis, noch vor Aktivitätsauswahl und Pause, nicht danach. Begründung: Die Frage "war der Zeitpunkt
 > passend" bewertet die gerade beendete Arbeitsphase; das lässt sich direkt im Anschluss zuverlässiger beantworten
 > als erst nach einer mehrminütigen Pause. Die dort entschiedene neue Arbeitszeit wird erst beim Sitzungsstart
 > nach der Pause angewendet.
@@ -182,12 +182,12 @@ Seite.
 
 Block D ist eine Baseline-Einschätzung des typischen Befindens, kein Sitzungsvergleich mehr - der
 verlässlichere Vergleichswert für die Nachbefragung wird jetzt direkt vor der Sitzung erhoben, siehe [4]. Die
-frühere Frage nach der typischen Konzentration (D2) ist seit 14.09. ersatzlos gestrichen (Husins Vorgabe) -
+frühere Frage nach der typischen Konzentration (D2) ist seit 14.09. ersatzlos gestrichen (Vorgabe) -
 Erschöpfung allein reicht als Baseline-Trait, `focusAtStart` aus [4] deckt Konzentration bereits situativ ab.
 
 Bei B2 und B3 erscheint die jeweilige Anschlussfrage nur bei „Ja".
 
-**B3 hängt zusätzlich an B2 (Änderung 17.09., Husins Hinweis):** Wer bei „Machst du bewusst Pausen?" mit Nein
+**B3 hängt zusätzlich an B2 (Änderung 17.09., Hinweis):** Wer bei „Machst du bewusst Pausen?" mit Nein
 antwortet, wurde vorher trotzdem gefragt, ob er *Hilfsmittel für Pausen* nutzt - das ergibt keinen Sinn und
 wirkte wie eine verdrehte Logik. Jetzt erscheinen bei Nein weder die Anzahl-Frage noch B3. B4 („Beschreibe
 kurz, wie du Pausen machst") bleibt bewusst in beiden Fällen sichtbar: auch „ich mache keine" ist eine
@@ -206,9 +206,11 @@ durch eine Zwischenseite mehr.
 - Freitextfeld: „Woran wirst du in dieser Sitzung arbeiten?" (eine Zeile, wird gespeichert)
 - „Wie ausgeruht fühlst du dich jetzt gerade?" - Skala 1–7
 - „Wie konzentriert fühlst du dich jetzt gerade?" - Skala 1–7
+- Kurzer Hinweiskasten „Kurz vor dem Start, bitte einmal prüfen" mit drei Zeilen und einem
+  Bestätigungshäkchen (ergänzt 18.09., siehe unten)
 - Dezenter Hinweistext: Startwerte (25/5 Minuten) plus kurze Erklärung, dass sich das über das Kurzfeedback
   anpasst
-- Ein großer, primärer Knopf „🚀 Fokus-Sitzung starten" - löst `PATCH /api/session/:id/start` aus und
+- Ein großer, primärer Knopf „Fokus-Sitzung starten" - löst `PATCH /api/session/:id/start` aus und
   springt bei Erfolg **sofort** zur Timer-Ansicht [5], ohne Zwischenstation über das Dashboard
 
 Die beiden Skalenwerte (ergänzt 12.09., Prioritaet 2) ersetzen das alte V7 aus der Vorbefragung. Eine Messung
@@ -216,13 +218,29 @@ unmittelbar vor der Sitzung ist ein verlässlicherer Vergleichswert als eine Ein
 Zustands, und beide Werte lassen sich direkt gegen N1/N2 aus der Nachbefragung stellen. Gespeichert als
 eigene Felder auf `Session` (`restedAtStart`, `focusAtStart`), landen aber trotzdem in `participants.csv`.
 
+**Hinweiskasten mit Bestätigungshäkchen (ergänzt 18.09.):** Drei Zeilen direkt über dem Startknopf, Text in
+`session-start.ts`: Fenster sichtbar lassen (ein Viertel bis ein Drittel des Bildschirms daneben oder zweiter
+Bildschirm), Ton an, eigene echte Aufgabe. Darunter ein Pflichthäkchen „Passt alles, ich kann loslegen",
+ohne das der Startknopf gesperrt bleibt.
+
+Die Erklärseite „So funktioniert die App" vor der Vorbefragung [3] bleibt daneben bestehen, sie erklärt den
+Ablauf. Zwischen dem Lesen dort und dem echten Sitzungsstart liegen aber rund zehn Minuten Fragebogen, und
+wer das Fenster danach zurechtrücken soll, hat es bis dahin vergessen. Deshalb hier noch einmal kurz die
+Bedingungen, die wirklich erfüllt sein müssen.
+
+Das ist keine Formalie: bleibt das Fenster im Hintergrund, wirkt die visuelle Eskalation [6] bei dieser
+Person gar nicht, und dann wird bei ihr etwas anderes gemessen als bei den übrigen neun. Weil der Startknopf
+ohne Häkchen gesperrt ist, gilt für jede gestartete Sitzung, dass die Bedingungen zur Kenntnis genommen
+wurden. Das lässt sich so in Kapitel 6.4 schreiben, ohne dass es dafür ein eigenes Feld in der Datenbank
+braucht.
+
 ### [5] Arbeitsphase
 
 **Der wichtigste Bildschirm, und der muss fast leer sein.** Das ist der Kern deiner Forschungsfrage: Wenn dieser Bildschirm ablenkt, hast du dein eigenes Prinzip verletzt.
 
-Sichtbar: die verbleibende Zeit als M:SS, groß und in einem dezenten Rahmen, aber weiterhin kontrastarm (Änderung 12.09., Betreuung: zurückhaltend heißt nicht unlesbar - die Lösung ist große Schrift bei wenig Kontrast, nicht kleine Schrift). Die Sekundenanzeige war für ein paar Stunden am 12.09. testweise auf Minuten reduziert, noch am selben Tag auf Husins Wunsch wieder auf M:SS zurückgestellt (Details siehe ENTSCHEIDUNGEN.md). Zusätzlich ein sehr sanfter, langsam atmender Farbfleck im Hintergrund (kühl für die Arbeitsphase, warm für die Pause) - rein dekorativ, keine Kennzahl, keine schnelle Bewegung. Darüber klein und kontrastarm: „Fokus · Runde N" bzw. „Pause · Runde N", damit erkennbar ist, welche Phase gerade läuft (dieselbe schon gespeicherte Zyklusnummer, keine eigene Zählung). Sonst nichts. Kein Fortschrittsbalken der zappelt, keine Statistiken, keine Motivationssprüche.
+Sichtbar: die verbleibende Zeit als M:SS, groß und in einem dezenten Rahmen, aber weiterhin kontrastarm (Änderung 12.09., Betreuung: zurückhaltend heißt nicht unlesbar - die Lösung ist große Schrift bei wenig Kontrast, nicht kleine Schrift). Die Sekundenanzeige war für ein paar Stunden am 12.09. testweise auf Minuten reduziert, noch am selben Tag auf meinen Wunsch wieder auf M:SS zurückgestellt (Details siehe ENTSCHEIDUNGEN.md). Zusätzlich ein sehr sanfter, langsam atmender Farbfleck im Hintergrund (kühl für die Arbeitsphase, warm für die Pause) - rein dekorativ, keine Kennzahl, keine schnelle Bewegung. Darüber klein und kontrastarm: „Fokus · Runde N" bzw. „Pause · Runde N", damit erkennbar ist, welche Phase gerade läuft (dieselbe schon gespeicherte Zyklusnummer, keine eigene Zählung). Sonst nichts. Kein Fortschrittsbalken der zappelt, keine Statistiken, keine Motivationssprüche.
 
-Erlaubte Interaktion: „Sitzung beenden" — eine klar erkennbare Schaltfläche oben rechts (Änderung 12.09.: vorher ein kaum sichtbarer Textlink, dann ein kleiner Knopf unten links, der aber hinter dem Next.js-Entwicklungs-Icon steckte), erkennbar ohne dominant zu sein. Rückfrage vor dem Beenden über ein eigenes Bestätigungsfenster im Stil des Pausenhinweises, nicht mehr über den nativen Browser-Dialog. Dazu, ebenso zurückhaltend, unten rechts: „Pause jetzt starten" (ergänzt 14.09.) - lässt die Person die Pause aus eigenem Antrieb beginnen, ohne auf den Pausenhinweis zu warten. Siehe `BREAK_SELF_INITIATED` weiter unten.
+Erlaubte Interaktion: „Sitzung beenden": eine klar erkennbare Schaltfläche oben rechts (Änderung 12.09.: vorher ein kaum sichtbarer Textlink, dann ein kleiner Knopf unten links, der aber hinter dem Next.js-Entwicklungs-Icon steckte), erkennbar ohne dominant zu sein. Rückfrage vor dem Beenden über ein eigenes Bestätigungsfenster im Stil des Pausenhinweises, nicht mehr über den nativen Browser-Dialog. Dazu, ebenso zurückhaltend, unten rechts: „Pause jetzt starten" (ergänzt 14.09.) - lässt die Person die Pause aus eigenem Antrieb beginnen, ohne auf den Pausenhinweis zu warten. Siehe `BREAK_SELF_INITIATED` weiter unten.
 
 ### [6] Der abgestufte Pausenhinweis
 
@@ -239,19 +257,19 @@ Geschwindigkeitsrückmeldung im Auto (nicht die Tankanzeige) - die Rückmeldung 
 
 **Hintergrundfarbe eskaliert seit 17.09. mit (Betreuung):** Bis dahin gab es nur einen einzigen Zielton ab Stufe 0, der über alle vier Stufen konstant blieb. Jetzt wandert er mit jeder erreichten Stufe eine Nuance weiter - Beige `#f6e7cd` (Stufe 0/1), gedämpftes Bernstein `#f0cd94` (Stufe 2), gedämpftes Terrakotta `#dd9b6c` (Stufe 3) - dasselbe Ampelschema wie die Auto-Analogie, aber gedämpft: „Auffallen statt erschrecken" bleibt das Prinzip, kein reines Rot.
 
-> **Nachgeschärft am 17.09., nachdem Husin die Eskalation live getestet hat:** Die erste Fassung war mit `#fdf3e6`/`#f6ddb8`/`#efc9a8` und 60-Sekunden-Übergängen auf **allen** Stufen praktisch unsichtbar - Husins Rückmeldung war „ich sehe NUR weiß". Nachgemessen am gerenderten Bildschirm: Stufe 1 landete nach 60 Sekunden bei `rgb(253,243,230)`, also 2/12/25 RGB-Punkte neben Weiß, und lag 10 Sekunden nach dem Stufenwechsel noch bei `rgb(255,253,251)`. Zwei Korrekturen: deutlich kräftigere Farbstufen (siehe oben) und der 60-Sekunden-Übergang gilt nur noch für **Stufe 0**, wo er laut Spezifikation absichtlich unmerklich sein soll. Ab Stufe 1 sind es 15 Sekunden - die Farbe ist dort ein Hinweis, der ankommen soll. Gemessen erreicht Stufe 1 jetzt `rgb(246,231,205)`, Stufe 2 `rgb(240,205,148)` und Stufe 3 `rgb(221,155,108)`, jeweils innerhalb von etwa 15 Sekunden. **Lehre daraus für künftige Gestaltungsänderungen:** Es reicht nicht zu prüfen, dass der richtige Zielwert gesetzt wird - es muss am gerenderten Bild geprüft werden, ob man die Änderung auch sieht.
+> **Nachgeschärft am 17.09., nach dem Live-Test der Eskalation:** Die erste Fassung war mit `#fdf3e6`/`#f6ddb8`/`#efc9a8` und 60-Sekunden-Übergängen auf **allen** Stufen praktisch unsichtbar - Die Rückmeldung war „ich sehe NUR weiß". Nachgemessen am gerenderten Bildschirm: Stufe 1 landete nach 60 Sekunden bei `rgb(253,243,230)`, also 2/12/25 RGB-Punkte neben Weiß, und lag 10 Sekunden nach dem Stufenwechsel noch bei `rgb(255,253,251)`. Zwei Korrekturen: deutlich kräftigere Farbstufen (siehe oben) und der 60-Sekunden-Übergang gilt nur noch für **Stufe 0**, wo er laut Spezifikation absichtlich unmerklich sein soll. Ab Stufe 1 sind es 15 Sekunden - die Farbe ist dort ein Hinweis, der ankommen soll. Gemessen erreicht Stufe 1 jetzt `rgb(246,231,205)`, Stufe 2 `rgb(240,205,148)` und Stufe 3 `rgb(221,155,108)`, jeweils innerhalb von etwa 15 Sekunden. **Lehre daraus für künftige Gestaltungsänderungen:** Es reicht nicht zu prüfen, dass der richtige Zielwert gesetzt wird - es muss am gerenderten Bild geprüft werden, ob man die Änderung auch sieht.
 
 **Jede erreichte Stufe wird protokolliert, ebenso die Stufe, bei der reagiert wurde.** Das ist eines deiner wertvollsten Ergebnisse: Bei welcher Stufe reagieren Menschen tatsächlich? Reicht Stufe 1? Braucht es Stufe 3? Das ist ein echter Befund, den du in der Diskussion auswerten kannst.
 
-Optionen für Nutzende bei jeder Stufe: Pause starten, Noch 5 Minuten oder überspringen. Zwischen 09.08. und 25.08. gab es nur die ersten beiden Optionen (**kein** "5 Minuten verschieben") — ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, war durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt. Am 25.08. kam „Noch 5 Minuten" als dritte Option zurück, aber als eigenständiges Ereignis `BREAK_SNOOZED`: es ändert nicht die Rundenlänge (das bleibt weiterhin Aufgabe des Kurzfeedbacks), sondern verschiebt nur, wann der Hinweis erneut erscheint — Details siehe Abschnitt 4, „Ereignistypen für das Log". „Überspringen" umgeht dabei wirklich Aktivitätsauswahl [8] und Pause [9] — nach dem Kurzfeedback geht es direkt in die nächste Arbeitsrunde, nicht nur mit anderem Ereignisnamen durch denselben Ablauf wie „Pause starten".
+Optionen für Nutzende bei jeder Stufe: Pause starten, Noch 5 Minuten oder überspringen. Zwischen 09.08. und 25.08. gab es nur die ersten beiden Optionen (**kein** "5 Minuten verschieben"), ein blindes Verlängern der laufenden Arbeitsphase ohne anzugeben, um wie viel, war durch das direkt anschließende Kurzfeedback [7] ersetzt, das explizit nach Minuten fragt. Am 25.08. kam „Noch 5 Minuten" als dritte Option zurück, aber als eigenständiges Ereignis `BREAK_SNOOZED`: es ändert nicht die Rundenlänge (das bleibt weiterhin Aufgabe des Kurzfeedbacks), sondern verschiebt nur, wann der Hinweis erneut erscheint. Details siehe Abschnitt 4, „Ereignistypen für das Log". „Überspringen" umgeht dabei wirklich Aktivitätsauswahl [8] und Pause [9], nach dem Kurzfeedback geht es direkt in die nächste Arbeitsrunde, nicht nur mit anderem Ereignisnamen durch denselben Ablauf wie „Pause starten".
 
-Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist) — sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
+Solange nicht reagiert wurde, zeigt der Bildschirm zusätzlich zur Restzeit-Anzeige auch eine **Überzeit** an (`+MM:SS`, wie lange der Zielzeitpunkt schon überschritten ist), sonst verschwindet die Zeitanzeige nach Ablauf ersatzlos, was sich anfühlt, als würde nichts mehr passieren.
 
-> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Die Karte blendet beim ersten Erscheinen (Stufe 1) einmalig per CSS-Keyframe ein (~400ms), das Wachsen zu Stufe 2 läuft über eine weiche `transition` statt eines Sprungs. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen, direkt an die vier Stufen gekoppelt statt nach eigenem Zeitplan: **ein Ton je erreichter Stufe**, Stufe 0 bleibt tonlos (der Übergang soll kaum bewusst wahrnehmbar bleiben, ein Ton dort wäre eine hörbare Vorwarnung), Stufe 1 ein leiser Sinuston, Stufe 2 ein etwas deutlicherer Glockenton, Stufe 3 ein klarer aufsteigender Ton — danach keine Wiederholung mehr, die Eskalation läuft über Deutlichkeit, nicht über Wiederholung. Protokolliert als `NUDGE_SOUND_PLAYED` (Befund der Betreuung, 17.09.). Alle drei Töne mit weichem Einsatz (~50ms Anstieg, nichts beginnt schlagartig) und im mittleren Frequenzbereich (ca. 500–900 Hz) statt schrill hoch - Feinabstimmung ebenfalls Befund der Betreuung, 17.09., zum Anhören/Kalibrieren gibt es `/admin/sound-check`.
+> **Technischer Hinweis:** Die Farbübergänge über CSS-Transitions mit langer Dauer (60 Sekunden) lösen, nicht per JavaScript-Animation. Ruhiger und billiger. Die Karte blendet beim ersten Erscheinen (Stufe 1) einmalig per CSS-Keyframe ein (~400ms), das Wachsen zu Stufe 2 läuft über eine weiche `transition` statt eines Sprungs. Ebenfalls per Web Audio API synthetisiert statt aus Audiodateien geladen, direkt an die vier Stufen gekoppelt statt nach eigenem Zeitplan: **ein Ton je erreichter Stufe**, Stufe 0 bleibt tonlos (der Übergang soll kaum bewusst wahrnehmbar bleiben, ein Ton dort wäre eine hörbare Vorwarnung), Stufe 1 ein leiser Sinuston, Stufe 2 ein etwas deutlicherer Glockenton, Stufe 3 ein klarer aufsteigender Ton, danach keine Wiederholung mehr, die Eskalation läuft über Deutlichkeit, nicht über Wiederholung. Protokolliert als `NUDGE_SOUND_PLAYED` (Befund der Betreuung, 17.09.). Alle drei Töne mit weichem Einsatz (~50ms Anstieg, nichts beginnt schlagartig) und im mittleren Frequenzbereich (ca. 500–900 Hz) statt schrill hoch - Feinabstimmung ebenfalls Befund der Betreuung, 17.09., zum Anhören/Kalibrieren gibt es `/admin/sound-check`.
 
 ### [7] Kurzfeedback und Anpassung
 
-> **Wichtig (Änderung 09.08.):** Dieser Schritt kommt jetzt direkt nach der Reaktion auf den Pausenhinweis, **noch vor** Aktivitätsauswahl und Pause. Die Frage bewertet die gerade beendete Arbeitsphase — das lässt sich direkt danach zuverlässiger beantworten als erst nach einer mehrminütigen Pause. Die neue Arbeitszeit wird erst beim „Sitzung starten"-Knopf nach der Pause tatsächlich angewendet.
+> **Wichtig (Änderung 09.08.):** Dieser Schritt kommt jetzt direkt nach der Reaktion auf den Pausenhinweis, **noch vor** Aktivitätsauswahl und Pause. Die Frage bewertet die gerade beendete Arbeitsphase, das lässt sich direkt danach zuverlässiger beantworten als erst nach einer mehrminütigen Pause. Die neue Arbeitszeit wird erst beim „Sitzung starten"-Knopf nach der Pause tatsächlich angewendet.
 
 Maximal 20 Sekunden Aufwand:
 
@@ -264,7 +282,7 @@ Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
 
 **Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle zehn Personen von 25 auf 35 gehen, hast du einen Befund.
 
-**Selbst gestartete Pause (ergänzt 14.09., korrigiert 17.09.):** Auch bei einer selbst gestarteten Pause (Knopf „Pause jetzt starten" während der Arbeitsphase, `BREAK_SELF_INITIATED`) kommt direkt danach dasselbe Kurzfeedback wie sonst. Bis 17.09. entfiel es hier komplett, mit der Begründung, es gäbe keinen Systemhinweis, dessen Zeitpunkt man bewerten könnte - Husin wollte die Frage trotzdem gestellt haben: eine freiwillig früh beendete Runde kann genauso auf „Zu früh" hindeuten wie eine, bei der man auf den Hinweis reagiert hat, und soll genauso die nächste Rundenlänge beeinflussen können.
+**Selbst gestartete Pause (ergänzt 14.09., korrigiert 17.09.):** Auch bei einer selbst gestarteten Pause (Knopf „Pause jetzt starten" während der Arbeitsphase, `BREAK_SELF_INITIATED`) kommt direkt danach dasselbe Kurzfeedback wie sonst. Bis 17.09. entfiel es hier komplett, mit der Begründung, es gäbe keinen Systemhinweis, dessen Zeitpunkt man bewerten könnte - ich wollte die Frage trotzdem gestellt haben: eine freiwillig früh beendete Runde kann genauso auf „Zu früh" hindeuten wie eine, bei der man auf den Hinweis reagiert hat, und soll genauso die nächste Rundenlänge beeinflussen können.
 
 ### [8] Aktivitätsauswahl
 
@@ -291,13 +309,13 @@ dem letzten Schritt erscheint wieder die normale, große Pausenuhr für die rest
 
 **Sprachausgabe für die Anleitung** (ergänzt 14.09.): Bei „Augenentlastung" schaut man bewusst vom Bildschirm weg - ein reiner Anleitungstext lässt sich in dem Moment nicht lesen, bei „Nacken und Schultern" abgeschwächt genauso. Jeder Schritt wird deshalb einmal per `speechSynthesis` (Web Speech API, keine externe Bibliothek/kein Dienst) vorgelesen: deutsche Stimme falls verfügbar, sonst Standardstimme, Sprechgeschwindigkeit leicht reduziert (`rate` 0.9). Schalter „Sprachausgabe: an/aus" direkt bei der Anleitung, Voreinstellung an, protokolliert als `SPEECH_TOGGLED` mit `{ enabled }`. Ist `speechSynthesis` nicht verfügbar, erscheint kein Fehler, nur der Text wie zuvor. Ausschließlich hier - nicht in der Arbeitsphase, nicht beim Pausenhinweis.
 
-**Taktung der Schritte überarbeitet (17.09., Husin hat das zweimal gemeldet):** Ursprünglich dauerten einzelne Schritte 30-90 Sekunden bei einem einzigen kurzen Satz am Anfang - bei „Aufstehen und bewegen" etwa ein Satz, dann rund 85 Sekunden reine Stille. Unbegleitet wirkt das nicht wie eine unterstützte Übung, sondern wie ein Hänger. Jetzt gilt für jeden Schritt in `activities.ts`: die Ansage nennt immer die eigene Dauer oder Wiederholzahl (man weiß also, wie lange die Stille dauert, statt zu raten), und kein Schritt lässt mehr als rund 15 Sekunden Stille nach dem letzten gesprochenen Wort - lieber mehr, kürzere Schritte als wenige, lange. Jede Aktivität endet außerdem mit einem kurzen, spürbar abschließenden Satz statt einfach mitten im Ablauf aufzuhören. Dadurch sind alle drei Aktivitäten insgesamt kürzer als ursprünglich grob geplant (siehe [8]) - bewusst, ein gut getaktetes 1,5-Minuten-Programm ist besser als ein schlecht getaktetes 5-Minuten-Programm. Die tatsächlichen Sprechzeiten wurden per echter `speechSynthesis`-Wiedergabe gemessen, nicht nur geschätzt.
+**Taktung der Schritte überarbeitet (17.09., zweimal aufgefallen):** Ursprünglich dauerten einzelne Schritte 30-90 Sekunden bei einem einzigen kurzen Satz am Anfang - bei „Aufstehen und bewegen" etwa ein Satz, dann rund 85 Sekunden reine Stille. Unbegleitet wirkt das nicht wie eine unterstützte Übung, sondern wie ein Hänger. Jetzt gilt für jeden Schritt in `activities.ts`: die Ansage nennt immer die eigene Dauer oder Wiederholzahl (man weiß also, wie lange die Stille dauert, statt zu raten), und kein Schritt lässt mehr als rund 15 Sekunden Stille nach dem letzten gesprochenen Wort - lieber mehr, kürzere Schritte als wenige, lange. Jede Aktivität endet außerdem mit einem kurzen, spürbar abschließenden Satz statt einfach mitten im Ablauf aufzuhören. Dadurch sind alle drei Aktivitäten insgesamt kürzer als ursprünglich grob geplant (siehe [8]) - bewusst, ein gut getaktetes 1,5-Minuten-Programm ist besser als ein schlecht getaktetes 5-Minuten-Programm. Die tatsächlichen Sprechzeiten wurden per echter `speechSynthesis`-Wiedergabe gemessen, nicht nur geschätzt.
 
-**Die Pausenzeit hat Vorrang vor der Aktivität** (Änderung 26.08.): dauert die gewählte Aktivität länger als die Pause (z. B. beim Testen mit kurzen Pausenzeiten, oder wenn das Kurzfeedback die Pause selbst nicht betrifft, aber die Aktivität-Presets fix sind), blockiert das nicht den Weiterknopf — die Aktivitätsanzeige wird einfach ausgeblendet, sobald die Pausenzeit abgelaufen ist, die Aktivität endet quasi mit der Pause. Vorher musste die Aktivität immer erst zu Ende laufen, auch wenn die Pause selbst schon lange vorbei war.
+**Die Pausenzeit hat Vorrang vor der Aktivität** (Änderung 26.08.): dauert die gewählte Aktivität länger als die Pause (z. B. beim Testen mit kurzen Pausenzeiten, oder wenn das Kurzfeedback die Pause selbst nicht betrifft, aber die Aktivität-Presets fix sind), blockiert das nicht den Weiterknopf, die Aktivitätsanzeige wird einfach ausgeblendet, sobald die Pausenzeit abgelaufen ist, die Aktivität endet quasi mit der Pause. Vorher musste die Aktivität immer erst zu Ende laufen, auch wenn die Pause selbst schon lange vorbei war.
 
-Bei 9, 8, 7 … 1 je ein Klopf-Ton, bei 0 ein klares akustisches Signal — sonst endet die Pause komplett unbemerkt, wenn man nicht gerade auf den Bildschirm schaut (Änderung 09.08.). Der Countdown prüft zusätzlich bei jedem `visibilitychange` sofort nach (Änderung 26.08.), statt nur auf den nächsten 200ms-Tick zu warten — sonst kann ein gedrosselter Hintergrund-Tab das enge Ein-Sekunden-Fenster einzelner Klopftöne verpassen, während das robustere Endsignal trotzdem ankommt. Die Klopftöne waren anfangs deutlich leiser als das Endsignal, dadurch kaum wahrnehmbar (Husin hat zweimal, 26.08. und 17.09., berichtet, nur das Endsignal gehört zu haben) - seit 17.09. auf derselben Lautstärke wie das Endsignal.
+Bei 9, 8, 7 … 1 je ein Klopf-Ton, bei 0 ein klares akustisches Signal, sonst endet die Pause komplett unbemerkt, wenn man nicht gerade auf den Bildschirm schaut (Änderung 09.08.). Der Countdown prüft zusätzlich bei jedem `visibilitychange` sofort nach (Änderung 26.08.), statt nur auf den nächsten 200ms-Tick zu warten, sonst kann ein gedrosselter Hintergrund-Tab das enge Ein-Sekunden-Fenster einzelner Klopftöne verpassen, während das robustere Endsignal trotzdem ankommt. Die Klopftöne waren anfangs deutlich leiser als das Endsignal, dadurch kaum wahrnehmbar (zweimal, 26.08. und 17.09., kam nur das Endsignal an) - seit 17.09. auf derselben Lautstärke wie das Endsignal.
 
-Am Ende: Knopf „Sitzung starten" — **nicht automatisch zurückspringen**, das wäre selbst eine Störung. Die im Kurzfeedback [7] entschiedene Arbeitszeit wird jetzt angewendet, die nächste Runde beginnt.
+Am Ende: Knopf „Sitzung starten", **nicht automatisch zurückspringen**, das wäre selbst eine Störung. Die im Kurzfeedback [7] entschiedene Arbeitszeit wird jetzt angewendet, die nächste Runde beginnt.
 
 ### [10] Nachbefragung
 

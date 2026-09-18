@@ -1,4 +1,4 @@
-// Von Husin am 04.08.2026 freigegeben, um weiterzubauen. Inhalt mit der
+// Am 04.08.2026 freigegeben, um weiterzubauen. Inhalt mit der
 // Betreuung Ende August 2026 besprochen, hier umgesetzt am 12.09.2026: kein
 // Ethikvotum nötig, Phase A damit im Kern abgeschlossen. Aufbewahrungsfrist
 // auf konkretes Datum 11.11.2027 (ein Jahr nach der ursprünglich geplanten
@@ -23,7 +23,7 @@ export const consentContent = {
     },
     {
       heading: "Wo und wie lange werden die Daten gespeichert?",
-      body: "Die Daten werden auf einem Server in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum 11.11.2027 aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
+      body: "Die Daten werden bei einem Hosting-Dienstleister mit Serverstandort in Deutschland gespeichert und ausschließlich für die Zwecke dieser Bachelorarbeit verwendet. Sie werden bis zum 11.11.2027 aufbewahrt und danach gelöscht, sofern du nicht vorher eine frühere Löschung verlangst.",
     },
     {
       heading: "Freiwilligkeit",

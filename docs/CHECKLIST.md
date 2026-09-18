@@ -242,7 +242,7 @@ npm install -D @types/bcryptjs
       Änderung 17.09.): bei „Nein" auf „Machst du bewusst Pausen?" entfallen Anzahl-Frage und B3 komplett,
       B4 („Beschreibe kurz, wie du Pausen machst") bleibt in beiden Fällen sichtbar. Nicht gestellte Fragen
       werden nicht mitgespeichert (Spalte im Export leer). Regel liegt als `isPreSurveyItemVisible` in
-      `pre-survey.ts` und gilt für Formular **und** `POST /api/survey` — lagen die beiden auseinander, liess
+      `pre-survey.ts` und gilt für Formular **und** `POST /api/survey`. Lagen die beiden auseinander, liess
       sich die Vorbefragung mit „Nein" gar nicht mehr absenden (genau das im Test aufgefallen)
 - [ ] Validierung: alle Pflichtfelder des jeweiligen Schritts ausgefüllt
 - [ ] `POST /api/survey` mit `phase: "PRE"` (beide Schritte zusammen als eine Antwort)
@@ -258,7 +258,13 @@ npm install -D @types/bcryptjs
       fühlst du dich jetzt gerade?" - ersetzen das alte V7 aus der Vorbefragung, landen als eigene
       Session-Felder (`restedAtStart`, `focusAtStart`) in `participants.csv`
 - [ ] Dezenter Hinweistext zu den Startwerten 25/5 und zur späteren Anpassbarkeit
-- [ ] Großer, primärer Knopf „🚀 Fokus-Sitzung starten"
+- [x] Hinweiskasten „Kurz vor dem Start, bitte einmal prüfen" mit drei Zeilen (Fenster sichtbar lassen, Ton
+      an, eigene echte Aufgabe) und Pflichthäkchen „Passt alles, ich kann loslegen" (ergänzt 18.09., Text in
+      `session-start.ts`). Ohne Häkchen bleibt der Startknopf gesperrt. Grund: bleibt das Fenster im
+      Hintergrund, wirkt die visuelle Eskalation bei dieser Person nicht, und dann wird bei ihr etwas
+      anderes gemessen als bei den übrigen neun. Die Erklärseite vor der Vorbefragung bleibt daneben
+      bestehen, zwischen ihr und dem echten Start liegen aber zehn Minuten Fragebogen
+- [ ] Großer, primärer Knopf „Fokus-Sitzung starten"
 - [ ] `PATCH /api/session/:id/start`
 - [ ] Bei Erfolg direkt zu `/study/session`, nicht zurück zum Dashboard (Änderung 14.09.: vorher ein
       zusätzlicher Klick über die Hub-Seite nötig)
@@ -288,11 +294,11 @@ npm install -D @types/bcryptjs
 - [ ] Seite `/study/session`, bewusst fast leer
 - [ ] Restzeit als M:SS (`formatRemaining`), groß und in einem dezenten Rahmen, aber weiterhin kontrastarm
       (Änderung 12.09.: zurückhaltend heißt nicht unlesbar). Arbeitsphase kurzzeitig nur auf Minuten reduziert,
-      auf Husins Wunsch noch am selben Tag wieder auf M:SS zurückgestellt — siehe ENTSCHEIDUNGEN.md
-- [ ] Sehr sanfter, langsam atmender Farbfleck im Hintergrund (`.phase-glow`, kühl bei Arbeit, warm bei Pause) —
+      auf meinen Wunsch noch am selben Tag wieder auf M:SS zurückgestellt, siehe ENTSCHEIDUNGEN.md
+- [ ] Sehr sanfter, langsam atmender Farbfleck im Hintergrund (`.phase-glow`, kühl bei Arbeit, warm bei Pause),
       rein dekorativ, keine Kennzahl (Änderung 12.09., Betreuung: bisheriges Grau-auf-Weiss wirkte zu trocken)
 - [ ] Kleine, kontrastarme Zeile „Fokus · Runde N" / „Pause · Runde N" über der Restzeit (Änderung 12.09.),
-      damit erkennbar ist, welche Phase läuft — nutzt die schon gespeicherte Zyklusnummer
+      damit erkennbar ist, welche Phase läuft, nutzt die schon gespeicherte Zyklusnummer
 - [ ] Knopf „Sitzung beenden" oben rechts, klar erkennbar, aber nicht dominant (Änderung 12.09.: erst
       Textlink, dann Knopf unten links hinter dem Next.js-Dev-Icon). Rückfrage über ein eigenes
       Bestätigungsfenster statt des nativen Browser-Dialogs
@@ -301,7 +307,7 @@ npm install -D @types/bcryptjs
       übersprungen), erst dann weiter zur Aktivitätsauswahl. Ereignis `BREAK_SELF_INITIATED` mit
       `payload: { cycleNumber, secondsIntoWork }`, in `cycles.csv` über `reactionType: "SELF_INITIATED"` sichtbar
 - [ ] Page Visibility API: `TAB_HIDDEN` und `TAB_VISIBLE` protokollieren
-- [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.) — nur bei
+- [ ] Maus-/Tastaturaktivität im Tab aggregiert pro Minute als `ACTIVITY_TICK` (Änderung 26.08.), nur bei
       sichtbarem Tab, keine Inhalte. Einschränkung dokumentieren: misst Interaktion mit der App, nicht die
       echte Arbeitsaktivität außerhalb des Tabs (siehe SPEZIFIKATION.md 4)
 - [x] Immer heller Modus, unabhängig von der Systemeinstellung (Regel 9, Befund der Betreuung 17.09.):
@@ -313,10 +319,10 @@ npm install -D @types/bcryptjs
 
 - [x] **Stufe 0** bei T minus 2 Min: Hintergrund wandert über CSS-Transition (Dauer 60s) nach Beige `#f6e7cd`,
       Zifferfarbe des Timers zieht mit (Betreuung, 17.09.)
-- [x] Farben und Übergangsdauern nachgeschärft (17.09., nach Husins Live-Test „ich sehe NUR weiß"): erste
-      Fassung lag nur 2/12/25 RGB-Punkte neben Weiß und brauchte auf jeder Stufe 60s — gemessen 10s nach
+- [x] Farben und Übergangsdauern nachgeschärft (17.09., nach dem Live-Test, da war schlicht nichts zu sehen): erste
+      Fassung lag nur 2/12/25 RGB-Punkte neben Weiß und brauchte auf jeder Stufe 60s, gemessen 10s nach
       Stufenwechsel noch `rgb(255,253,251)`. Jetzt kräftigere Stufen und 60s nur noch für Stufe 0, ab Stufe 1
-      15s. **Nicht nur den gesetzten Zielwert prüfen, sondern die gerenderte Farbe messen** — genau daran ist
+      15s. **Nicht nur den gesetzten Zielwert prüfen, sondern die gerenderte Farbe messen**, genau daran ist
       die erste Prüfung vorbeigelaufen
 - [x] **Stufe 1** bei 0:00: weiter Beige, kleine ruhige Karte unten rechts mit kurzer Einblendbewegung (~400ms,
       `.animate-nudge-card-in`), ein einzelner leiser Ton
@@ -330,18 +336,18 @@ npm install -D @types/bcryptjs
 - [ ] Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden:
       `BREAK_ACCEPTED`/`BREAK_SKIPPED` mit `payload: { stage, secondsAfterEnd }`
 - [ ] Optionen: Pause starten / Noch 5 Minuten / überspringen. Das Snoozen ("Noch 5 Minuten", Änderung 26.08.,
-      Ereignis `BREAK_SNOOZED`) verschiebt nur die Eskalation, nicht die Rundenlänge — kein Rückfall in das am
+      Ereignis `BREAK_SNOOZED`) verschiebt nur die Eskalation, nicht die Rundenlänge, kein Rückfall in das am
       09.08. entfernte blinde Verlängern der laufenden Runde (das änderte die Rundenlänge ohne Minutenangabe,
       das übernimmt weiterhin ausschließlich das Kurzfeedback F8)
 - [ ] "Überspringen" umgeht wirklich Aktivitätsauswahl und Pause (direkt weiter zur nächsten Arbeitsrunde nach
-      dem Kurzfeedback) — nicht nur ein anderer Ereignisname bei sonst gleichem Ablauf wie "Pause starten"
+      dem Kurzfeedback), nicht nur ein anderer Ereignisname bei sonst gleichem Ablauf wie "Pause starten"
 - [ ] Zusätzlich zur Ton-Eskalation: solange nicht reagiert wurde, zeigt die Hinweis-Karte/das Modal eine
       **Überzeit**-Anzeige (`+MM:SS`, seit wann der Zielzeitpunkt überschritten ist), damit die Anzeige nach
       Ablauf nicht einfach leer bleibt (steht seit 25.08. direkt in der Karte, vorher separat und vom Modal verdeckt)
 - [x] Ton-Eskalation direkt an die vier Stufen gekoppelt (`useNudgeStageSound.ts`, Befund der Betreuung 17.09.,
       ersetzt den vorherigen eigenen Zeitplan in `useNudgeSoundSchedule.ts`): ein Ton je erreichter Stufe, Stufe 0
       tonlos, Stufe 1 leiser Sinuston, Stufe 2 etwas deutlicherer Glockenton, Stufe 3 klarer aufsteigender Ton,
-      danach keine Wiederholung — protokolliert als `NUDGE_SOUND_PLAYED`. Verifiziert per Playwright
+      danach keine Wiederholung, protokolliert als `NUDGE_SOUND_PLAYED`. Verifiziert per Playwright
       (`page.clock`, alle vier Stufen und weit darüber hinaus durchlaufen): genau drei Ereignisse, keins bei
       Stufe 0, keins wiederholt nach Stufe 3
 - [x] Feinabstimmung der drei Töne (`nudgeSound.ts`, Befund der Betreuung 17.09.): weicher Einsatz (~50ms
@@ -352,7 +358,7 @@ npm install -D @types/bcryptjs
       `globals.css`) statt schlagartig dazustehen (Onset nach Hillstrom/Yantis, Befund der Betreuung 17.09.);
       das Wachsen zu Stufe 2 läuft über eine weiche `transition` statt eines Sprungs, dabei rückt die Karte auch
       sichtbar näher zur Mitte (`bottom-6/right-6` → `bottom-8/right-8`)
-- [ ] Hinweis-Karte/-Modal nur bei `state === "WORK"` rendern, nicht nur bei `!hasReacted` (Bugfix 14.09.) —
+- [ ] Hinweis-Karte/-Modal nur bei `state === "WORK"` rendern, nicht nur bei `!hasReacted` (Bugfix 14.09.),
       sonst kann nach einem Reload mitten in Pause/Kurzfeedback/Aktivitätsauswahl der alte Hinweis der
       vorherigen Runde wieder aufscheinen, weil `hasReacted` (anders als der Rundenzustand) nicht in
       `sessionStorage` gesichert wird und bei jedem Neu-Mount auf `false` zurückfällt
@@ -361,13 +367,13 @@ npm install -D @types/bcryptjs
 
 ### F8. Kurzfeedback und Anpassung (halber Tag)
 
-> **Reihenfolge korrigiert (Husin, 09.08.):** Das Kurzfeedback kommt jetzt **direkt nach der Reaktion auf den
-> Pausenhinweis**, noch vor Aktivitätsauswahl und Pause — nicht danach. Die Frage "war der Zeitpunkt passend"
+> **Reihenfolge korrigiert (09.08.):** Das Kurzfeedback kommt jetzt **direkt nach der Reaktion auf den
+> Pausenhinweis**, noch vor Aktivitätsauswahl und Pause, nicht danach. Die Frage "war der Zeitpunkt passend"
 > bewertet die gerade zu Ende gegangene Arbeitsphase, das lässt sich direkt danach am zuverlässigsten beantworten.
 > Die hier entschiedene neue Arbeitszeit wird erst nach der Pause tatsächlich angewendet (F7 folgt danach).
 >
 > **Selbst gestartete Pause (ergänzt 14.09., korrigiert 17.09.):** Auch bei `BREAK_SELF_INITIATED` (siehe F5)
-> kommt dieser Schritt jetzt genauso — bis 17.09. entfiel er hier, weil es keinen Systemhinweis gab, den man
+> kommt dieser Schritt jetzt genauso. Bis 17.09. entfiel er hier, weil es keinen Systemhinweis gab, den man
 > bewerten könnte, aber eine freiwillig früh beendete Runde kann genauso "Zu früh" sein und soll genauso die
 > nächste Rundenlänge beeinflussen können.
 
@@ -388,10 +394,10 @@ npm install -D @types/bcryptjs
       „{Aktivität} · Schritt X von Y", Fortschritts-Ring, größere Anleitung, kleine Zeile mit der
       verbleibenden Gesamtpause. Leiser Übergangston bei jedem Schrittwechsel (`playNudgeSound(0.25,
       "water-drop")`). Nach dem letzten Schritt wieder die normale, große Pausenuhr
-- [ ] Jeder Anleitungsschritt einmal per `speechSynthesis` vorgelesen (ergänzt 14.09., `useSpeech.ts`) —
+- [ ] Jeder Anleitungsschritt einmal per `speechSynthesis` vorgelesen (ergänzt 14.09., `useSpeech.ts`),
       deutsche Stimme falls verfügbar, `rate` 0.9, Schalter „Sprachausgabe an/aus" (Vorgabe an),
       `SPEECH_TOGGLED`-Ereignis, kein Fehler falls die API fehlt. Nur hier, nicht in Arbeitsphase/Pausenhinweis
-- [x] Taktung aller Schritte überarbeitet (`activities.ts`, Husin hat's zweimal gemeldet, 17.09.): vorher ein
+- [x] Taktung aller Schritte überarbeitet (`activities.ts`, zweimal aufgefallen, 17.09.): vorher ein
       Satz und danach 30-85 Sekunden reine Stille pro Schritt, unbegleitet wirkte das wie ein Hänger statt
       einer unterstützten Übung. Jetzt nennt jede Ansage die eigene Dauer/Wiederholzahl, kein Schritt lässt
       mehr als ~15s Stille nach dem letzten Wort, jede Aktivität endet mit einem kurzen Abschlusssatz statt
@@ -399,9 +405,9 @@ npm install -D @types/bcryptjs
       statt 2/3/5 Min) - Sprechzeiten real per `speechSynthesis` gemessen, nicht geschätzt. Per Playwright
       Schritt für Schritt durchlaufen (P01, Testdaten danach entfernt): korrekte Anzahl/Reihenfolge der
       Schritte, danach normale Pausenuhr
-- [x] Bei 9, 8, 7 … 1 ein Klopf-Ton, bei 0 ein klares Signal ("Pause vorbei") — vorher endete die Pause
-      komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (Husin, 09.08.). Der Klopf-Ton war anfangs
-      deutlich leiser als das Endsignal, dadurch kaum zu hören (Husin, 26.08. und erneut 17.09.) — jetzt auf
+- [x] Bei 9, 8, 7 … 1 ein Klopf-Ton, bei 0 ein klares Signal ("Pause vorbei"), vorher endete die Pause
+      komplett unbemerkt, wenn man nicht auf den Bildschirm schaute (09.08.). Der Klopf-Ton war anfangs
+      deutlich leiser als das Endsignal, dadurch kaum zu hören (26.08. und erneut 17.09.), jetzt auf
       derselben Lautstärke, verifiziert per Playwright (unmockierte Echtzeit-Pause, `page.clock` würde bei
       zwei parallelen Intervallen Ticks verschlucken): genau neun Klopftöne plus Endsignal, im Sekundenabstand
 - [ ] Am Ende **kein** automatischer Rücksprung, sondern Knopf „Sitzung starten" (die im F8-Kurzfeedback
@@ -438,7 +444,7 @@ npm install -D @types/bcryptjs
 
 **Testen:**
 - [x] Netzwerk in den DevTools auf offline stellen, weiterklicken, wieder online: Daten kommen an
-      (dabei einen echten Bug gefunden und behoben, Husin 10.08.: Reload während die Queue noch
+      (dabei einen echten Bug gefunden und behoben, 10.08.: Reload während die Queue noch
       unterwegs war, konnte die Runde auf den letzten dem Server bekannten Stand zurücksetzen)
 - [ ] Browser mitten in der Sitzung schließen, wieder öffnen: nichts verloren
 
@@ -466,7 +472,7 @@ npm install -D @types/bcryptjs
 
 ## PHASE I: Deployment
 
-**Entscheidung 17.09.: die Studie läuft auf Vercel + Neon, nicht auf Hetzner.** Husins Begründung: er will die
+**Entscheidung 17.09.: die Studie läuft auf Vercel + Neon, nicht auf Hetzner.** Begründung: ich will die
 App jetzt live haben, und ein eigener Server kostet Zeit, die vor der Studie fehlt. Der komplette
 Hetzner-Stack (I1–I5 unten) bleibt gebaut und getestet im Repo stehen - falls er später doch umziehen will,
 ist nichts davon verloren. Wichtig für die Einwilligung ("Die Daten werden auf einem Server in Deutschland
