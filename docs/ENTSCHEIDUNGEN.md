@@ -939,3 +939,38 @@ machbar, ohne die Architektur umzubauen. Die Sitzung merkt sich, welches Fenster
 und ein Fenster, das den Anspruch verliert, zeigt statt der Sitzung nur noch den Hinweis "Diese Sitzung ist
 in einem anderen Fenster geöffnet". Schätzung rund eine halbe Stunde. Bewusst nicht vorab gebaut, weil es vor
 dem Einfrieren zusätzliche Fehlerfläche wäre und die Anweisung den realistischen Fall abdeckt.
+
+## 18.09.2026 dotenv als echte Abhängigkeit eingetragen
+
+**Entscheidung:** `dotenv` steht jetzt als devDependency in der `package.json`.
+
+**Begründung:** `prisma.config.ts` beginnt mit `import "dotenv/config"`, aber das Paket war nirgends
+deklariert. Aufgelöst wurde es nur zufällig über vier Ebenen: `prisma` zu `@prisma/config` zu `c12` zu
+`dotenv`. Solange das Paket oben in `node_modules` landet, funktioniert es. Ändert ein Prisma-Update diese
+Kette, schlägt `prisma generate` fehl, und weil das seit dem Umstieg auf Vercel Teil von `npm run build` ist,
+fällt damit der ganze Deploy aus. Gefunden bei der Durchsicht vor dem ersten Hosting.
+
+**Getestet:** `src/generated/prisma` gelöscht und komplett neu gebaut, dazu `npx prisma db seed` gegen die
+lokale Datenbank, beides läuft mit der jetzt expliziten dotenv-Version 18 durch.
+
+## 18.09.2026 Nachgemessen: Töne pro Hinweispunkt
+
+**Anlass:** Beim Testen war ein Ton deutlich vor 0:00 zu hören, dann ein zweiter etwa 13 Sekunden später.
+Nachgemessen statt geraten, mit einem Mitschnitt aller tatsächlich gestarteten Oszillatoren im echten
+Browser.
+
+**Ergebnis Arbeitsphase:** In den 59 Sekunden vor dem Rundenende kommt kein einziger Ton. Bei 0:00 genau
+einer. Das ist so gewollt.
+
+**Ergebnis Pause (2 Minuten, Augenentlastung):** 14 Oszillatoren, alle erklärbar. Drei `water-drop` bei den
+Schrittwechseln der Aktivität (20s, 40s, 60s), neun `soft-mallet` im Sekundentakt von 9 bis 1 vor dem
+Pausenende, und zum Schluss zwei gleichzeitig startende Oszillatoren. Die zwei sind kein doppelter Ton,
+sondern das Endsignal `double-chime`, das absichtlich aus zwei kurz versetzten Tönen besteht. Genauso hat
+`soft-bell` auf Stufe 2 einen zusätzlichen Oberton. Pro Hinweispunkt gibt es also genau ein wahrnehmbares
+Signal, auch wenn technisch zwei Oszillatoren laufen.
+
+**Erklärung für das Gehörte:** Es lag an den zwei gleichzeitig offenen Fenstern. In den eigenen Daten steht
+es eindeutig: Runde gestartet 13:10:23, also Ende 13:15:23, Stufe-1-Ton um 13:15:23.971 und ein zweiter um
+13:15:24.546. Später drifteten die Fenster auseinander, zwei Stufe-1-Töne lagen um 13:31:17 und 13:32:34, das
+sind 77 Sekunden Abstand. Wer auf das zweite Fenster schaut, hört den Ton des ersten, während die eigene
+Anzeige noch über eine Minute zeigt. Siehe den Eintrag zu den zwei Fenstern weiter oben.
