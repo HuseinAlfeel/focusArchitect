@@ -159,7 +159,17 @@ export function PostSurveyForm({ sessionId }: { sessionId: string }) {
     const allRequiredAnswered = requiredPostSurveyIds.every(
       (id) => answers[id] !== undefined && answers[id] !== ""
     );
-    if (!allRequiredAnswered) return;
+    // Sollte nicht vorkommen - die Pflichtfragen stehen alle auf Seite 1 und 2
+    // und werden dort schon geprueft. Falls doch, darf der Knopf nicht
+    // wortlos nichts tun: die Person sitzt sonst vor der letzten Seite ihrer
+    // Nachbefragung fest, ohne zu sehen warum, und ihre Antworten gehen
+    // verloren (Datenverlust-Pruefung 18.09.).
+    if (!allRequiredAnswered) {
+      setError(
+        "Auf einer der vorherigen Seiten fehlt noch eine Antwort. Geh bitte einmal zurück und ergänze sie."
+      );
+      return;
+    }
 
     markSubmitted(3);
     setSubmitting(true);
