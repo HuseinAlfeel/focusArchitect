@@ -21,7 +21,7 @@ const POST_IDS = [
   postSurveyComparisonReasonItem.id,
   ...postSurveyClosingTextItems.map((item) => item.id),
 ];
-// Lesezeit je Nachbefragungs-Seite (Husin, 14.09.): Differenz aus
+// Lesezeit je Nachbefragungs-Seite (14.09.): Differenz aus
 // page_load_timestamp/page_submit_timestamp, in `answers.pageTimings`
 // gespeichert (siehe /api/survey) - hier fuer die Auswertung als eigene
 // Sekunden-Spalten aufbereitet, um Blindklicker zu erkennen.
@@ -66,7 +66,7 @@ async function participantsCsv() {
 
     // Gesamtdauer nicht redundant in der DB gespeichert, sondern hier aus
     // startedAt/endedAt berechnet - beide stehen schon fest, ein eigenes Feld
-    // könnte nur aus dem Takt geraten (Husin, 25.08.: Sitzung hat jetzt kein
+    // könnte nur aus dem Takt geraten (25.08., Sitzung hat jetzt kein
     // festes Ende mehr, siehe ENTSCHEIDUNGEN.md).
     const durationMin =
       session.startedAt && session.endedAt
@@ -190,7 +190,7 @@ async function cyclesCsv() {
       // Reaktionslatenz: wie lange, bis die Person nach Stufe 1 überhaupt
       // wieder zum Tab zurückkommt - unabhängig davon, wann/ob sie dann auf
       // den Hinweis reagiert. Kein TAB_VISIBLE danach gefunden heißt: Tab war
-      // durchgehend sichtbar, es gab nichts zum Zurückkommen (Husin, 25.08.).
+      // durchgehend sichtbar, es gab nichts zum Zurückkommen (25.08.).
       const nudgeStage1 = cycleEvents.find((e) => e.type === "NUDGE_STAGE_1");
       const firstTabVisibleAfterNudge = nudgeStage1
         ? cycleEvents.find(

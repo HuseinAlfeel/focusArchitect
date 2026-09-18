@@ -39,13 +39,13 @@ export function SoundCheckPanel() {
   return (
     <div className="space-y-6">
       <p className="rounded border border-amber-600/40 bg-amber-500/10 px-3 py-2 text-sm">
-        🔊 Stell deine Lautstärke auf mindestens 80%, bevor du testest — die
+        Stell deine Lautstärke auf mindestens 80%, bevor du testest. Die
         Töne sind absichtlich leise.
       </p>
 
       <div className="space-y-2 rounded border border-black/10 p-4 dark:border-white/15">
         <p className="text-xs uppercase tracking-wide opacity-50">
-          Lautstärke — gilt für alle Knöpfe unten
+          Lautstärke, gilt für alle Knöpfe unten
         </p>
         <div className="flex items-center gap-3">
           <input
@@ -111,7 +111,7 @@ function CandidateGroup({
   return (
     <div className="space-y-2">
       <p className="text-xs uppercase tracking-wide opacity-50">
-        {title} <span className="normal-case opacity-70">— {subtitle}</span>
+        {title} <span className="normal-case opacity-70">({subtitle})</span>
       </p>
       {items.map((item) => (
         <button

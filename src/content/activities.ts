@@ -17,7 +17,7 @@ export type Activity = {
   steps: ActivityStep[];
 };
 
-// Feinabstimmung 17.09. (Husin, zum zweiten Mal gemeldet): ein Satz und
+// Feinabstimmung 17.09., beim Testen zweimal aufgefallen: ein Satz und
 // danach 60-85 Sekunden reine Stille pro Schritt wirkte robotisch und kaputt,
 // nicht wie eine unterstützte Aktivität - gerade weil die Durchführung
 // unbegleitet ist, muss die App selbst die ganze "Anwesenheit" tragen. Zwei

@@ -25,7 +25,7 @@ const SNOOZE_MS = 5 * 60_000;
 
 // Bewusst minimal (Regel 7: die Arbeitsphase darf nicht ablenken). Die vier
 // Nudge-Stufen laufen rein zeitbasiert (Regel 1) und parallel zur
-// Ton-Eskalation. Reihenfolge (mit Husin am 09.08. korrigiert): auf die
+// Ton-Eskalation. Reihenfolge (am 09.08. korrigiert): auf die
 // Nudge-Reaktion folgt SOFORT das Kurzfeedback (F8) - die Frage "war der
 // Zeitpunkt passend" bezieht sich auf die gerade zu Ende gegangene
 // Arbeitsphase, nicht auf die noch bevorstehende Pause. Die dort
@@ -55,7 +55,7 @@ export function SessionTimer({
   // echten Rundenendzeit `endsAt`: "Noch 5 Minuten" (reactToSnooze) verschiebt
   // nur diesen, nicht die Runde selbst - die Anzeige "Seit Rundenende" oben
   // bleibt dadurch ehrlich (echte Gesamtverspätung), während die Eskalation
-  // nach dem Snooze wirklich bei Stufe 1 neu beginnt (Husin, 25.08.).
+  // nach dem Snooze wirklich bei Stufe 1 neu beginnt (25.08.).
   const [nudgeEndsAt, setNudgeEndsAt] = useState(endsAt);
   // Setstate direkt im Render statt in einem Effect - offiziell empfohlenes
   // Muster fürs Zurücksetzen von State bei einer geänderten Prop (neue
@@ -68,7 +68,7 @@ export function SessionTimer({
   const isSnoozeActive = nudgeEndsAt !== endsAt;
   // Eigener Countdown bis zum nächsten Hinweis während der Snooze-Gnadenfrist
   // - vorher wurde der Bildschirm hier komplett leer, das wirkte wie ein Fehler
-  // (Husin, 26.08.: "Timer geht weg, unsichtbar, soll nicht so sein").
+  // (26.08., "Timer geht weg, unsichtbar, soll nicht so sein").
   const { remainingMs: snoozeRemainingMs } = useCountdown(nudgeEndsAt);
   const nudgeStage = useNudgeStage(nudgeEndsAt);
   const [hasReacted, setHasReacted] = useState(false);
@@ -97,7 +97,7 @@ export function SessionTimer({
   // im Browser gemerkte Rundennummer verloren (sessionStorage überlebt das
   // nicht) - ohne diese Bestätigung kennt der Server dann noch die alte
   // Runde, und die Sitzung fällt beim nächsten Aufruf fälschlich darauf
-  // zurück (Husin, 11.08.: genau das mit "Pause starten"/"Überspringen"
+  // zurück (11.08., genau das mit "Pause starten"/"Überspringen"
   // sofort nach einem frischen Rundenstart beobachtet).
   async function logEvent(
     type: EventType,
@@ -141,7 +141,7 @@ export function SessionTimer({
   }
 
   // Eigene Entscheidung statt Reaktion auf einen Systemhinweis, aber genau
-  // deshalb (Husin, 17.09.) trotzdem durchs Kurzfeedback: "War der Zeitpunkt
+  // deshalb (17.09.) trotzdem durchs Kurzfeedback: "War der Zeitpunkt
   // passend?" beantwortet sich hier nicht von selbst nur weil die
   // Entscheidung freiwillig war - eine Antwort wie "Zu früh" kann genauso
   // in eine kürzere nächste Runde münden wie beim Reagieren auf den
@@ -242,7 +242,7 @@ export function SessionTimer({
   // Ab Stufe 1 ist die Farbe ein Hinweis, der ankommen soll - mit 60s auch
   // hier war der Wechsel faktisch unsichtbar: gemessen lag der Bildschirm
   // 10 Sekunden nach Stufenwechsel noch bei rgb(255,253,251), also Weiss
-  // (Husin, 17.09.: "die Farben aendern sich nicht"). 15s bleibt ruhig, ist
+  // (17.09., im Test aenderte sich sichtbar nichts). 15s bleibt ruhig, ist
   // aber als Veraenderung wahrnehmbar.
   const nudgeTransitionSeconds = nudgeStage === 0 ? 60 : 15;
 
@@ -649,12 +649,12 @@ function BreakScreen({
   // Aktivität, die länger dauert als die (ggf. per Kurzfeedback verkürzte)
   // Pause, darf den Weiterknopf nicht blockieren. Endet die Pause während
   // eine Aktivität noch läuft, wird deren Anzeige einfach ausgeblendet,
-  // die Aktivität endet quasi mit der Pause (Husin, 26.08.).
+  // die Aktivität endet quasi mit der Pause (26.08.).
   const readyToContinue = breakDone;
 
   useBreakEndSound(breakEndsAt, !readyToContinue);
 
-  // Sprachausgabe nur für die Pausenanleitungen (Husin, 14.09.) - die
+  // Sprachausgabe nur für die Pausenanleitungen (14.09.) - die
   // Augenentlastung verlangt, vom Bildschirm wegzuschauen, eine reine
   // Textanleitung lässt sich in dem Moment nicht lesen.
   const {
@@ -668,7 +668,7 @@ function BreakScreen({
   useEffect(() => {
     if (!speechEnabled || !activity || allStepsDone || breakDone) return;
     // Ohne dieses Warten sprach der allererste Schritt mit der Browser-
-    // Standardstimme statt der gewählten (Husin, 14.09.: klang bei
+    // Standardstimme statt der gewählten (14.09., klang bei
     // "Augenentlastung" hörbar anders/roboterhafter als Schritt 2 und 3) -
     // sobald voicesReady kippt, läuft dieser Effekt erneut und holt den
     // aktuellen Schritt dann mit der richtigen Stimme nach.
@@ -689,7 +689,7 @@ function BreakScreen({
 
   useEffect(() => cancelSpeech, [cancelSpeech]);
 
-  // Leiser Übergangston bei jedem Schrittwechsel (Husin, 14.09.: die
+  // Leiser Übergangston bei jedem Schrittwechsel (14.09., die
   // Aktivitäten wirkten trotz Sprachausgabe noch zu statisch, "alle 20 bis
   // 60 Sekunden nur eine Anweisung"). Nicht beim allerersten Schritt -
   // die Aktivitätswahl selbst war schon die Bestätigung.

@@ -101,7 +101,7 @@ export function PostSurveyForm({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [triedStep, setTriedStep] = useState<number | null>(null);
 
-  // page_load_timestamp/page_submit_timestamp je Seite (Husin, 14.09.) - für
+  // page_load_timestamp/page_submit_timestamp je Seite (14.09.) - für
   // die Auswertung, um über die Lesezeit Blindklicker zu erkennen. Als Ref,
   // weil es reine Buchführung ist und keinen Re-Render braucht.
   const timingsRef = useRef<Record<number, PageTiming>>({});

@@ -1,4 +1,4 @@
-// Kurze Erklärung, wie die App funktioniert - ergänzt 14.09. Husins Befund:
+// Kurze Erklärung, wie die App funktioniert, ergänzt 14.09. Der Grund:
 // die Durchführung ist ortsunabhängig und nicht begleitet (Teilnehmende
 // bekommen nur Link + Zugangsdaten), die Einwilligung erklärt WARUM
 // (Studienzweck), aber nirgends steht WIE man die App bedient. Bewusst

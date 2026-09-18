@@ -6,7 +6,7 @@ import { LogoutButton } from "./logout-button";
 import { ReopenSessionButton } from "./reopen-session-button";
 import { DashboardStartForm } from "./dashboard-start-form";
 
-// Landet hier bei jedem Login (Husin, 14.09.: die alte leere "Eingeloggt
+// Landet hier bei jedem Login (14.09., die alte leere "Eingeloggt
 // als..."-Zwischenseite ist weg). Fehlen Einwilligung oder Vorbefragung,
 // geht es ohne Klick direkt weiter dorthin - erst wenn beides steht, zeigt
 // diese Seite das eigentliche Dashboard mit dem Sitzungsstart.
@@ -34,7 +34,7 @@ export default async function StudyPage() {
   }
 
   // Läuft die Sitzung schon, gibt es hier nichts zu entscheiden - direkt
-  // weiter zum Timer, kein Klick über eine Zwischenseite (Husin, 14.09.:
+  // weiter zum Timer, kein Klick über eine Zwischenseite (14.09.,
   // genau das fiel nach "Sitzung fortsetzen" unangenehm auf).
   if (session.startedAt && !session.endedAt) {
     redirect("/study/session");

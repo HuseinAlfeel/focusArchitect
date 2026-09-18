@@ -87,7 +87,7 @@ function writePersistedRound(sessionId: string, round: PersistedRound) {
  * genau in diesem kurzen Fenster den Browser auf den (dann veralteten)
  * Serverstand zurücksetzen, obwohl die neue Runde längst begonnen hatte.
  *
- * Hydration (Husin, 14.09.): Der allererste Render MUSS auf Server und
+ * Hydration (14.09.): Der allererste Render MUSS auf Server und
  * Client identisch aussehen, sonst wirft React einen Hydration-Mismatch und
  * verwirft den Teilbaum. sessionStorage gibt es aber nur im Browser - der
  * Ausgangszustand hier ist deshalb IMMER der Server-Fallback (WORK), und der

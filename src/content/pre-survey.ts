@@ -8,14 +8,14 @@
 // Sitzungsvergleich - der verlaesslichere Vergleichswert fuer die
 // Nachbefragung ist restedAtStart/focusAtStart vom Sitzungsstart, siehe
 // session-start.ts). Die "typische Konzentration" (frueher D2) ist bewusst
-// raus, Husins Vorgabe beim Onboarding-Umbau am 14.09. - Erschoepfung allein
+// raus, so entschieden beim Onboarding-Umbau am 14.09. Erschoepfung allein
 // reicht als Baseline-Trait.
 //
 // B2 und B3 haben eine bedingte Anschlussfrage (nur bei "ja" sichtbar).
 //
-// B3 selbst haengt zusaetzlich an B2 (`showIf`, ergaenzt 17.09. auf Husins
-// Hinweis): wer bei "Machst du bewusst Pausen?" mit Nein antwortet, wurde
-// vorher trotzdem gefragt, ob er Hilfsmittel FUER Pausen nutzt - das ergibt
+// B3 selbst haengt zusaetzlich an B2 (`showIf`, ergaenzt 17.09.): wer bei
+// "Machst du bewusst Pausen?" mit Nein antwortet, wurde vorher trotzdem
+// gefragt, ob er Hilfsmittel FUER Pausen nutzt. Das ergibt
 // keinen Sinn und wirkte wie eine verdrehte Logik. B4 ("Beschreibe kurz, wie
 // du Pausen machst") bleibt bewusst in beiden Faellen sichtbar: auch ein
 // "ich mache keine" ist eine verwertbare Antwort. Verborgene Fragen werden

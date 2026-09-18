@@ -122,7 +122,7 @@ sanfte Sinuston wie bei 0:00, statt des abweichenden "pulsing-tone". (2) Der Tic
 die zuletzt fällige feste Stufe wirklich ab, falls durch einen verzögerten Tick (gedrosselter Hintergrund-Tab)
 mehrere Schwellen im selben Tick überschritten werden - genau dieselbe Absicherung, die es für die minütlichen
 Wiederholungstöne ab +4 Min schon seit dem 10.08. gibt, war für die festen Stufen (-30s bis +3 Min) nie gebaut.
-**Begründung:** Husin meldete zwei gleichzeitig laufende, gegeneinander klingende Töne bei Minute 3. Ursache:
+**Begründung:** Bei Minute 3 liefen zwei gegeneinander klingende Töne gleichzeitig. Ursache:
 wenn der Tick durch Tab-Drosselung verzögert wird, können zwei Schwellen (z.B. +2 Min und +3 Min) im selben
 Tick fällig werden und dann nahezu gleichzeitig abspielen. Mit gleichem Klangcharakter klingt ein solcher
 seltener Doppel-Treffer wie ein einzelner, etwas voller Ton statt wie zwei widersprüchliche Klänge.
@@ -133,7 +133,7 @@ das Symptom für genau diese eine Minuten-Kombination kaschiert hätte, nicht di
 
 **Entscheidung:** Teilnehmerzahl auf zehn erhöht (P07-P10 als neue Accounts angelegt), Probelauf-Person
 entsprechend zur "elften Person" statt "siebten Person".
-**Begründung:** Empfehlung von Husins Beraterin.
+**Begründung:** Empfehlung von meine Beraterin.
 **Alternative:** Bei sechs bleiben. Verworfen auf Empfehlung.
 
 ## 25.08.2026 Offenes Sitzungsende statt fester 120 Minuten
@@ -164,7 +164,7 @@ für die Forschungsfrage, unabhängig von der Selbstauskunft in der Nachbefragun
 
 **Entscheidung:** Die "+MM:SS seit Rundenende"-Anzeige steht jetzt direkt in `NudgeCard`/`NudgeModal`, über
 den beiden Knöpfen "Pause starten"/"Überspringen", statt separat mittig auf dem Bildschirm.
-**Begründung:** Husin fand die Anzeige nicht - sie war zwar da, stand aber an einer eigenen zentrierten
+**Begründung:** Die Anzeige war nicht zu finden: sie war zwar da, stand aber an einer eigenen zentrierten
 Stelle im Layout, während `NudgeModal` (Stufe 3) als `fixed inset-0` zentriertes Fenster optisch genau darüber
 lag und sie damit verdeckte. Direkt in der Karte ist sie unübersehbar mit der Entscheidung verbunden, die sie
 begründet.
@@ -175,7 +175,7 @@ begründet.
 **Entscheidung:** Neuer Hook `useActivityTicks.ts`: zählt `mousemove`/`wheel` (zusammen als `mouseMoves`),
 `mousedown` (`clicks`) und `keydown` (`keyPresses`) auf `window`, sendet einmal pro Minute ein `ACTIVITY_TICK`
 mit den vier Aggregaten plus `tabVisible`. Kein Tick, wenn der Tab am Ende der Minute nicht sichtbar ist.
-**Begründung:** Husins Vorschlag, objektives Signal für "wie oft schaut jemand zur Anwendung" als Grundlage
+**Begründung:** mein Vorschlag, objektives Signal für "wie oft schaut jemand zur Anwendung" als Grundlage
 für eine mögliche spätere Desktop-Erweiterung.
 **Einschränkung, bewusst mitdokumentiert (siehe SPEZIFIKATION.md Abschnitt 4):** Erfasst nur Eingaben im
 eigenen Fenster. Während der eigentlichen Arbeitsphase arbeiten Teilnehmende erwartungsgemäß in einer
@@ -209,7 +209,7 @@ widersprechen würde - häufiges Snoozen ist selbst ein Befund, kein Fehlverhalt
 Vergleichbarkeit der Daten.
 
 **Nachtrag 26.08.2026:** Der Bildschirm blieb während der 5-Minuten-Gnadenfrist komplett leer (nur "Sitzung
-beenden" sichtbar) - bewusst so gebaut, um ein verwirrendes "0:00" zu vermeiden. Husin fand das falsch: wirkte
+beenden" sichtbar) - bewusst so gebaut, um ein verwirrendes "0:00" zu vermeiden. Das war falsch: es wirkte
 wie ein Fehler ("Timer geht weg, unsichtbar"). Korrigiert: eigener Countdown "Nächster Hinweis in M:SS" während
 der Gnadenfrist, gespeist aus `useCountdown(nudgeEndsAt)`. Leere Bildschirme sind nicht automatisch das ruhige
 Design, das Regel 7 will - eine Person muss trotzdem erkennen können, dass etwas passiert.
@@ -219,7 +219,7 @@ Design, das Regel 7 will - eine Person muss trotzdem erkennen können, dass etwa
 **Entscheidung:** `readyToContinue` in `BreakScreen` hängt nur noch von `breakDone` ab, nicht mehr zusätzlich
 von `allStepsDone`. Die Aktivitätsanzeige wird ausgeblendet, sobald die Pause vorbei ist, auch wenn die
 Aktivität selbst noch laufen würde.
-**Begründung:** Husin testete mit einer 2-Minuten-Pause und einer länger dauernden Aktivität - "Sitzung
+**Begründung:** Getestet mit einer 2-Minuten-Pause und einer länger dauernden Aktivität: "Sitzung
 starten" erschien erst, wenn die Aktivität zu Ende war, nicht wenn die Pause endete. Aktivitäten haben feste
 Presets (2/3/5 Min), die Pause ist aber frei einstellbar (initialBreakMin, zusätzlich per Kurzfeedback
 anpassbar) - eine kürzere Pause als das gewählte Aktivitäts-Preset ist ein realistischer Fall, nicht nur ein
@@ -231,7 +231,7 @@ genau der gemeldete Bug.
 
 **Entscheidung:** `useBreakEndSound.ts` prüft jetzt zusätzlich sofort bei jedem `visibilitychange`, nicht nur
 im 200ms-Takt.
-**Begründung:** Husin hörte bei einer Pause nur das Endsignal, keinen der zehn Klopftöne davor. Ursache:
+**Begründung:** Bei einer Pause kam nur das Endsignal an, keiner der zehn Klopftöne davor. Ursache:
 jeder Klopfton hat nur eine einzige Sekunde Zeitfenster, in dem der Tick ihn treffen muss - bei gedrosseltem
 Hintergrund-Tab (realistisch, da man während der Pause meist nicht auf den Bildschirm schaut) reicht das
 leicht zum Verpassen. Das Endsignal dagegen trifft bei jedem Tick nach 0:00 erneut zu, deshalb kam nur das an.
@@ -335,9 +335,9 @@ minimalistisch statt bewusst schlicht.
 
 **Entscheidung:** Die Arbeitsphase zeigt die Restzeit wieder als M:SS (`formatRemaining`), genau wie die
 Pause - nicht mehr nur Minuten.
-**Begründung:** Husins ausdrücklicher Wunsch, nach dem visuellen Überarbeiten von Fokus- und
+**Begründung:** mein ausdrücklicher Wunsch, nach dem visuellen Überarbeiten von Fokus- und
 Pausenbildschirm am selben Tag. Der Eintrag vom 01.09. ("Restzeit größer, Rundenanzeige ergänzt") hatte die
-testweise Minuten-Anzeige fälschlich mit einem Befund der Betreuung begründet - laut Husin haben Holly/Orhan
+testweise Minuten-Anzeige fälschlich mit einem Befund der Betreuung begründet. Holly/Orhan haben
 das nie so gesagt, diese Zuschreibung war schlicht falsch.
 **Alternative:** Bei Minuten bleiben. Auf Nachfrage klar abgelehnt.
 
@@ -346,7 +346,7 @@ das nie so gesagt, diese Zuschreibung war schlicht falsch.
 **Entscheidung:** Der Knopf steht jetzt oben rechts statt unten links, und die Rückfrage vor dem Beenden ist
 ein eigenes Fenster im Stil des Pausenhinweises statt `window.confirm()`.
 **Begründung:** Der Knopf unten links überlappte in der lokalen Entwicklung mit dem Next.js-Dev-Icon; der
-native Browser-Dialog wirkte "hässlich und primitiv" (Husin).
+native Browser-Dialog wirkte hässlich und primitiv.
 
 ## 14.09.2026 Pause manuell starten, ohne auf den Hinweis zu warten
 
@@ -356,7 +356,7 @@ Aktivitätsauswahl - kein Kurzfeedback, keine Intervallanpassung für diese Rund
 bisherigen Wert weiter. Neues Ereignis `BREAK_SELF_INITIATED` mit
 `payload: { cycleNumber, secondsIntoWork }`. In `cycles.csv` über `reactionType: "SELF_INITIATED"` sichtbar
 (neuer Wert, bestehende Werte unverändert) plus eigener Spalte `reactionSecondsIntoWork`.
-**Begründung:** Husins Vorgabe - Nutzende sollen eine Pause auch aus eigenem Antrieb beginnen können, nicht
+**Begründung:** Vorgabe: Nutzende sollen eine Pause auch aus eigenem Antrieb beginnen können, nicht
 nur als Reaktion auf den Systemhinweis.
 **Bezug:** Kein Kurzfeedback in diesem Fall, weil es nichts zu bewerten gibt ("war der Zeitpunkt passend"
 bezieht sich auf den *Hinweis*, den es hier nicht gab). Die `workMin`-Spalte in `cycles.csv` wird dafür
@@ -374,7 +374,7 @@ an/aus" direkt bei der Anleitung, Voreinstellung an, protokolliert als `SPEECH_T
 Laufende Ausgabe wird abgebrochen (`speechSynthesis.cancel()`), sobald der Schritt wechselt, die Anleitung
 endet oder die Pause vorbei ist - sonst überlappt es mit dem nächsten Bildschirm. Ohne `speechSynthesis` im
 Browser: kein Fehler, Text erscheint wie bisher nur schriftlich.
-**Begründung:** Husins Vorgabe. Bei der Augenentlastung schaut man bewusst vom Bildschirm weg - ein reiner
+**Begründung:** Vorgabe. Bei der Augenentlastung schaut man bewusst vom Bildschirm weg - ein reiner
 Anleitungstext ist in dem Moment funktional unbrauchbar, weil er sich nicht lesen lässt. Bei der
 Nackenübung abgeschwächt dasselbe Problem.
 **Bezug:** Ausschließlich in den Pausenanleitungen, nicht in der Arbeitsphase und nicht beim Pausenhinweis -
@@ -405,7 +405,7 @@ eigene Route ebenso - dessen Inhalt (`start-form.tsx`) ist jetzt `dashboard-star
 von `/study/page.tsx` gerendert, sobald der Zustand passt. Alle anderen Zustände von `/study` (Sitzung
 läuft, beendet, abgeschlossen) sind unverändert, nur im selben File zusammengeführt statt über Links auf
 separate Seiten zu verweisen.
-**Begründung:** Husins Vorgabe - "Time-to-Value" (Zeit bis der Timer läuft) drastisch verkürzen, keine
+**Begründung:** Vorgabe: "Time-to-Value" (Zeit bis der Timer läuft) drastisch verkürzen, keine
 Bildschirme ohne eigenen Zweck.
 **Bezug:** Ändert nichts am Datenmodell oder an der API - `POST /api/survey`, `PATCH /api/session/:id/start`
 und die Feldnamen bleiben exakt wie in den Einträgen vom 12.09. Betrifft ausschließlich, wie das Formular im
@@ -419,7 +419,7 @@ und die Seite springt direkt zur Timer-Ansicht.
 
 **Entscheidung:** `useSpeech.ts` spricht jetzt erst, wenn `voicesReady` true ist (neuer Rückgabewert des
 Hooks) - `BreakScreen` wartet damit vor dem allerersten Vorlesen kurz, statt sofort loszulegen.
-**Begründung:** Husin fiel bei der Augenentlastung auf, dass der erste Anleitungsschritt mit einer anderen,
+**Begründung:** Bei der Augenentlastung ist aufgefallen, dass der erste Anleitungsschritt mit einer anderen,
 roboterhafter klingenden Stimme gesprochen wurde als Schritt 2 und 3. Ursache: `speechSynthesis.getVoices()`
 liefert bei manchen Browsern (v.a. Chrome/Chromium) direkt nach dem Laden der Seite noch eine leere Liste,
 die echte Stimmenliste kommt asynchron über das `voiceschanged`-Ereignis nach. Der Hook wählte beim allerersten
@@ -431,7 +431,7 @@ und erst ab dem zweiten Aufruf stand die eigentlich gewünschte, bessere Stimme 
 ## 14.09.2026 Emoji im "Zurück"-Knopf entfernt
 
 **Entscheidung:** Der Knopf in der Vorbefragung heißt jetzt nur noch "Zurück", ohne das 🔙-Emoji davor.
-**Begründung:** Husin fand es kindisch wirkend - das Emoji zeigt in den meisten Emoji-Schriftarten zusätzlich
+**Begründung:** Es wirkte kindisch, und das Emoji zeigt in den meisten Emoji-Schriftarten zusätzlich
 den englischen Schriftzug "BACK" mit an, was neben dem deutschen "Zurück" unpassend aussah.
 
 ## 14.09.2026 Hydration-Fehler nach Reload mitten in einer Pause
@@ -439,7 +439,7 @@ den englischen Schriftzug "BACK" mit an, was neben dem deutschen "Zurück" unpas
 **Entscheidung:** `useRoundTimer.ts` startet den allerersten Render (Server UND Client) immer mit dem
 Server-Fallback (Runde WORK) und liest `sessionStorage` erst in einem `useEffect` nach dem Hydrieren, statt
 direkt im `useState`-Initializer.
-**Begründung:** Husin bekam beim Reload eines `/study/session`-Tabs mitten in einer Pause einen React-
+**Begründung:** Beim Reload eines `/study/session`-Tabs mitten in einer Pause kam ein React-
 Hydration-Fehler ("server rendered HTML didn't match the client"). Ursache: `useRoundTimer` las
 `sessionStorage` bisher direkt im `useState`-Initializer - der läuft aber beim allerersten Render sowohl auf
 dem Server (kein `sessionStorage`, also immer der Fallback "WORK") als auch beim Hydrieren im Browser (dort
@@ -456,7 +456,7 @@ geladen, keine Hydration-Fehler mehr in der Konsole (vorher reproduzierbar der e
 **Entscheidung:** Läuft die Sitzung bereits (`startedAt` gesetzt, `endedAt` noch leer), leitet `/study` jetzt
 direkt zu `/study/session` weiter (`redirect()`), statt eine eigene Info-Seite mit Textlink "Zur Sitzung" zu
 zeigen.
-**Begründung:** Husin fiel das nach "Sitzung fortsetzen" (Reopen) unangenehm auf: erst der
+**Begründung:** Nach "Sitzung fortsetzen" (Reopen) fiel das unangenehm auf: erst der
 Bestätigungsdialog zum Beenden, dann diese zusätzliche, spärliche Zwischenseite mit einem Link statt einem
 Knopf, bevor man wirklich zurück im Timer war - zu viele Schritte für "ich will einfach weiterarbeiten".
 **Bezug:** Gleiche Logik wie beim Dashboard (12./14.09.): gibt es an dieser Stelle nur einen sinnvollen
@@ -473,7 +473,7 @@ Skalen, (3) N19/N18/N20 als optionale Freitexte in dieser Reihenfolge. Dezenter 
 Zusätzlich wird je Seite `page_load_timestamp`/`page_submit_timestamp` erfasst (`answers.pageTimings`,
 gleiche `SurveyResponse` wie bisher) und im Export als `postPage1Seconds` bis `postPage3Seconds` in
 `participants.csv` aufbereitet (Differenz in Sekunden).
-**Begründung:** Husins Vorgabe - kognitive Last durch Paging reduzieren, ohne methodische Standards zu
+**Begründung:** Vorgabe: kognitive Last durch Paging reduzieren, ohne methodische Standards zu
 verletzen (keine wertenden Zwischenüberschriften, kein Priming). Die Lesezeit je Seite soll später helfen,
 Blindklicker (Leute, die ohne zu lesen durchklicken) als Ausreißer zu erkennen.
 **Bezug:** N17 gehörte bisher zu den gesammelten Freitextfeldern am Ende, steht jetzt inhaltlich direkt bei
@@ -492,7 +492,7 @@ Variante `--glow-neutral`/`.phase-glow-neutral` (weder Arbeit-Blau noch Pause-Gr
 Phase gehört). Inhalte selbst unverändert, nur Rahmen/Karten-Optik und der Farbfleck ergänzt. Login bekommt
 zusätzlich eine kleine "FocusArchitect"-Kennzeichnung über der Überschrift - vorher stand nirgends, welche
 App das überhaupt ist.
-**Begründung:** Husins Vorgabe - alles, was Teilnehmende sehen, soll einheitlich aussehen. Vorher wirkten
+**Begründung:** Vorgabe: alles, was Teilnehmende sehen, soll einheitlich aussehen. Vorher wirkten
 diese Bildschirme merklich schlichter/älter als die frisch überarbeiteten Fokus-/Pausen- und Onboarding-
 Bildschirme.
 **Bezug:** Rein optisch, keine Text- oder Verhaltensänderung. Dashboard, Vorbefragung und Nachbefragung
@@ -503,7 +503,7 @@ den gesamten sichtbaren Ablauf.
 
 **Entscheidung:** `NudgeCard`/`NudgeModal` werden jetzt nur noch gerendert, wenn `state === "WORK"` ist,
 nicht mehr nur abhängig von `!hasReacted`.
-**Begründung:** Husin bekam nach "Sitzung beenden am Ende einer Pause" einen widersprüchlichen Bildschirm:
+**Begründung:** Nach "Sitzung beenden am Ende einer Pause" kam ein widersprüchlicher Bildschirm:
 "Pause vorbei." mit dem "Sitzung starten"-Knopf UND gleichzeitig die Hinweis-Karte "Zeit für eine Pause" mit
 "Seit Rundenende: +0:24". Ursache: `hasReacted` (und der Bezugspunkt der Eskalation, `nudgeEndsAt`) sind
 gewöhnlicher React-State in `SessionTimer`, nicht Teil des in `sessionStorage` gesicherten Rundenzustands -
@@ -528,7 +528,7 @@ Gesamtpausenzeit nur noch als kleine Zeile darunter - vorher war es umgekehrt (g
 eigentliche Anleitung ein kleiner Nebensatz mit eigenem kleinen Timer). Bei jedem Schrittwechsel zusätzlich
 ein leiser Übergangston (`playNudgeSound(0.25, "water-drop")`, dieselbe Tonbibliothek wie beim
 Pausenhinweis). Nach dem letzten Schritt erscheint wieder die normale große Pausenuhr.
-**Begründung:** Husins Befund nach eigenem Test aller drei Aktivitäten: "alle 20 bis 59 Sekunden nur eine
+**Begründung:** Befund aus dem eigenen Test aller drei Aktivitäten: "alle 20 bis 59 Sekunden nur eine
 Anweisung" fühle sich trotz Sprachausgabe passiv und langweilig an. Beim Nachvollziehen bestätigt: die
 visuelle Hierarchie war verkehrt - das auffälligste Element am Bildschirm (die große Zahl) war die
 Gesamtpausenzeit, nicht der laufende Schritt, und zwischen den Schritten änderte sich nur ein Satz Text ohne
@@ -537,7 +537,7 @@ jedes Fortschritts- oder Wechselsignal.
 Sekunden in die Ferne schauen") funktionieren nur, wenn die Zeit wirklich abläuft, ein Skip würde den
 gesundheitlichen Zweck der Übung untergraben. Die Interaktivität kommt stattdessen aus reicherem Feedback
 während der ohnehin nötigen Wartezeit (Ring, Ton, Fortschrittszählung), nicht aus mehr Kontrolle.
-**Bezug:** "Keine Aktivität" bleibt unverändert (einfach die normale Pausenuhr, wie von Husin bestätigt kein
+**Bezug:** "Keine Aktivität" bleibt unverändert (einfach die normale Pausenuhr, und das ist kein
 Verbesserungsbedarf). Inhalt und Dauer der einzelnen Übungsschritte (`activities.ts`) unverändert, nur wie
 sie während des Wartens dargestellt werden.
 **Getestet:** Alle drei Aktivitäten einmal komplett per Playwright durchlaufen (Ring, Schrittzählung,
@@ -553,7 +553,7 @@ eine Pause starten kann, dass nach jeder Pause kurz nach dem Zeitpunkt gefragt w
 Schritt und nicht als Zusatz im Einwilligungstext - der ist mit der Betreuung abgestimmt und bleibt
 unangetastet, hier geht es nicht um Rechte/Zweck, sondern reine Bedienung. "Schritt X von 3" jetzt oben auf
 allen drei Vorbefragungs-Seiten (vorher nur "Willkommen..." und "Noch dein Pausenverhalten." ohne Zählung).
-**Begründung:** Husins Befund - die Durchführung ist ortsunabhängig und unbegleitet, Teilnehmende bekommen
+**Begründung:** Befund: die Durchführung ist ortsunabhängig und unbegleitet, Teilnehmende bekommen
 nur Link und Zugangsdaten per Nachricht, niemand erklärt vor Ort, wie die App bedient wird. Die Einwilligung
 beantwortet nur "warum", nicht "wie".
 **Bezug:** Rein zusätzlicher Inhalt, ändert nichts an Einwilligung, Datenmodell oder den bestehenden zwei
@@ -578,7 +578,7 @@ bewusste Abweichungen vom ursprünglichen Plan in `docs/CHECKLIST.md`:
    Einstieg. Debian "slim" ist etwas größer, dafür funktioniert Prisma ohne Sonderkonfiguration. `openssl`
    zusätzlich per `apt-get` installiert, weil die Prisma-Engine zur Laufzeit dagegen linkt und "slim" das
    nicht mitbringt.
-**Begründung:** Husins Bitte, Phase I jetzt umzusetzen und ihm dabei Docker/Deployment beizubringen - beide
+**Begründung:** meine Bitte, Phase I jetzt umzusetzen und ihm dabei Docker/Deployment beizubringen - beide
 Abweichungen sind bewusste Vereinfachungen für den Einstieg, nicht Nachlässigkeit.
 **Getestet, nicht nur gebaut:** Kompletten Stack lokal hochgefahren (`docker compose up -d --build`, isolierte
 Test-`.env` außerhalb des Projekts, eigener `-p`-Projektname und Port, um die echte lokale Dev-Datenbank nicht
@@ -589,7 +589,7 @@ holen. Dabei zwei echte Fehler gefunden und behoben, bevor sie auf dem echten Se
 Seed-Befehl schlug erst fehl (fehlendes `src/`/`tsconfig.json`, siehe oben), und `credentials.local.json`
 fehlte im Container (liegt per `.dockerignore` bewusst nicht im Image, jetzt stattdessen zur Laufzeit
 eingehängt).
-**Hinweis für Husin:** Beim Testen aus Versehen kurz die lokale `.env` mit Test-Werten überschrieben (beim
+**Hinweis:** Beim Testen aus Versehen kurz die lokale `.env` mit Test-Werten überschrieben (beim
 allerersten Versuch, den Stack lokal hochzufahren, bevor die isolierte Test-Env-Datei benutzt wurde) - sofort
 bemerkt und mit der korrekten `DATABASE_URL` (aus `docker-compose.dev.yml` rekonstruiert) sowie einem neuen
 `SESSION_SECRET` wiederhergestellt. Einzige Auswirkung: bestehende Login-Cookies in deinem Browser sind
@@ -617,7 +617,7 @@ Stufe 3.
 
 ## 17.09.2026 Pausenende-Countdown lauter, Kurzfeedback jetzt auch nach selbst gestarteter Pause
 
-**Entscheidung:** Zwei getrennte Korrekturen, beide von Husin gemeldet:
+**Entscheidung:** Zwei getrennte Korrekturen, beide beim Testen aufgefallen:
 1. `useBreakEndSound.ts`: die Klopftöne der letzten Sekunden vor Pausenende liefen bisher mit Intensität 0.4,
    das Endsignal (`double-chime`) mit 0.9 - reichlich leiser, dadurch praktisch unhörbar neben dem lauten
    Endsignal. Jetzt beide auf 0.9. Zusätzlich `COUNTDOWN_SECONDS` von 10 auf 9 korrigiert, damit die Klopftöne
@@ -628,7 +628,7 @@ Stufe 3.
    andere Runde erst durchs Kurzfeedback (`setRound("FEEDBACK", ...)` statt `setRound("ACTIVITY_CHOICE", ...)`),
    keine neue Komponente nötig, die bestehende `FeedbackScreen`/`handleFeedbackSubmitted`-Logik greift
    unverändert.
-**Begründung:** Husin hat den leisen Countdown zweimal gemeldet (schon am 26.08., dann erneut heute) - er hört
+**Begründung:** Der leise Countdown ist zweimal aufgefallen (schon am 26.08., dann erneut heute): ich höre
 nur das laute Endsignal, nicht die Klopftöne davor, das Gegenteil vom beabsichtigten "beep beep runterzählen".
 Beim Kurzfeedback wollte er die Frage auch nach einer freiwillig beendeten Runde gestellt haben: eine Antwort
 wie "Zu früh" ist genauso aussagekräftig, egal ob die Runde durch den Systemhinweis oder aus eigenem Antrieb
@@ -700,7 +700,7 @@ kurzen Abschlusssatz ("Gut gemacht, ..."), statt mitten im Ablauf aufzuhören. D
 Augenentlastung ca. 1:08 (vorher grob mit "2 Min" beziffert, tatsächlich waren es auch vorher nur 60s reiner
 Schrittzeit), Nacken/Schultern ca. 1:38 (vorher grob "3 Min"), Aufstehen/Bewegen ca. 1:33 (vorher grob
 "5 Min").
-**Begründung:** Husin hat das zweimal gemeldet - zuerst grob, dann konkret an "Aufstehen und bewegen"
+**Begründung:** Zweimal aufgefallen: zuerst grob, dann konkret an "Aufstehen und bewegen"
 festgemacht: "ein Satz und danach 80 Sekunden Stille" wirkt unbegleitet nicht wie eine unterstützte Übung,
 sondern wie ein Hänger oder Bug. Ohne Live-Anleitung muss die App selbst die ganze "Anwesenheit" tragen - ein
 Satz, der die eigene Dauer nennt, macht die folgende Stille erwartbar statt beunruhigend. Ein besser
@@ -722,8 +722,8 @@ dem letzten Schritt korrekt zurück zur normalen, großen Pausenuhr.
 `#f6e7cd`/`#f0cd94`/`#dd9b6c` angehoben, Zifferfarbe bei Stufe 0 von `#8a6f52` auf `#9a6b3f`. Die
 60-Sekunden-Transition gilt nur noch für Stufe 0 (dort laut Spezifikation absichtlich unmerklich), ab Stufe 1
 sind es 15 Sekunden.
-**Begründung:** Husin hat die Eskalation live getestet und gemeldet: "ich sehe NUR weiß ... auch nach dem Ende
-vom Timer". Nachgemessen am gerenderten Bildschirm hatte er recht: Stufe 1 landete nach 60 Sekunden bei
+**Begründung:** Beim Live-Test der Eskalation war nichts zu sehen, nur Weiß, auch nach dem Ende
+vom Timer. Nachgemessen am gerenderten Bildschirm stimmt das: Stufe 1 landete nach 60 Sekunden bei
 `rgb(253,243,230)`, also 2/12/25 RGB-Punkte neben Weiß, und lag 10 Sekunden nach dem Stufenwechsel noch bei
 `rgb(255,253,251)`. Auf einem Laptop-Display, ohne Weiß daneben als Vergleich, ist das nichts. Der Vorschlag
 der Betreuung war ausdrücklich, dass der Hintergrund nach 0:00 *weiterwandert* - mit so schwachen Abständen
@@ -747,7 +747,7 @@ Stufe 3 `rgb(221,155,108)` - jeweils innerhalb von etwa 15 Sekunden und auf dem 
 Arbeit bewusst Pausen?" mit Ja beantwortet wurde (neues Feld `showIf` in `pre-survey.ts`). B4 "Beschreibe
 kurz, wie du Pausen machst" bleibt in beiden Fällen sichtbar. Wird eine Frage durch ein "Nein" verborgen,
 nachdem sie schon beantwortet war, wird die Antwort verworfen statt mitgeschickt.
-**Begründung:** Husins Hinweis - wer keine bewussten Pausen macht, wurde trotzdem gefragt, ob er Hilfsmittel
+**Begründung:** Hinweis: wer keine bewussten Pausen macht, wurde trotzdem gefragt, ob er Hilfsmittel
 *für Pausen* nutzt. Das wirkte wie eine verdrehte Logik und liefert keine verwertbare Antwort. B4 soll
 bewusst bleiben, weil auch "ich mache keine festen Pausen" eine Antwort ist, die man auswerten kann.
 **Bezug:** SPEZIFIKATION.md Abschnitt [3] Block B, CHECKLIST.md F2.
@@ -766,14 +766,14 @@ und landen vollständig im Datensatz.
 Frankfurt). Der fertige Hetzner-Weg (Dockerfile, docker-compose.yml, Caddyfile) bleibt vollständig im Repo
 und in CHECKLIST.md I1-I5 dokumentiert, nur eben ungenutzt. Einzige nötige Codeänderung: `npm run build`
 heißt jetzt `prisma generate && next build`.
-**Begründung:** Husins Vorgabe - "ich will die app live haben für die leute". Ein eigener Server kostet vor
+**Begründung:** Vorgabe: "ich will die app live haben für die leute". Ein eigener Server kostet vor
 der Studie Zeit, die er nicht hat: SSH, Firewall, Systemupdates, Zertifikate. Bei Vercel genügt ein
 `git push`. Für zehn Teilnehmende reicht der kostenlose Tarif, und wenn später Zeit ist, kann er auf den
 schon gebauten Hetzner-Stack umziehen, ohne dass etwas verloren wäre.
 **Zur Einwilligung:** Dort steht "Die Daten werden auf einem Server in Deutschland gespeichert". Das bleibt
 korrekt, **solange bei Neon die Region Frankfurt gewählt wird** - die Daten liegen dann physisch in
 Deutschland. Der Unterschied zu vorher ist der Anbieter (Vercel Inc. und Neon sind US-Firmen, Hetzner ist
-deutsch), nicht der Speicherort. Husin hat entschieden, das nicht vorher mit der Betreuung abzustimmen; der
+deutsch), nicht der Speicherort. Ich habe entschieden, das nicht vorher mit der Betreuung abzustimmen; der
 Einwilligungstext selbst wurde deshalb **nicht** angefasst (CLAUDE.md: Einwilligungstexte werden mit der
 Betreuung abgestimmt, nicht eigenmächtig geändert) - er musste auch nicht, weil die Zusage mit
 Frankfurt-Region weiter zutrifft. Falls die Ethik-Einreichung ausdrücklich Hetzner nennt, ist das ein Punkt
@@ -784,7 +784,7 @@ Vercel hat die nicht - ohne die Änderung bricht der Build dort mit "Cannot find
 ab. Das wäre beim ersten Deploy-Versuch aufgefallen, kostet aber unnötig Nerven.
 **Warum Migration und Seed nicht bei Vercel laufen:** `prisma/seed.ts` liest `credentials.local.json` mit den
 echten Teilnehmer-Passwörtern. Die Datei soll auf keinen fremden Server, deshalb laufen `migrate deploy` und
-`db seed` von Husins Laptop gegen die **direkte** Neon-Verbindung. Vercel selbst bekommt nur den
+`db seed` von meinem Laptop gegen die **direkte** Neon-Verbindung. Vercel selbst bekommt nur den
 **gepoolten** String, weil jede Serverless-Funktion sonst eine eigene DB-Verbindung aufmacht und das
 Verbindungslimit sprengt.
 **Getestet:** `npm run build` läuft durch. Zusätzlich die Vercel-Situation nachgestellt, indem
@@ -794,8 +794,8 @@ Deployment steht noch aus, die Schritte stehen in CHECKLIST.md I0.
 
 ## 18.09.2026 Datenverlust-Prüfung der ganzen App, zwei echte Funde behoben
 
-**Anlass:** Husin nach dem "Nein"-Fehler in der Vorbefragung: "ich will nicht jemandem Feedback oder Daten
-verlieren ... jeder Nutzer ist extrem wertvoll". Deshalb die App einmal gezielt darauf durchgesehen, wo
+**Anlass:** Nach dem "Nein"-Fehler in der Vorbefragung: ich will niemandem Feedback oder Daten
+verlieren, jeder Teilnehmende ist extrem wertvoll. Deshalb die App einmal gezielt darauf durchgesehen, wo
 Teilnehmerdaten verloren gehen, überschrieben oder falsch zugeordnet werden können.
 
 **Fund 1 (der schwerste): eine zweite Einwilligung legte eine zweite, leere Sitzung an.**
@@ -841,3 +841,49 @@ nächsten Versuch klappen. `flushWithBeacon` hatte denselben sessionId-Fehler un
 **Bekannt und bewusst so (kein Fehler, gehört in die Limitationen):** Bei einem harten Absturz des Browsers
 können bis zu 10 Sekunden Ereignisse fehlen - der reguläre Takt sendet alle 10s, beim normalen Schließen
 greift `sendBeacon`. Befragungsantworten sind davon nicht betroffen, die gehen direkt beim Absenden raus.
+
+## 18.09.2026 Hinweis mit Häkchen vor dem Start, Einwilligungstext präzisiert
+
+**Entscheidung:** Drei Dinge, alle klein, alle aus der Durchsicht vor dem Einfrieren der App.
+
+1. Über dem Startknopf steht jetzt ein Kasten mit drei Zeilen und einem Pflichthäkchen: Fenster sichtbar
+   lassen, Ton an, eigene echte Aufgabe. Ohne Häkchen bleibt der Startknopf gesperrt. Text in
+   `session-start.ts`, Anzeige in `dashboard-start-form.tsx`.
+2. Im Einwilligungstext steht statt "auf einem Server in Deutschland" jetzt "bei einem Hosting-Dienstleister
+   mit Serverstandort in Deutschland".
+3. Das Raketen-Emoji im Startknopf ist raus, wie vorher schon beim Zurück-Knopf der Vorbefragung.
+
+**Begründung zu 1:** Die Erklärseite "So funktioniert die App" steht vor der Vorbefragung und erklärt dort
+den Ablauf, das bleibt auch so. Zwischen dem Lesen und dem echten Sitzungsstart liegen aber rund zehn Minuten
+Fragebogen, und wer das Fenster danach zurechtrücken soll, hat es bis dahin vergessen. Das ist keine
+Formalie: bleibt das Fenster im Hintergrund, wirkt die visuelle Eskalation bei dieser Person gar nicht, und
+dann wird bei ihr etwas anderes gemessen als bei den übrigen neun. Weil der Startknopf ohne Häkchen gesperrt
+ist, gilt für jede gestartete Sitzung, dass die Bedingungen zur Kenntnis genommen wurden. Das reicht für
+Kapitel 6.4, ein eigenes Datenbankfeld braucht es dafür nicht.
+
+**Begründung zu 2:** Grammatisch bezog sich das "ausschließlich" schon vorher auf die Verwendung der Daten,
+nicht auf den Server, der Satz war also nicht falsch. Aber in einer Einwilligungserklärung zählt, wie eine
+Teilnehmerin ihn liest, nicht was sich grammatisch ableiten lässt. Mit dem Halbsatz ist eindeutig, dass die
+Speicherung bei einem Dienstleister passiert, und genau so lässt sich das auch im Datenschutzabschnitt der
+Arbeit beschreiben. Der Speicherort bleibt Deutschland, solange bei Neon die Region Frankfurt steht.
+
+**Getestet:** Den ganzen Weg von Login über Einwilligung und Vorbefragung bis zum Startbildschirm auf 640px
+Fensterbreite durchgeklickt (P04, Testdaten danach entfernt): ohne Häkchen bleibt man auf `/study` und
+bekommt "Bitte einmal bestätigen", mit Häkchen startet die Sitzung wie vorher. Produktionsbuild läuft durch.
+
+## 18.09.2026 Kommentare und Doku als eigene Notizen geschrieben
+
+**Entscheidung:** In allen Kommentaren und in der Doku stehen keine Formulierungen mehr wie "Husin hat
+gemeldet", "auf Husins Wunsch" oder "Husins Vorgabe". Die Notizen sind jetzt so geschrieben, wie ich sie
+selbst schreiben würde: entweder neutral ("beim Testen aufgefallen", "Vorgabe: ...") oder in der ersten
+Person ("ich höre nur das Endsignal"). Dazu sind die langen Gedankenstriche überall raus, ersetzt durch
+Komma, Doppelpunkt oder Punkt.
+
+**Begründung:** Das Repo ist öffentlich und das sind meine eigenen Projektnotizen. Notizen, die mich in der
+dritten Person zitieren, lesen sich, als würde jemand anderes über mich Buch führen. Die langen
+Gedankenstriche fallen als typische KI-Schreibweise auf.
+
+**Umfang:** 16 Dateien unter `src/`, dazu SPEZIFIKATION.md, CHECKLIST.md, ENTSCHEIDUNGEN.md und CLAUDE.md.
+Stehen bleiben durfte der Name an drei Stellen, wo er hingehört: in den Titelzeilen der Dokumente als Autor
+und im Einwilligungstext, den die Teilnehmenden lesen. "Betreuung" als Quelle bleibt ebenfalls stehen, das
+schreibt man in eigenen Notizen ganz normal so.

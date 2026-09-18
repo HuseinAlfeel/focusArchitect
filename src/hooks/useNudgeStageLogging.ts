@@ -15,7 +15,7 @@ import { enqueueEvent } from "@/lib/eventQueue";
  * Tab in genau diesem Moment sichtbar war. Zusammen mit TAB_VISIBLE aus
  * useTabVisibilityLogging.ts ergibt das im Export die Reaktionslatenz: wie
  * lange, bis eine Person nach einem Hinweis überhaupt zurückkommt (siehe
- * ENTSCHEIDUNGEN.md, ergänzt Husin 25.08.).
+ * ENTSCHEIDUNGEN.md, ergänzt 25.08.).
  */
 export function useNudgeStageLogging(
   sessionId: string,

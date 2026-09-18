@@ -70,8 +70,8 @@ export function useSpeech() {
     // dem Laden der Seite liefert getVoices() dort oft noch eine leere
     // Liste. Ohne dieses Warten wurde genau deshalb der allererste Satz mit
     // der Browser-Standardstimme gesprochen (oft eine andere, schlechter
-    // klingende als die spaeter korrekt gewaehlte) - Husin ist genau das an
-    // der Augenentlastung aufgefallen: erster Schritt klang anders/
+    // klingende als die spaeter korrekt gewaehlte). An der Augenentlastung
+    // ist das klar zu hoeren gewesen: der erste Schritt klang anders und
     // roboterhafter als der zweite und dritte.
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
     // Fallback: manche Browser/Systeme liefern die Liste synchron und

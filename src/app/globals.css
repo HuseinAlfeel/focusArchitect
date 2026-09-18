@@ -17,8 +17,8 @@
      als die vorige, aber nie grell oder rot ("auffallen statt erschrecken").
      Die erste Fassung vom 17.09. war mit #fdf3e6 / #f6ddb8 / #efc9a8 viel zu
      zurueckhaltend: Stufe 1 lag nur 2/12/25 RGB-Punkte neben Weiss, gemessen
-     war der Bildschirm nach 60 Sekunden praktisch noch weiss. Husin hat
-     genau das gemeldet ("ich sehe NUR weiss"). Jetzt klar sichtbare
+     war der Bildschirm nach 60 Sekunden praktisch noch weiss, im Test sah
+     man schlicht nichts. Jetzt klar sichtbare
      Abstaende zwischen den Stufen. */
   --background-nudge-1: #f6e7cd;
   --background-nudge-2: #f0cd94;
@@ -36,7 +36,7 @@
   /* Fuer alle Bildschirme ausserhalb der eigentlichen Sitzung (Login,
      Einwilligung, Kurzfeedback/Aktivitaet, Abschluss) - derselbe ruhige
      Look wie Arbeits-/Pausenbildschirm, aber neutral statt an eine Phase
-     gebunden (Husin, 14.09.: "alles einheitlich aussehen lassen"). */
+     gebunden (14.09., "alles einheitlich aussehen lassen"). */
   --glow-neutral: rgba(110, 110, 150, 0.14);
 }
 

@@ -27,7 +27,7 @@ Wenn eine vorgeschlagene Funktion nichts misst und nicht Teil der Intervention i
 - Tailwind CSS
 - PostgreSQL mit Prisma
 - Auth: eigene Credentials-Lösung mit signiertem httpOnly-Cookie (`jose`, `bcryptjs`). Kein NextAuth, es gibt nur acht feste Accounts ohne Registrierung.
-- Deployment (Entscheidung 17.09.): **Vercel** für die App (Region Frankfurt) und **Neon** für Postgres (Region Frankfurt, damit die Daten wie in der Einwilligung zugesagt in Deutschland liegen). Migration und Seed laufen von Husins Laptop gegen die direkte Neon-Verbindung, nicht bei Vercel - `prisma/seed.ts` braucht `credentials.local.json` mit den echten Teilnehmer-Passwörtern. `npm run build` enthält deshalb `prisma generate`, weil `src/generated/prisma` nicht im Git liegt.
+- Deployment (Entscheidung 17.09.): **Vercel** für die App (Region Frankfurt) und **Neon** für Postgres (Region Frankfurt, damit die Daten wie in der Einwilligung zugesagt in Deutschland liegen). Migration und Seed laufen von meinem Laptop gegen die direkte Neon-Verbindung, nicht bei Vercel - `prisma/seed.ts` braucht `credentials.local.json` mit den echten Teilnehmer-Passwörtern. `npm run build` enthält deshalb `prisma generate`, weil `src/generated/prisma` nicht im Git liegt.
 - Der ursprüngliche Weg (Docker Compose auf Hetzner mit Caddy) ist vollständig gebaut und getestet und bleibt im Repo (`Dockerfile`, `docker-compose.yml`, `Caddyfile`, CHECKLIST.md I1–I5) - als Option für später, aktuell nicht in Benutzung.
 
 ---
