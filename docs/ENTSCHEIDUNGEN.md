@@ -1028,3 +1028,17 @@ danach wieder entfernt.
 
 **Hinweis zum Auswerten:** Der Export filtert bewusst nichts. Die Zeilen von PILOT und ADMIN stehen deshalb
 mit in `participants.csv` und müssen bei der Auswertung ausgeschlossen werden.
+
+## 18.09.2026 ADMIN kann keine Studiensitzung mehr anlegen
+
+**Entscheidung:** Wer mit dem ADMIN-Konto angemeldet ist, wird von `/study` und `/study/consent` auf `/admin`
+weitergeleitet.
+
+**Begründung:** Nach dem Login geht es für alle auf `/study`, und ohne Sitzung landet man von dort auf der
+Einwilligung. Beim ersten Ausprobieren in Produktion wurde die Einwilligung mit dem ADMIN-Konto einmal
+durchgeklickt, dadurch stand ADMIN als ganz normale Teilnehmerzeile im Export. Das Konto ist zum Auswerten
+da, zum Ausprobieren des Ablaufs gibt es PILOT.
+
+**Getestet:** Als ADMIN führen `/study` und `/study/consent` beide mit 307 auf `/admin`, `/admin` selbst
+antwortet mit 200. Gegenprobe mit PILOT: kommt weiterhin normal auf die Einwilligung. Danach null Sitzungen
+in der Datenbank, der Test hat also keine angelegt.

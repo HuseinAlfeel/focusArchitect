@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentParticipant } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Role } from "@/generated/prisma/enums";
 import { LogoutButton } from "./logout-button";
 import { ReopenSessionButton } from "./reopen-session-button";
 import { DashboardStartForm } from "./dashboard-start-form";
@@ -14,6 +15,15 @@ export default async function StudyPage() {
   const participant = await getCurrentParticipant();
   if (!participant) {
     redirect("/login");
+  }
+
+  // Das ADMIN-Konto ist zum Auswerten da, nicht zum Teilnehmen. Ohne diese
+  // Weiche landet es nach dem Login auf der Einwilligung und legt beim
+  // Durchklicken eine ganz normale Studiensitzung an, die dann als eigene
+  // Zeile im Export steht (18.09. genau so passiert). Zum Ausprobieren des
+  // Ablaufs gibt es PILOT.
+  if (participant.role === Role.ADMIN) {
+    redirect("/admin");
   }
 
   const session = await prisma.session.findFirst({
