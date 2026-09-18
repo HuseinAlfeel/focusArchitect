@@ -598,6 +598,14 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 
 *Aufwand: 1 Tag*
 
+> **ZUERST: Rundenlänge zurück auf 25 Minuten.** Am 18.09. für schnelleres Testen auf 5 Minuten gesetzt,
+> `initialWorkMin` in `prisma/schema.prisma`. Zurückstellen und `npx prisma migrate dev` laufen lassen,
+> lokal und danach `migrate deploy` gegen die Produktionsdatenbank. Solange das nicht passiert ist, läuft
+> die Erhebung mit der falschen Rundenlänge, und die Intervallanpassung ist die wichtigste Datenquelle der
+> Arbeit. Die Pausenlänge bleibt bei 5, die war nie verstellt.
+
+- [ ] **Rundenlänge wieder auf 25 Minuten gestellt** (siehe Kasten oben), in einer frisch angelegten Sitzung
+      geprüft, dass wirklich 25 in der Datenbank steht
 - [ ] Elfte Person (nicht aus den zehn!) macht den kompletten Ablauf durch
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?

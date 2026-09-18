@@ -887,3 +887,20 @@ Gedankenstriche fallen als typische KI-Schreibweise auf.
 Stehen bleiben durfte der Name an drei Stellen, wo er hingehört: in den Titelzeilen der Dokumente als Autor
 und im Einwilligungstext, den die Teilnehmenden lesen. "Betreuung" als Quelle bleibt ebenfalls stehen, das
 schreibt man in eigenen Notizen ganz normal so.
+
+## 18.09.2026 Rundenlänge vorübergehend auf 5 Minuten (Testwert)
+
+**Entscheidung:** `initialWorkMin` in `prisma/schema.prisma` von 25 auf 5 gesetzt, Migration
+`testwert_rundenlaenge_5min`. Die Pausenlänge bleibt unverändert bei 5 Minuten.
+
+**Begründung:** Zum Testen soll der ganze Ablauf schnell durchspielbar sein, ohne 25 Minuten zu warten. Das
+ist ausdrücklich vorübergehend. In CLAUDE.md steht eigentlich, dass die Standardwerte im Code bei 25/5
+bleiben und man zum Testen nur kurze Zeiten benutzt. Die Abweichung ist bewusst und an drei Stellen
+markiert: als Kommentar direkt an der Stelle im Schema, als Kasten ganz oben in PHASE J der Checkliste und
+hier.
+
+**Zurückstellen:** `initialWorkMin` auf 25, `npx prisma migrate dev`, danach gegen die Produktionsdatenbank
+`npx prisma migrate deploy`. Wichtig vor dem Probelauf, nicht erst vor der Studie.
+
+**Zu beachten:** Der Wert wirkt nur auf **neu angelegte** Sitzungen. Sitzungen, die schon existieren, haben
+ihre 25 gespeichert und behalten sie. Zum Testen also mit einem Code starten, der noch keine Sitzung hat.

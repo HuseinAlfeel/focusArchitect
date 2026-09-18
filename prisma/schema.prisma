@@ -35,7 +35,11 @@ model Session {
   startedAt       DateTime?
   endedAt         DateTime?
   finalizedAt     DateTime? // endgültig abgegeben, danach kein Reopen mehr
-  initialWorkMin  Int         @default(25)
+  // TESTWERT (18.09.): Arbeitsrunde auf 5 Minuten verkuerzt, um den Ablauf
+  // schnell durchspielen zu koennen. VOR DER STUDIE ZURUECK AUF 25, sonst
+  // laeuft die Erhebung mit der falschen Rundenlaenge. Steht auch als
+  // eigener Punkt in CHECKLIST.md, PHASE J.
+  initialWorkMin  Int         @default(5)
   initialBreakMin Int         @default(5)
   restedAtStart   Int? // Skala 1-7, "Wie ausgeruht fühlst du dich jetzt gerade?" direkt vor Sitzungsstart
   focusAtStart    Int? // Skala 1-7, "Wie konzentriert fühlst du dich jetzt gerade?" direkt vor Sitzungsstart
