@@ -622,6 +622,10 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?
 - [ ] Daten exportiert und geprüft: Ist alles drin, was du brauchst?
+- [ ] **PILOT- und ADMIN-Zeilen ausschließen.** Der Export filtert nichts, beide stehen als normale Zeilen in
+      `participants.csv`.
+- [ ] Falls Excel alles in Spalte A zeigt: nicht die Datei ist kaputt, sondern das Listentrennzeichen von
+      Windows steht auf Komma. In Excel über Daten, Aus Text/CSV importieren und Semikolon wählen.
 - [ ] **Auf doppelt gesteuerte Sitzungen prüfen** (zwei Fenster gleichzeitig offen, oder Neuladen mitten in
       einer Pause). Diese Abfrage muss leer bleiben, jede Zeile ist eine Runde, die zweimal gesteuert wurde:
       ```sql

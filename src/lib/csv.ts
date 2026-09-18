@@ -17,7 +17,14 @@ function escapeCsvValue(value: unknown): string {
     text = String(value);
   }
 
-  if (/[;"\r\n]/.test(text)) {
+  // Zeilenumbrueche aus Freitextantworten werden zu Leerzeichen, damit ein
+  // Datensatz auch wirklich eine Zeile bleibt. Maskiert waeren sie zwar auch
+  // gueltig, aber in Excel wird die Zeile dann meterhoch und die Datei sieht
+  // kaputt aus. Es geht dabei kein Wort verloren, nur die Absatzstruktur der
+  // Freitextantwort (18.09., beim ersten echten Export aufgefallen).
+  text = text.replace(/\s+/g, " ").trim();
+
+  if (/[;"]/.test(text)) {
     return `"${text.replace(/"/g, '""')}"`;
   }
   return text;

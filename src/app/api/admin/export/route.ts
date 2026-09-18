@@ -12,7 +12,10 @@ import {
   postSurveyClosingTextItems,
 } from "@/content/post-survey";
 
-const PRE_IDS = preSurveyItems.map((item) => item.id);
+// Ja/Nein-Fragen bekommen zwei Spalten (siehe Aufbau der Zeilen unten).
+const PRE_COLUMNS = preSurveyItems.flatMap((item) =>
+  item.type === "yesno" ? [item.id, `${item.id}_followUp`] : [item.id]
+);
 const POST_IDS = [
   ...postSurveyStateItems.map((item) => item.id),
   ...postSurveyPersuasivenessItems.map((item) => item.id),
@@ -89,7 +92,24 @@ async function participantsCsv() {
       restedAtStart: session.restedAtStart,
       focusAtStart: session.focusAtStart,
     };
-    for (const id of PRE_IDS) row[id] = preAnswers[id];
+    // Ja/Nein-Fragen mit Anschlussfrage liegen als Objekt { yes, followUp } in
+    // den Antworten. Direkt geschrieben stand im CSV roher JSON-Text
+    // (`{""yes"":false,""followUp"":""""}`), damit laesst sich in Excel nicht
+    // rechnen. Jetzt zwei saubere Spalten je Frage: B2 mit ja/nein und
+    // B2_followUp mit der Anschlussantwort. Eine leere B3-Spalte heisst
+    // weiterhin, dass die Frage gar nicht gestellt wurde, weil B2 "nein" war
+    // (siehe isPreSurveyItemVisible).
+    for (const item of preSurveyItems) {
+      const value = preAnswers[item.id];
+      if (item.type === "yesno") {
+        const answer = value as { yes?: boolean; followUp?: string } | undefined;
+        row[item.id] =
+          typeof answer?.yes === "boolean" ? (answer.yes ? "ja" : "nein") : null;
+        row[`${item.id}_followUp`] = answer?.followUp ?? null;
+      } else {
+        row[item.id] = value;
+      }
+    }
     for (const id of POST_IDS) row[id] = postAnswers[id];
 
     const pageTimings = postAnswers.pageTimings as
@@ -122,7 +142,7 @@ async function participantsCsv() {
     "taskDescription",
     "restedAtStart",
     "focusAtStart",
-    ...PRE_IDS,
+    ...PRE_COLUMNS,
     ...POST_IDS,
     ...POST_PAGE_TIMING_COLUMNS,
   ];

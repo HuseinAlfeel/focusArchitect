@@ -998,3 +998,33 @@ dort steckt `prisma generate` im Build.
 
 **Zum Testen künftig:** Nicht mehr den Standard im Schema verstellen, sondern die Werte direkt auf der
 Testsitzung setzen. Dann bleibt der Studienwert immer korrekt.
+
+## 18.09.2026 Export lesbar gemacht: Ja/Nein-Fragen und Zeilenumbrüche
+
+**Anlass:** Erster echter Export aus der Produktion, in Excel geöffnet. Genau der Schritt aus PHASE J, und er
+hat zwei Dinge gefunden.
+
+**Problem 1, Ja/Nein-Antworten standen als roher JSON-Text im CSV.** In der Zelle für B2 stand
+`{"yes":false,"followUp":""}`. Damit lässt sich in Excel nicht rechnen und nicht filtern.
+**Gelöst:** Jede Ja/Nein-Frage bekommt jetzt zwei Spalten, `B2` mit dem Wert `ja` oder `nein` und
+`B2_followUp` mit der Anschlussantwort. Eine leere `B3`-Spalte bedeutet weiterhin, dass die Frage gar nicht
+gestellt wurde, weil B2 mit Nein beantwortet war.
+
+**Problem 2, Zeilenumbrüche in Freitextantworten sprengten die Zeile.** Ein Absatz in einer Antwort ist
+maskiert zwar gültiges CSV, aber in Excel wird die Zeile dann meterhoch und die Datei sieht kaputt aus.
+**Gelöst:** In `toCsv` werden Folgen von Leerraum zu einem Leerzeichen zusammengezogen. Ein Datensatz bleibt
+damit immer eine physische Zeile. Es geht kein Wort verloren, nur die Absatzstruktur.
+
+**Kein Fehler, aber Ursache für den ersten Schreck:** Excel hatte die Datei gar nicht in Spalten zerlegt,
+alles stand in Spalte A. Die Datei benutzt Semikolon und eine UTF-8-BOM, das ist auf deutsches Excel
+ausgelegt. Steht das Listentrennzeichen von Windows auf Komma, ignoriert Excel die Semikolons. Abhilfe ohne
+Änderung an der Datei: in Excel über Daten, Aus Text/CSV importieren und dort Semikolon wählen.
+
+**Getestet:** Testdatensatz mit allen drei Fallen gleichzeitig angelegt, echter Zeilenumbruch, Semikolon und
+Anführungszeichen in derselben Freitextantwort. Export gezogen und mit einem CSV-Parser gegengelesen:
+49 Spalten im Kopf, 49 Werte in der Datenzeile, `B2` gleich `ja`, `B2_followUp` gleich `4`, `B3` gleich
+`nein`, und der Freitext einzeilig mit erhaltenem Semikolon und erhaltenen Anführungszeichen. Testdaten
+danach wieder entfernt.
+
+**Hinweis zum Auswerten:** Der Export filtert bewusst nichts. Die Zeilen von PILOT und ADMIN stehen deshalb
+mit in `participants.csv` und müssen bei der Auswertung ausgeschlossen werden.
