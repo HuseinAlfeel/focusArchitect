@@ -605,14 +605,19 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 
 *Aufwand: 1 Tag*
 
-> **ZUERST: Rundenlänge zurück auf 25 Minuten.** Am 18.09. für schnelleres Testen auf 5 Minuten gesetzt,
-> `initialWorkMin` in `prisma/schema.prisma`. Zurückstellen und `npx prisma migrate dev` laufen lassen,
-> lokal und danach `migrate deploy` gegen die Produktionsdatenbank. Solange das nicht passiert ist, läuft
-> die Erhebung mit der falschen Rundenlänge, und die Intervallanpassung ist die wichtigste Datenquelle der
-> Arbeit. Die Pausenlänge bleibt bei 5, die war nie verstellt.
+> **Rundenlänge steht wieder auf 25/5** (erledigt 18.09.). Sie war am selben Tag kurz auf 5 Minuten gesetzt,
+> um den Ablauf schnell durchspielen zu können. Falls du noch einmal mit kurzen Zeiten testen willst: nicht
+> wieder den Standard im Schema ändern, sondern die Werte direkt auf der Testsitzung setzen
+> (`update "Session" set "initialWorkMin"=5 where id='...'`). Dann kann der Studienwert gar nicht erst
+> versehentlich stehen bleiben.
+>
+> **Nach jeder Schemaänderung lokal:** `npx prisma migrate dev`, dann **`npx prisma generate`** und den
+> Dev-Server neu starten. `migrate dev` erzeugt den Client nicht zuverlässig mit, und der laufende Server hält
+> den alten im Speicher. Genau daran lag es, dass eine geänderte Vorgabe zweimal scheinbar nicht wirkte.
+> Bei Vercel passiert das automatisch, weil `npm run build` das `prisma generate` enthält.
 
-- [ ] **Rundenlänge wieder auf 25 Minuten gestellt** (siehe Kasten oben), in einer frisch angelegten Sitzung
-      geprüft, dass wirklich 25 in der Datenbank steht
+- [x] **Rundenlänge wieder auf 25 Minuten gestellt**, in einer frisch angelegten Sitzung geprüft: 25/5 steht
+      in der Datenbank
 - [ ] Elfte Person (nicht aus den zehn!) macht den kompletten Ablauf durch
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?

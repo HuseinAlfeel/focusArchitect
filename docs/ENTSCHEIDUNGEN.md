@@ -974,3 +974,27 @@ es eindeutig: Runde gestartet 13:10:23, also Ende 13:15:23, Stufe-1-Ton um 13:15
 13:15:24.546. Später drifteten die Fenster auseinander, zwei Stufe-1-Töne lagen um 13:31:17 und 13:32:34, das
 sind 77 Sekunden Abstand. Wer auf das zweite Fenster schaut, hört den Ton des ersten, während die eigene
 Anzeige noch über eine Minute zeigt. Siehe den Eintrag zu den zwei Fenstern weiter oben.
+
+## 18.09.2026 Datenbank geleert und Rundenlänge zurück auf 25
+
+**Entscheidung:** Alle Aktivitätsdaten aus der lokalen Datenbank gelöscht (Sitzungen, Ereignisse,
+Befragungen, Kurzfeedback), die zwölf Teilnehmer-Accounts bleiben unberührt. Danach `initialWorkMin` im
+Schema von 5 zurück auf 25, Migration `rundenlaenge_zurueck_auf_25`.
+
+**Begründung:** Vor dem Hosting soll alles frisch sein, damit die Teilnehmenden mit ihren eigenen Eingaben
+starten. Die Testdaten waren ohnehin teilweise unbrauchbar, etwa die doppelt gesteuerte Sitzung von P01 aus
+den zwei gleichzeitig offenen Fenstern. Vor dem Löschen wurde ein vollständiger `pg_dump` abgelegt, falls
+doch noch etwas gebraucht wird.
+
+**Geprüft:** Nach dem Löschen zwölf Teilnehmer mit korrekten Rollen, null Sitzungen, null Ereignisse, null
+Befragungen, null Kurzfeedback. Nach der Migration in einer frisch über die API angelegten Sitzung
+nachgesehen: 25 Minuten Arbeit, 5 Minuten Pause.
+
+**Zum Merken, hat zweimal Zeit gekostet:** Eine geänderte Vorgabe im Schema wirkt lokal erst, wenn nach
+`npx prisma migrate dev` auch `npx prisma generate` gelaufen **und** der Dev-Server neu gestartet ist. Der
+generierte Client trägt den Vorgabewert in sich, und der laufende Server hält den alten im Speicher. Beim
+ersten Versuch sah es deshalb so aus, als hätte die Änderung nicht gewirkt. Bei Vercel ist das kein Thema,
+dort steckt `prisma generate` im Build.
+
+**Zum Testen künftig:** Nicht mehr den Standard im Schema verstellen, sondern die Werte direkt auf der
+Testsitzung setzen. Dann bleibt der Studienwert immer korrekt.
