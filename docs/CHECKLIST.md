@@ -526,7 +526,7 @@ bricht der Build bei Vercel mit "Cannot find module '@/generated/prisma'" ab). L
       Mit dem direkten Neon-String, und weil Docker sowieso da ist, geht das ohne lokale
       Postgres-Installation:
       ```
-      docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > dump_2026-09-18.sql
+      docker run --rm -v "${PWD}:/arbeit" postgres:16 pg_dump "DIREKTER_NEON_STRING" -f /arbeit/dump_2026-09-18.sql
       ```
       Neon macht zwar eigene Backups, aber ein eigener Dump auf deiner Platte ist das, was dich rettet, wenn
       am Account etwas schiefgeht. Teilnehmende kann man nicht nachbestellen.
@@ -647,9 +647,11 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 - [ ] Gefundene Fehler beheben
 - [ ] **Testdaten aus der Produktionsdatenbank löschen, bevor die echten Teilnehmenden anfangen.** Fertiges
       Skript: `scripts/studiendaten-zuruecksetzen.sql`. Vorher eine Sicherung ziehen.
-      ```
-      docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > sicherung.sql
-      docker run --rm -i postgres:16 psql "DIREKTER_NEON_STRING" -v ON_ERROR_STOP=1 < scripts/studiendaten-zuruecksetzen.sql
+      In PowerShell, im Projektordner. Nicht mit `>` oder `<` arbeiten, die kennt PowerShell nicht wie eine
+      Unix-Shell. Stattdessen den Projektordner in den Container einbinden und `-f` benutzen:
+      ```powershell
+      docker run --rm -v "${PWD}:/arbeit" postgres:16 pg_dump "DIREKTER_NEON_STRING" -f /arbeit/sicherung.sql
+      docker run --rm -v "${PWD}:/arbeit" postgres:16 psql "DIREKTER_NEON_STRING" -v ON_ERROR_STOP=1 -f /arbeit/scripts/studiendaten-zuruecksetzen.sql
       ```
       Das ist keine Kosmetik: eine Person hat genau eine Sitzung. Liegt für einen Code schon eine
       Testsitzung mit Einwilligung und Vorbefragung vor, bekommt die echte Person genau diese Sitzung wieder
@@ -674,7 +676,7 @@ Für **jede** der zehn Personen:
 - [ ] **Sofort danach Backup ziehen.** Auf dem Vercel/Neon-Weg von deinem Laptop aus, mit dem DIREKTEN
       Neon-String (Docker ist schon da, du brauchst kein lokales Postgres):
       ```
-      docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > dump_P03_2026-09-20.sql
+      docker run --rm -v "${PWD}:/arbeit" postgres:16 pg_dump "DIREKTER_NEON_STRING" -f /arbeit/dump_P03_2026-09-20.sql
       ```
       Dateiname mit Teilnehmer-Code und Datum, und die Datei an einen zweiten Ort kopieren (Cloud oder
       zweite Platte). Neon hat eigene Backups, aber die retten dich nicht, wenn am Account selbst etwas

@@ -11,15 +11,21 @@
 -- im laufenden Timer der Testsitzung, und ihre Daten landen an der alten
 -- Sitzung. Deshalb vorher zuruecksetzen.
 --
--- Vorher eine Sicherung ziehen:
---   docker run --rm postgres:16 pg_dump "DIREKTER_NEON_STRING" > sicherung.sql
+-- ALLE Befehle hier sind fuer PowerShell und werden im Projektordner
+-- ausgefuehrt. Wichtig: PowerShell kennt die Umleitungen "<" und teilweise ">"
+-- nicht so wie eine Unix-Shell. Deshalb wird der Projektordner in den
+-- Container eingebunden (-v) und mit -f gearbeitet, das umgeht beides.
 --
--- Ausfuehren gegen die Produktionsdatenbank (DIREKTER String, nicht der
--- gepoolte):
---   docker run --rm -i postgres:16 psql "DIREKTER_NEON_STRING" -v ON_ERROR_STOP=1 < scripts/studiendaten-zuruecksetzen.sql
+-- 1. Vorher eine Sicherung ziehen:
+--    docker run --rm -v "${PWD}:/arbeit" postgres:16 pg_dump "DIREKTER_NEON_STRING" -f /arbeit/sicherung.sql
 --
--- Lokal gegen die Entwicklungsdatenbank:
---   docker exec -i focusarchitect-db-1 psql -U focus -d focusdb -v ON_ERROR_STOP=1 < scripts/studiendaten-zuruecksetzen.sql
+-- 2. Ausfuehren gegen die Produktionsdatenbank (DIREKTER String, nicht der
+--    gepoolte):
+--    docker run --rm -v "${PWD}:/arbeit" postgres:16 psql "DIREKTER_NEON_STRING" -v ON_ERROR_STOP=1 -f /arbeit/scripts/studiendaten-zuruecksetzen.sql
+--
+-- Lokal gegen die Entwicklungsdatenbank geht es einfacher, weil der Container
+-- schon laeuft:
+--    Get-Content scripts\studiendaten-zuruecksetzen.sql | docker exec -i focusarchitect-db-1 psql -U focus -d focusdb -v ON_ERROR_STOP=1
 
 BEGIN;
 
