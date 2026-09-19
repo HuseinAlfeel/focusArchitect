@@ -12,9 +12,8 @@ const BURSTS = 5;
 const INTERVAL_MS = 1000;
 
 /**
- * Konfetti auf der Abschlussseite (19.09.): fuenf Explosionen, eine pro
- * Sekunde, abwechselnd von links und rechts plus jeweils eine kleinere aus
- * der Mitte.
+ * Konfetti auf der Abschlussseite (19.09.): fuenfmal dieselbe Explosion aus
+ * der Mitte, eine pro Sekunde, unabhaengig von der Bewegungseinstellung.
  *
  * Bewusst erst hier und nirgends frueher. Diese Seite kommt nach dem
  * Absenden der Nachbefragung, zu diesem Zeitpunkt sind alle Antworten
@@ -35,39 +34,27 @@ export function Celebration() {
     if (!canvas) return;
 
     const fire = confetti.create(canvas, { resize: true, useWorker: false });
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timers: number[] = [];
 
-    function burst(i: number) {
-      const fromLeft = i % 2 === 0;
+    // Fuenfmal dieselbe Explosion aus der Mitte, damit jede einzeln als
+    // eigener Knall erkennbar ist. Frueher gab es bei eingestellter
+    // "reduzierter Bewegung" nur einen einzigen Gruss. Unter Windows reicht
+    // dafuer schon, dass die Animationseffekte aus sind, und dann sah man
+    // statt fuenf nur eine Explosion. Deshalb jetzt immer fuenf.
+    function burst() {
       void fire({
-        particleCount: 90,
-        spread: 78,
-        startVelocity: 46,
-        decay: 0.9,
-        scalar: 1.05,
-        angle: fromLeft ? 62 : 118,
-        origin: { x: fromLeft ? 0.18 : 0.82, y: 0.68 },
-        colors: COLORS,
-      });
-      void fire({
-        particleCount: 45,
-        spread: 120,
-        startVelocity: 34,
-        scalar: 0.85,
-        origin: { x: 0.5, y: 0.55 },
+        particleCount: 140,
+        spread: 100,
+        startVelocity: 48,
+        decay: 0.91,
+        scalar: 1.1,
+        origin: { x: 0.5, y: 0.6 },
         colors: COLORS,
       });
     }
 
-    if (reduced) {
-      // Wer reduzierte Bewegung eingestellt hat, bekommt einen einzigen,
-      // kleinen Gruss statt fuenf Explosionen.
-      void fire({ particleCount: 60, spread: 90, origin: { x: 0.5, y: 0.6 }, colors: COLORS });
-    } else {
-      for (let i = 0; i < BURSTS; i++) {
-        timers.push(window.setTimeout(() => burst(i), i * INTERVAL_MS));
-      }
+    for (let i = 0; i < BURSTS; i++) {
+      timers.push(window.setTimeout(burst, i * INTERVAL_MS));
     }
 
     return () => {

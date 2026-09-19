@@ -1107,3 +1107,9 @@ einzelnen kleinen Gruß. Die Canvas lässt Klicks durch, "Abmelden" bleibt bedie
 nachkommen, während ältere aus dem Bild fallen. Bei 7,5 s ist die Canvas wieder leer. Keine Fehler in der
 Konsole, Text der Seite unverändert. Screenshot angeschaut, das Konfetti ist über den ganzen Bildschirm
 verteilt und der Dank bleibt lesbar.
+
+**Nachtrag am selben Tag:** Auf dem eigenen Rechner kam nur eine einzige Explosion statt fünf. Grund: die
+Windows-Animationseffekte sind dort ausgeschaltet, der Browser meldet das als "reduzierte Bewegung", und für
+diesen Fall gab es absichtlich nur einen kleinen Gruß. Jetzt immer fünfmal dieselbe Explosion aus der Mitte,
+unabhängig von der Einstellung, damit jede Explosion als eigener Knall erkennbar ist. Mit eingeschalteter
+reduzierter Bewegung nachgezählt: Explosionen bei 0,3 s, 1,1 s, 2,2 s, 3,2 s und 4,3 s.
