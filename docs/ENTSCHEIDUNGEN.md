@@ -1083,3 +1083,27 @@ geleert. Zwölf Accounts stehen, keine Daten.
 
 **Damit ist die App aus technischer Sicht fertig und eingefroren.** Was ab hier noch geändert wird, ändert
 die Bedingungen für einen Teil der Teilnehmenden und gehört dann in die Limitationen.
+
+## 19.09.2026 Konfetti auf der Abschlussseite
+
+**Entscheidung:** Die Abschlussseite `/study/complete` feiert jetzt das Ende der Teilnahme: fünf Explosionen,
+eine pro Sekunde, mit `canvas-confetti`. Die Farben sind die der App, also die vier Hinweisstufen (Beige,
+Bernstein, Terrakotta), dazu das Blau der Arbeitsphase und das Grün der Pause.
+
+**Begründung:** Wer bis hierhin mitgemacht hat, hat eine ganze Arbeitssitzung und zwei Fragebögen hinter
+sich, das darf man merken. Die Leitregel in CLAUDE.md sagt eigentlich, dass nur gebaut wird, was zur
+Intervention gehört oder Daten liefert. Hier ist die Ausnahme bewusst: die Abschlussseite kommt erst, nachdem
+die Nachbefragung abgeschickt und die Sitzung finalisiert ist. Es gibt danach keine Messung mehr, die das
+Konfetti beeinflussen könnte, und die Seite schreibt selbst nichts in die Datenbank.
+
+**Umsetzung:** Eigene Canvas statt des globalen `confetti()`, das sonst eine Canvas an den body hängt, die
+liegen bleiben kann. Ohne Worker, weil der Effekt kurz ist. Beim Verlassen der Seite werden die Zeitgeber
+gestoppt und die Canvas geleert. Das ist auch nötig, weil der Effekt im Entwicklungsmodus zweimal anläuft,
+sonst kämen dort zehn statt fünf Explosionen. Bei eingestellter reduzierter Bewegung gibt es nur einen
+einzelnen kleinen Gruß. Die Canvas lässt Klicks durch, "Abmelden" bleibt bedienbar.
+
+**Getestet:** Im echten Browser alle halbe Sekunde die farbigen Pixel auf der Canvas gezählt: etwa 6.000 bei
+0,5 s, 12.000 bei 1,5 s, 18.000 bei 2,5 s, danach hält sich das Niveau bis 5 s, weil neue Explosionen
+nachkommen, während ältere aus dem Bild fallen. Bei 7,5 s ist die Canvas wieder leer. Keine Fehler in der
+Konsole, Text der Seite unverändert. Screenshot angeschaut, das Konfetti ist über den ganzen Bildschirm
+verteilt und der Dank bleibt lesbar.

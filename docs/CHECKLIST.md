@@ -428,6 +428,9 @@ npm install -D @types/bcryptjs
 - [ ] `POST /api/survey` mit `phase: "POST"`
 - [ ] `PATCH /api/session/:id/end`, Ereignisse `SESSION_ENDED`, `SURVEY_POST_SUBMITTED`
 - [ ] Abschlussseite: Dank, deine Kontaktadresse für Rückfragen und Löschwünsche
+- [x] Konfetti auf der Abschlussseite (19.09.): fünf Explosionen, eine pro Sekunde, Farben der App. Erst nach
+      der Nachbefragung, deshalb ohne Einfluss auf die Messung. Im Browser nachgemessen: farbige Pixel steigen
+      bei 0,5 s, 1,5 s und 2,5 s stufenweise an, halten bis 5 s und sind bei 7,5 s wieder bei null
 - [ ] **Keine** Auswertung für Teilnehmende anzeigen
 
 > **Fertig, wenn:** Du kannst den kompletten Ablauf einmal von Login bis Abschluss durchspielen.

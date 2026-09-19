@@ -360,6 +360,13 @@ N3-N11 sind die Skala "wahrgenommene Überzeugungskraft" (Persuasiveness), N12-N
 
 Dank, Hinweis auf deine Kontaktadresse für Rückfragen und Löschwünsche, fertig. Keine Auswertung für die Nutzenden anzeigen, das würde nachträglich ihre Antworten beeinflussen.
 
+**Konfetti zum Abschluss (ergänzt 19.09.):** Beim Öffnen der Seite fünf Explosionen, eine pro Sekunde, in den
+Farben der vier Hinweisstufen plus Blau der Arbeitsphase und Grün der Pause (`canvas-confetti`,
+`src/app/study/complete/celebration.tsx`). Eine bewusste Ausnahme vom Leitprinzip, dass nur gebaut wird, was
+zur Intervention gehört oder etwas misst. Vertretbar, weil diese Seite erst nach dem Absenden der
+Nachbefragung kommt: alle Antworten sind dann gespeichert und die Sitzung ist finalisiert, die Feier kann
+keine Messung mehr beeinflussen. Bei eingestellter reduzierter Bewegung nur ein einzelner kleiner Gruß.
+
 ---
 
 ## 3. Login ohne Registrierung
