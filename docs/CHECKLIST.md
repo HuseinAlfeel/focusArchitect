@@ -11,9 +11,12 @@
 
 *Aufwand: 1 Tag, hauptsächlich Warten auf Antworten*
 
-- [ ] **A1. Meeting mit Holly gehabt.** Studienaufbau ist abgesegnet.
+- [x] **A1. Meeting mit Holly gehabt.** Studienaufbau ist abgesegnet (Stand 19.09. geklärt).
 - [ ] **A2. Datenschutz und Ethik geklärt.** Weißt du, ob ein Antrag nötig ist? Falls ja: gestellt.
-- [ ] **A3. Text für Einwilligung und Datenschutz.** Vorlage vom Fachgebiet erfragt oder selbst entworfen und von Holly gegengelesen.
+- [x] **A3. Text für Einwilligung und Datenschutz.** Mit der Betreuung geklärt (Stand 19.09.). Auflage
+      daraus: die Angabe zum Hosting muss der Wahrheit entsprechen. Erfüllt, im Text steht seit 18.09.
+      "bei einem Hosting-Dienstleister mit Serverstandort in Deutschland", und genau das ist der Fall
+      (Vercel und Neon, beide Region Frankfurt). **Ändert sich der Hostingort, muss dieser Satz mit.**
 - [ ] **A4. Fragebogen-Items final.** Inklusive Entscheidung: eigene Skalen oder NASA-TLX / UEQ-S dazu?
 - [ ] **A5. KI-Logbuch angelegt.** Eine Textdatei. Ab jetzt jeden Tag eine Zeile.
 - [ ] **A6. Zehn Teilnehmende terminiert.** Feste Termine im Kalender, nicht nur „hat zugesagt".
@@ -621,7 +624,7 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 - [ ] Elfte Person (nicht aus den zehn!) macht den kompletten Ablauf durch
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?
-- [ ] Daten exportiert und geprüft: Ist alles drin, was du brauchst?
+- [x] Daten exportiert und geprüft (19.09.): alle drei Dateien gegengelesen, alles drin
 - [ ] **PILOT- und ADMIN-Zeilen ausschließen.** Der Export filtert nichts, beide stehen als normale Zeilen in
       `participants.csv`.
 - [ ] Falls Excel alles in Spalte A zeigt: nicht die Datei ist kaputt, sondern das Listentrennzeichen von
@@ -643,9 +646,11 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
       nimmt der Export den ersten Treffer und verwirft den Rest stillschweigend, die Zeile sieht danach
       völlig normal aus. Solche Sitzungen gehören wiederholt oder in den Limitationen benannt, nicht
       stillschweigend mitgerechnet.
-- [ ] **Fehlende Felder jetzt ergänzen.** Nach der Studie geht das nicht mehr.
+- [x] **Fehlende Felder ergänzt.** Beim ersten Export standen die Ja/Nein-Antworten als roher JSON-Text
+      in der Zelle, und Zeilenumbrüche aus Freitext sprengten die Zeile. Beides behoben, siehe
+      ENTSCHEIDUNGEN.md 18.09.
 - [ ] Gefundene Fehler beheben
-- [ ] **Testdaten aus der Produktionsdatenbank löschen, bevor die echten Teilnehmenden anfangen.** Fertiges
+- [x] **Testdaten aus der Produktionsdatenbank gelöscht** (19.09., nach dem Probelauf, mit Sicherung davor). Fertiges
       Skript: `scripts/studiendaten-zuruecksetzen.sql`. Vorher eine Sicherung ziehen.
       In PowerShell, im Projektordner. Nicht mit `>` oder `<` arbeiten, die kennt PowerShell nicht wie eine
       Unix-Shell. Stattdessen den Projektordner in den Container einbinden und `-f` benutzen:

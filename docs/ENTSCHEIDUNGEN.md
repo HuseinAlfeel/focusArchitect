@@ -1051,3 +1051,35 @@ einen direkten Aufruf der Schnittstelle.
 mit 307 auf `/admin`, der direkte Aufruf von `POST /api/session` antwortet mit 403. Gegenprobe mit PILOT:
 kommt weiterhin normal auf die Einwilligung. Danach null Sitzungen in der Datenbank, der Test hat also keine
 angelegt.
+
+## 19.09.2026 Probelauf in Produktion bestanden, letzte offene Lücke geschlossen
+
+**Was geprüft wurde:** Ein vollständiger Durchlauf mit PILOT auf der Produktionsseite, in einem Fenster, vom
+Login bis zur Abschlussseite. Danach Export aller drei Dateien und Gegenlesen.
+
+**Die entscheidende Stelle, die vorher nie live gelaufen war:** die Anpassung der Rundenlänge über das
+Kurzfeedback. In `cycles.csv` steht jetzt:
+
+```
+Runde 1: workMin 25, timing TOO_EARLY, adjustmentMin -20, newWorkMin 5
+Runde 2: workMin 5
+```
+
+Damit ist belegt, dass der im Kurzfeedback gewählte Wert tatsächlich auf die nächste Runde angewendet wird.
+Das ist die wichtigste Datenquelle der Arbeit, und sie war bis dahin nur lokal getestet.
+
+**Ebenfalls live bestätigt:**
+- Rundenwechsel: `BREAK_ENDED` zu `CYCLE_STARTED 2` zu `WORK_STARTED 2`.
+- Die neu getaktete Aktivität: "Nacken und Schultern" lieferte `ACTIVITY_STEP_DONE` für die Schritte 0 bis 6,
+  also sieben Schritte. Die gemessenen Abstände waren 15, 15, 15, 15, 15, 9 Sekunden und entsprechen exakt
+  den in `activities.ts` hinterlegten Dauern.
+- Abschluss: `SESSION_ENDED`, `SURVEY_POST_SUBMITTED`, `SESSION_FINALIZED`, dazu `durationMin` 6,
+  `finalizedAt` gesetzt, N1 bis N20 gefüllt und Lesezeiten von 15, 11 und 27 Sekunden je Fragebogenseite.
+- Die ADMIN-Sperre: nach der Anmeldung als ADMIN stand in der Übersicht nur PILOT, das Admin-Konto hat keine
+  eigene Sitzung mehr angelegt.
+
+**Danach:** Sicherung gezogen und die Produktionsdatenbank mit `scripts/studiendaten-zuruecksetzen.sql`
+geleert. Zwölf Accounts stehen, keine Daten.
+
+**Damit ist die App aus technischer Sicht fertig und eingefroren.** Was ab hier noch geändert wird, ändert
+die Bedingungen für einen Teil der Teilnehmenden und gehört dann in die Limitationen.
