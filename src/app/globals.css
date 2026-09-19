@@ -145,3 +145,77 @@ body {
     animation: none;
   }
 }
+
+/* Abschlussseite (19.09.): "Danke" in fuenf Sprachen rund um die Karte.
+   Aussen sitzt die Position und der Einflug, innen das Schweben. Getrennt,
+   weil beide Animationen transform brauchen und sich auf einem Element
+   gegenseitig ueberschreiben wuerden. */
+.thanks-word {
+  transform: translate(-50%, -50%) rotate(var(--r));
+  /* Enger, leiser Schein. Mit 22px und 32% sahen die Woerter unscharf aus,
+     als waeren sie aus dem Fokus. */
+  text-shadow: 0 2px 10px color-mix(in srgb, currentColor 20%, transparent);
+  animation: thanks-in 900ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay) both;
+}
+
+@keyframes thanks-in {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate(-50%, -25%) scale(0.45) rotate(calc(var(--r) - 14deg));
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -54%) scale(1.14) rotate(var(--r));
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(1) rotate(var(--r));
+  }
+}
+
+.thanks-float {
+  animation: thanks-float var(--float) ease-in-out calc(var(--delay) + 900ms) infinite;
+}
+
+@keyframes thanks-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+}
+
+/* Die Karte steigt weich auf, ihre Zeilen folgen nacheinander. */
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-card-rise {
+  animation: card-rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Nur ein Startpunkt: ohne "to" endet die Animation beim eigenen Wert des
+   Elements. Sonst wuerde sie bei voller Deckkraft enden und das gedaempfte
+   Grau von Zeilen mit opacity-80 oder opacity-60 ueberschreiben. */
+@keyframes line-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.animate-line-in {
+  animation: line-in 650ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}

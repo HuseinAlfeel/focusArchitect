@@ -431,6 +431,9 @@ npm install -D @types/bcryptjs
 - [x] Konfetti auf der Abschlussseite (19.09.): fünf Explosionen, eine pro Sekunde, Farben der App. Erst nach
       der Nachbefragung, deshalb ohne Einfluss auf die Messung. Im Browser nachgemessen: farbige Pixel steigen
       bei 0,5 s, 1,5 s und 2,5 s stufenweise an, halten bis 5 s und sind bei 7,5 s wieder bei null
+- [x] „Danke" in fünf Sprachen rund um die Karte (19.09.), eins pro Explosion, danach sanftes Schweben. In
+      sechs Fenstergrößen geprüft, vom kleinen Handy (375 px) bis zum Monitor (1440 px): alle fünf sichtbar,
+      keins berührt Karte, Knopf oder ein anderes Wort, keine seitliche Bildlaufleiste
 - [ ] **Keine** Auswertung für Teilnehmende anzeigen
 
 > **Fertig, wenn:** Du kannst den kompletten Ablauf einmal von Login bis Abschluss durchspielen.

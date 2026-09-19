@@ -1113,3 +1113,34 @@ Windows-Animationseffekte sind dort ausgeschaltet, der Browser meldet das als "r
 diesen Fall gab es absichtlich nur einen kleinen Gruß. Jetzt immer fünfmal dieselbe Explosion aus der Mitte,
 unabhängig von der Einstellung, damit jede Explosion als eigener Knall erkennbar ist. Mit eingeschalteter
 reduzierter Bewegung nachgezählt: Explosionen bei 0,3 s, 1,1 s, 2,2 s, 3,2 s und 4,3 s.
+
+## 19.09.2026 Abschlussseite: „Danke" in fünf Sprachen
+
+**Entscheidung:** Rund um die Abschlusskarte fliegen fünf Wörter ein: Danke!, Thank you!, شكراً!, Merci !,
+¡Gracias!. Jedes landet mit einer der fünf Konfetti-Explosionen, federt kurz nach und schwebt danach ruhig
+weiter. Die Karte selbst steigt beim Öffnen weich auf, ihre Zeilen erscheinen nacheinander.
+
+**Begründung:** Vorher stand der Dank als trockener Text in einer Karte. Wer bis hierhin mitgemacht hat,
+soll merken, dass das geschätzt wird. Wie beim Konfetti gilt: die Seite kommt erst nach der Nachbefragung,
+nichts davon kann eine Messung beeinflussen.
+
+**Umsetzung, und warum so:**
+- Fünf Wörter für fünf Explosionen, zeitlich aufeinander abgestimmt. Das CSS startet schon beim ersten
+  Zeichnen, das Konfetti erst nach dem Hydrieren, deshalb 200 ms Vorlauf.
+- Position und Einflug sitzen auf dem äußeren Element, das Schweben auf dem inneren. Beide brauchen
+  `transform` und würden sich auf einem Element gegenseitig überschreiben.
+- Bis 1024 px Breite liegen die Wörter nur über und unter der Karte. Bei einem Drittel Bildschirmbreite, wie
+  es der Hinweis vor dem Start empfiehlt, wären sie links und rechts sonst in die Karte geragt.
+- Das Arabische braucht eine eigene Schrift (Cairo), Geist hat keine arabischen Zeichen. Gesetzt von rechts
+  nach links. Im Französischen ein schmales geschütztes Leerzeichen vor dem Ausrufezeichen, im Spanischen das
+  umgedrehte am Anfang.
+- Die Zeilen der Karte blenden nur von unsichtbar ein und enden bei ihrem eigenen Wert. Eine Animation mit
+  festem Endpunkt hätte das gedämpfte Grau (`opacity-80`, `opacity-60`) auf volle Deckkraft überschrieben.
+- Der Schein um die Wörter war zuerst zu kräftig und ließ sie unscharf wirken, jetzt enger und leiser.
+- Reine CSS-Animation, kein JavaScript. Für Screenreader ausgeblendet.
+
+**Getestet:** In sechs Fenstergrößen (375, 390, 640, 1024, 1280, 1440 px Breite), mit eingeschalteter
+reduzierter Bewegung wie auf dem eigenen Rechner. Gemessen wurden die Rahmen aller Wörter gegen Karte, Knopf,
+Bildrand und untereinander: überall fünf von fünf sichtbar, keine Berührung, keine seitliche Bildlaufleiste.
+Die Deckkraft der Kartenzeilen bleibt bei 0,8 und 0,6, das Arabische steht in Cairo. Screenshots angeschaut:
+nach 2,7 Sekunden drei Wörter gelandet, nach 7 Sekunden alle fünf.

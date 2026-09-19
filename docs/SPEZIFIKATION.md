@@ -367,6 +367,14 @@ zur Intervention gehört oder etwas misst. Vertretbar, weil diese Seite erst nac
 Nachbefragung kommt: alle Antworten sind dann gespeichert und die Sitzung ist finalisiert, die Feier kann
 keine Messung mehr beeinflussen. Immer fünfmal dieselbe Explosion, auch bei eingestellter reduzierter Bewegung.
 
+**„Danke" in fünf Sprachen rund um die Karte (ergänzt 19.09.):** Mit jeder der fünf Explosionen fliegt ein
+Wort ein: Danke!, Thank you!, شكراً!, Merci !, ¡Gracias!. Es federt kurz nach und schwebt danach ruhig
+weiter, jedes Wort in seinem eigenen Takt. Dazu steigt die Karte beim Öffnen weich auf und ihre Zeilen
+erscheinen nacheinander. Bis 1024 px Breite liegen die Wörter nur über und unter der Karte, darüber
+verteilen sie sich frei um sie herum. Das Arabische in Cairo, weil die App-Schrift Geist keine arabischen
+Zeichen hat. Reine CSS-Animation, kein JavaScript. Für Screenreader ausgeblendet, der eigentliche Dank steht
+in der Karte.
+
 ---
 
 ## 3. Login ohne Registrierung
