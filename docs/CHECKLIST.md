@@ -19,7 +19,7 @@
       (Vercel und Neon, beide Region Frankfurt). **Ändert sich der Hostingort, muss dieser Satz mit.**
 - [ ] **A4. Fragebogen-Items final.** Inklusive Entscheidung: eigene Skalen oder NASA-TLX / UEQ-S dazu?
 - [ ] **A5. KI-Logbuch angelegt.** Eine Textdatei. Ab jetzt jeden Tag eine Zeile.
-- [ ] **A6. Zehn Teilnehmende terminiert.** Feste Termine im Kalender, nicht nur „hat zugesagt".
+- [ ] **A6. Teilnehmende terminiert.** Mindestens zehn, bis zu zwanzig (Entscheidung 20.09.). Feste Termine im Kalender, nicht nur „hat zugesagt".
 - [ ] **A7. Elfte Person für den Probelauf** angefragt.
 
 > **Fertig, wenn:** Du weißt genau, was du misst und wann du es messen darfst.
@@ -181,9 +181,9 @@ npm install -D @types/bcryptjs
 - [ ] `prisma/seed.ts` schreiben: legt `P01` bis `P06`, `PILOT` und `ADMIN` an, Passwörter mit bcrypt gehasht
 - [ ] Passwörter in einer separaten Datei notieren, die **nicht** im Git liegt (du musst sie den Teilnehmenden geben)
 - [ ] `npx prisma db seed` ausgeführt
-- [ ] In Prisma Studio prüfen: acht Einträge, Passwörter sind Hashes (beginnen mit `$2`)
+- [ ] In Prisma Studio prüfen: so viele Einträge wie `credentials.local.json` Zeilen hat (aktuell 22), Passwörter sind Hashes (beginnen mit `$2`)
 
-> **Fertig, wenn:** Acht Accounts in der Datenbank, keine Klartext-Passwörter.
+> **Fertig, wenn:** Alle Accounts aus `credentials.local.json` in der Datenbank, keine Klartext-Passwörter.
 
 ---
 
@@ -518,7 +518,7 @@ bricht der Build bei Vercel mit "Cannot find module '@/generated/prisma'" ab). L
       Die gesetzte Variable übersteuert die lokale `.env` (geprüft), aber genau deshalb vorher einmal
       `migrate status` laufen lassen: die Ausgabe nennt den Host in Klartext. Steht dort `localhost`, ist die
       Variable nicht angekommen, und Migration und Seed würden in die lokale Testdatenbank laufen statt nach
-      Neon. Danach prüfen: `npx prisma studio` zeigt die zwölf Accounts.
+      Neon. Danach prüfen: `npx prisma studio` zeigt alle Accounts aus `credentials.local.json` (aktuell 22).
 - [ ] **Projekt bei Vercel verbinden:** vercel.com → "Add New Project" → das GitHub-Repo `focusArchitect`
       auswählen. Framework wird automatisch als Next.js erkannt, Build-Command nicht anfassen.
 - [ ] **Region auf Frankfurt stellen:** Vercel → Projekt → Settings → Functions → Region `Frankfurt (fra1)`.
@@ -627,7 +627,7 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 
 - [x] **Rundenlänge wieder auf 25 Minuten gestellt**, in einer frisch angelegten Sitzung geprüft: 25/5 steht
       in der Datenbank
-- [ ] Elfte Person (nicht aus den zehn!) macht den kompletten Ablauf durch
+- [ ] Probelauf-Person (nicht aus den Teilnehmenden!) macht den kompletten Ablauf durch
 - [ ] Du bist erreichbar, aber greifst nicht ein
 - [ ] Danach ausführlich fragen: Was war unklar? Was hat gestört? War etwas kaputt?
 - [x] Daten exportiert und geprüft (19.09.): alle drei Dateien gegengelesen, alles drin
@@ -678,7 +678,7 @@ docker compose exec -T db pg_dump -U focus focusdb > ~/backups/backup_$(date +%F
 
 *Aufwand: verteilt über ca. 2 Wochen*
 
-Für **jede** der zehn Personen:
+Für **jede** teilnehmende Person (mindestens zehn, bis zu zwanzig):
 
 - [ ] Vorher: Zugangsdaten geschickt, Termin bestätigt, Dauer angekündigt
 - [ ] Kurze Einweisung (5 Min, Nachricht oder Anruf): Was passiert, dass sie an ihrer echten Arbeit arbeiten sollen, dass sie jederzeit abbrechen können
@@ -694,10 +694,10 @@ Für **jede** der zehn Personen:
       schiefgeht. **Nach der siebten Person kannst du niemanden nachbestellen.**
 - [ ] Kurze Notiz für dich: Auffälligkeiten, Bemerkungen, technische Probleme
 
-Nach allen zehn:
+Nach der letzten Person:
 
 - [ ] Vollständigen Export ziehen
-- [ ] Prüfen: zehn Sessions, alle mit PRE und POST, plausible Ereigniszahlen
+- [ ] Prüfen: so viele Sessions wie Teilnehmende, alle mit PRE und POST, plausible Ereigniszahlen
 - [ ] Rohdaten an zwei Orten sichern
 - [ ] Server erst abschalten, wenn die Arbeit abgegeben ist
 

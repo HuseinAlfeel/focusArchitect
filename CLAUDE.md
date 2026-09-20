@@ -11,7 +11,7 @@ Beide vor größeren Änderungen lesen.
 
 ## Worum es geht
 
-Die Anwendung untersucht, wie Software zu gesunden Bildschirmpausen anregen kann, ohne die Arbeit zu stören. Zehn Teilnehmende nutzen sie an ihrer eigenen, echten Arbeit. Die Sitzung hat kein festes Ende (Änderung 25.08.) - sie beenden selbst über den vorhandenen Knopf, sobald sie fertig sind.
+Die Anwendung untersucht, wie Software zu gesunden Bildschirmpausen anregen kann, ohne die Arbeit zu stören. Mindestens zehn, bis zu zwanzig Teilnehmende (Entscheidung 20.09.) nutzen sie an ihrer eigenen, echten Arbeit. Die Sitzung hat kein festes Ende (Änderung 25.08.) - sie beenden selbst über den vorhandenen Knopf, sobald sie fertig sind.
 
 **Leitprinzip: Das ist ein Messinstrument, keine Produkt-App.**
 
@@ -26,7 +26,7 @@ Wenn eine vorgeschlagene Funktion nichts misst und nicht Teil der Intervention i
 - Next.js 16, App Router, TypeScript
 - Tailwind CSS
 - PostgreSQL mit Prisma
-- Auth: eigene Credentials-Lösung mit signiertem httpOnly-Cookie (`jose`, `bcryptjs`). Kein NextAuth, es gibt nur acht feste Accounts ohne Registrierung.
+- Auth: eigene Credentials-Lösung mit signiertem httpOnly-Cookie (`jose`, `bcryptjs`). Kein NextAuth, es gibt nur die 22 festen Accounts ohne Registrierung (P01-P20, PILOT, ADMIN).
 - Deployment (Entscheidung 17.09.): **Vercel** für die App (Region Frankfurt) und **Neon** für Postgres (Region Frankfurt, damit die Daten wie in der Einwilligung zugesagt in Deutschland liegen). Migration und Seed laufen von meinem Laptop gegen die direkte Neon-Verbindung, nicht bei Vercel - `prisma/seed.ts` braucht `credentials.local.json` mit den echten Teilnehmer-Passwörtern. `npm run build` enthält deshalb `prisma generate`, weil `src/generated/prisma` nicht im Git liegt.
 - Der ursprüngliche Weg (Docker Compose auf Hetzner mit Caddy) ist vollständig gebaut und getestet und bleibt im Repo (`Dockerfile`, `docker-compose.yml`, `Caddyfile`, CHECKLIST.md I1–I5) - als Option für später, aktuell nicht in Benutzung.
 

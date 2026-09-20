@@ -280,7 +280,7 @@ Maximal 20 Sekunden Aufwand:
 
 Neuer Wert wird angezeigt: „Nächste Runde: 30 Minuten".
 
-**Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle zehn Personen von 25 auf 35 gehen, hast du einen Befund.
+**Das liefert dir deine besten quantitativen Daten:** Wie oft wird angepasst, in welche Richtung, konvergiert es? Wenn alle Teilnehmenden von 25 auf 35 gehen, hast du einen Befund.
 
 **Selbst gestartete Pause (ergänzt 14.09., korrigiert 17.09.):** Auch bei einer selbst gestarteten Pause (Knopf „Pause jetzt starten" während der Arbeitsphase, `BREAK_SELF_INITIATED`) kommt direkt danach dasselbe Kurzfeedback wie sonst. Bis 17.09. entfiel es hier komplett, mit der Begründung, es gäbe keinen Systemhinweis, dessen Zeitpunkt man bewerten könnte - ich wollte die Frage trotzdem gestellt haben: eine freiwillig früh beendete Runde kann genauso auf „Zu früh" hindeuten wie eine, bei der man auf den Hinweis reagiert hat, und soll genauso die nächste Rundenlänge beeinflussen können.
 

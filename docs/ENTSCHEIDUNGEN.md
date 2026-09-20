@@ -1144,3 +1144,27 @@ reduzierter Bewegung wie auf dem eigenen Rechner. Gemessen wurden die Rahmen all
 Bildrand und untereinander: überall fünf von fünf sichtbar, keine Berührung, keine seitliche Bildlaufleiste.
 Die Deckkraft der Kartenzeilen bleibt bei 0,8 und 0,6, das Arabische steht in Cairo. Screenshots angeschaut:
 nach 2,7 Sekunden drei Wörter gelandet, nach 7 Sekunden alle fünf.
+
+## 20.09.2026 Mindestens zehn, bis zu zwanzig Teilnehmende
+
+**Entscheidung:** Die Teilnehmerzahl ist nach unten auf zehn festgelegt und nach oben auf zwanzig geöffnet.
+Dafür zehn weitere Accounts angelegt (P11-P20), damit insgesamt 22 Accounts: P01-P20, PILOT, ADMIN. Ob am
+Ende zehn, fünfzehn oder zwanzig Personen teilnehmen, entscheidet sich während der Rekrutierung - die
+Accounts stehen jedenfalls bereit und müssen nicht mitten in der Erhebung nachgelegt werden.
+**Begründung:** Holly hat zehn Teilnehmende empfohlen, das ist die Untergrenze. Besprochen war auch, dass
+mehr Personen die Aussagekraft erhöhen. Wer erst bei Bedarf Accounts anlegt, muss das ausgerechnet unter
+Zeitdruck tun und mit der Produktionsdatenbank hantieren, während schon Daten darin liegen.
+**Alternative:** Bei zehn Accounts bleiben und bei Bedarf nachlegen. Verworfen, siehe oben.
+**Was dafür nötig war:** Nichts im Quelltext. Die Teilnehmer-Codes stehen an keiner Stelle fest im Code, der
+Login schlägt den eingegebenen Code in der Datenbank nach (`src/app/api/auth/login/route.ts`) und
+`prisma/seed.ts` legt genau die Accounts an, die in `credentials.local.json` stehen. Die zehn Zeilen in
+dieser Datei waren die ganze Änderung. Kein Schema, keine Migration.
+**Folge für die Auswertung:** Die Zahl der tatsächlich ausgewerteten Personen muss berichtet werden, nicht
+die Zahl der angelegten Accounts. Ungenutzte Accounts haben keine Sitzung und tauchen im Export nicht auf.
+
+**Getestet:** Seed gegen die lokale Datenbank laufen lassen, danach für jeden der 22 Codes geprüft, ob das
+Klartext-Passwort aus `credentials.local.json` gegen den gespeicherten bcrypt-Hash passt - also derselbe
+Vergleich, den der Login macht. Ergebnis: 22 Accounts, alle 22 Prüfungen bestanden, ADMIN als einziger mit
+der Rolle ADMIN. Zusätzlich geprüft, dass der Seed die zehn bestehenden Passwörter nicht verändert hat: Er
+läuft als `upsert` und hasht sie aus derselben Datei neu, die Klartexte von P01-P10, PILOT und ADMIN sind
+unangetastet.
