@@ -1203,3 +1203,74 @@ Browser läuft. Ergebnis: 0,068 / 0,139 / 0,330, also **+6,2 dB von Stufe 1 auf 
 unter der Übersteuerungsgrenze von 1,0. Einsatzzeiten geprüft: 150 / 50 / 50 ms, keiner beginnt schlagartig.
 `tsc --noEmit` und `eslint` ohne Befund. Der Klang selbst ist noch mit den Ohren zu prüfen, dafür liegen die
 drei Stufen jetzt auf `/admin/sound-check`.
+
+## 20.09.2026 Anleitungstexte der Pausenaktivitäten überarbeitet
+
+**Entscheidung:** Alle drei Aktivitäten haben neue Ansagen. Die Sekundenwerte bleiben Zeichen für Zeichen
+gleich, geändert wurde nur, was gesprochen wird.
+**Auslöser und wichtigster Punkt:** Die Augenentlastung endete mit „Kurz blinzeln, dann zurück zum
+Bildschirm." Nach einer rund 70 Sekunden langen Aktivität sind von fünf Minuten Pause aber noch fast vier
+übrig. Die Anwendung, deren ganzer Zweck Bildschirmpausen sind, holte einen also mitten in der eigenen
+Pause an den Bildschirm zurück. „Aufstehen und bewegen" endete entsprechend mit „Setz dich wieder hin".
+Das ist kein Formulierungsproblem, sondern ein inhaltlicher Fehler. Alle drei Schlusssätze übergeben jetzt
+an die restliche Pause: „Der Rest der Pause gehört dir."
+**Zweiter Punkt, Klang:** Die Ansagen wirkten abgelesen, weil jeder Schritt identisch gebaut war - Verb,
+„X Sekunden lang", Körperteil. Die Dauer steht weiterhin in jedem Schritt (das war die bewusste Entscheidung
+vom 17.09. und bleibt), aber an wechselnder Stelle im Satz. Dazu sagt jeder Schritt jetzt, wie die Bewegung
+gemeint ist: „Nicht ziehen, nur das Gewicht wirken lassen", „Lass die Augen ganz locker, du musst nichts
+scharf stellen". Das ist der Unterschied zwischen einer Anweisung und einer Anleitung, und bei einer
+unbegleiteten Durchführung trägt der Text die ganze Anleitung allein.
+**Dritter Punkt, Inhalt:** „Aufstehen und bewegen" bestand in der Mitte aus exakt denselben Schulterkreisen
+wie „Nacken und Schultern" - zwei von sechs Schritten waren eine Kopie der anderen Aktivität. Wer die
+Bewegungspause wählt, bekommt jetzt Bewegung: Strecken mit tiefem Einatmen, Drehen aus der Hüfte,
+Zehenspitzen für den Kreislauf. Das ist die einzige inhaltliche Änderung an den Übungen und gehört
+gegebenenfalls mit der Betreuung gegengelesen.
+**Technische Randbedingung, dabei gefunden:** `BreakScreen` bricht die Sprachausgabe ab, sobald der letzte
+Schritt abgelaufen ist (`cancelSpeech` bei `allStepsDone`). Ein Schlusssatz, der die 9 Sekunden fast
+ausfüllt, wird bei einer langsameren Stimme mitten im Wort abgeschnitten. Meine erste Fassung des
+Nacken-Schlusssatzes lag rechnerisch bei 8,0 von 9 Sekunden und wäre genau in diese Falle gelaufen. Alle
+drei Schlusssätze jetzt auf rund 6,2 Sekunden gekürzt, das lässt knapp ein Drittel Luft. Als Kommentar in
+`activities.ts` festgehalten.
+
+**Getestet:** Die Sekundenwerte vor und nach der Änderung maschinell verglichen - alle drei Aktivitäten
+Schritt für Schritt identisch (20/20/20/9, 15/15/15/15/15/15/9, 20/15/15/15/20/9). Für jeden Schritt die
+Sprechdauer aus Wortzahl und Satzzahl bei der eingestellten Rate 0.9 gerechnet und gegen die
+15-Sekunden-Regel aus der Spezifikation geprüft: längste Stille nach dem letzten Wort jetzt rund 12
+Sekunden, Regel eingehalten. `tsc`, `eslint` und `npm run build` ohne Befund. Der Klang der Stimme ist damit
+nicht geprüft, das geht nur durch Anhören.
+
+## 20.09.2026 Trinkhinweis in der Pause
+
+**Entscheidung:** Zu Beginn der freien Pausenzeit erscheint einmal je Pause eine kleine Pille am oberen
+Bildschirmrand: ein Wassertropfen und der Satz „Trink einen Schluck Wasser." Nach 12 Sekunden blendet sie
+von selbst aus. Wortlaut und Dauer stehen in `src/content/break-hint.ts`.
+**Begründung:** Eigene Entscheidung, Teilnehmende ans Trinken zu erinnern, ohne die Pause zu möblieren.
+Bildschirmarbeit und Trinken vergessen gehören zusammen, und die Pause ist der einzige Moment im Ablauf, an
+dem ein solcher Hinweis niemanden bei der Arbeit stört. Deshalb ein Satz ohne Ausrufezeichen, ohne „nicht vergessen", und etwas, das von allein
+wieder geht, statt weggeklickt werden zu müssen.
+**Zeitpunkt, und warum nicht beim Pausenstart:** Die Aktivitäten schicken die Teilnehmenden gerade vom
+Bildschirm weg - bei der Augenentlastung sechs Meter in die Ferne, beim Bewegen aufstehen und umhergehen.
+Ein rein sichtbarer Hinweis in den ersten 12 Sekunden der Pause wäre also ausgerechnet bei zwei von drei
+Aktivitäten unsichtbar gewesen. Er erscheint deshalb mit dem Beginn der freien Pausenzeit: bei „keine
+Aktivität" sofort, sonst nach dem letzten Aktivitätsschritt, wenn man wieder vor dem Bildschirm sitzt. Damit
+sieht ihn jede teilnehmende Person in jeder Pause einmal, auf allen vier Pausenbildschirmen an derselben
+Stelle. Ist die Pause schon vorbei, wenn die Aktivität endet, erscheint er nicht - ein Trinkhinweis im
+selben Moment wie „Sitzung starten" wäre nur im Weg.
+**Gestaltung:** Fest am oberen Rand statt im Inhaltsfluss, damit beim Verschwinden nichts verrutscht.
+Durchscheinender weißer Hintergrund mit Weichzeichner, sehr leiser Schatten, Symbol als dünne Linienzeichnung.
+Der Blauton ist **kein neuer Farbwert**: `--foreground-water` ist derselbe Farbton wie `--glow-work`, nur
+deckend. Ein frei erfundenes Wasserblau hätte die eng geführte Palette einer Arbeit über visuelle Gestaltung
+erweitert.
+**Nicht gesprochen:** Während der Aktivitäten liest die Sprachausgabe bereits die Anleitung vor. Eine zweite
+Stimme daneben wäre Lärm. Aus demselben Grund `aria-hidden` - als Live-Region würde der Hinweis
+Screenreader und Vorlesestimme unterbrechen.
+**Nicht protokolliert:** Der Hinweis ist Pausengestaltung, kein Teil der gemessenen Intervention. Ein
+eigener Ereignistyp hätte `events.ts` und die Ereignisliste in der Spezifikation erweitert, ohne eine
+Forschungsfrage zu beantworten (CLAUDE.md, Leitprinzip Messinstrument). Falls später doch belegt werden
+soll, dass er erschienen ist, ist das ein `enqueueEvent`-Aufruf und ein Eintrag in der Liste.
+
+**Getestet:** `tsc`, `eslint` und `npm run build` ohne Befund. Bei reduzierter Bewegung blendet der Hinweis
+weiterhin ein und aus, nur ohne Verschiebung - wichtig, weil das Ausblenden die Endstellung hält
+(`forwards`): hätte man die Animation dort einfach abgeschaltet, wäre der Hinweis für den Rest der Pause
+stehen geblieben. Das Aussehen selbst ist noch mit den Augen zu prüfen, dafür reicht eine Testsitzung mit
+kurzer Rundenlänge.

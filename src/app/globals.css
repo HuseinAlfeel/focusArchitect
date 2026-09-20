@@ -38,6 +38,11 @@
      Look wie Arbeits-/Pausenbildschirm, aber neutral statt an eine Phase
      gebunden (14.09., "alles einheitlich aussehen lassen"). */
   --glow-neutral: rgba(110, 110, 150, 0.14);
+  /* Trinkhinweis in der Pause (20.09.): bewusst KEIN neuer Farbton, sondern
+     derselbe Blauton wie --glow-work, nur deckend. Ein frisch erfundenes
+     Wasserblau haette die eng gefuehrte Palette der Studie erweitert - bei
+     einer Arbeit ueber visuelle Gestaltung unnoetiges Risiko. */
+  --foreground-water: #5a78a0;
 }
 
 @theme inline {
@@ -131,6 +136,51 @@ body {
   }
 }
 
+/* Trinkhinweis in der Pause (20.09.). Zwei getrennte Animationen statt einer
+   langen mit Haltephase: so steht die Anzeigedauer nur an einer Stelle, naemlich
+   in src/content/break-hint.ts, statt zusaetzlich in Prozentwerten hier. Das
+   Ausblenden ist laenger als das Einblenden - etwas, das leise verschwindet,
+   soll nicht wegschnappen. */
+@keyframes water-hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes water-hint-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+/* Fuer reduzierte Bewegung: derselbe Ablauf, aber ohne Verschiebung. */
+@keyframes water-hint-out-still {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-water-hint-in {
+  animation: water-hint-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-water-hint-out {
+  animation: water-hint-out 600ms ease-in forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .phase-glow {
     animation: none;
@@ -143,6 +193,17 @@ body {
 
   .animate-nudge-pulse {
     animation: none;
+  }
+
+  /* Der Hinweis erscheint und verschwindet weiterhin, nur ohne Bewegung.
+     Das Ausblenden darf nicht einfach entfallen: "forwards" haelt die
+     Endstellung, ohne die Animation bliebe der Hinweis sichtbar stehen. */
+  .animate-water-hint-in {
+    animation: none;
+  }
+
+  .animate-water-hint-out {
+    animation: water-hint-out-still 600ms linear forwards;
   }
 }
 

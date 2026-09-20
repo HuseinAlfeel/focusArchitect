@@ -11,6 +11,7 @@ import { useNudgeStageLogging } from "@/hooks/useNudgeStageLogging";
 import { useActivitySteps } from "@/hooks/useActivitySteps";
 import { useActivityTicks } from "@/hooks/useActivityTicks";
 import { useBreakEndSound } from "@/hooks/useBreakEndSound";
+import { WaterHint } from "./water-hint";
 import { useSpeech } from "@/hooks/useSpeech";
 import { playNudgeSound } from "@/lib/nudgeSound";
 import { activities, type ActivityId } from "@/content/activities";
@@ -710,6 +711,14 @@ function BreakScreen({
   }
 
   const activityStepActive = Boolean(activity) && !allStepsDone && !breakDone;
+
+  // Trinkhinweis (20.09.): sobald die freie Pausenzeit laeuft - bei "keine
+  // Aktivitaet" sofort, sonst nach dem letzten Aktivitaetsschritt. Nicht
+  // mehr, wenn die Pause ohnehin vorbei ist; ein Trinkhinweis im selben
+  // Moment wie "Sitzung starten" waere nur noch im Weg. Die Komponente
+  // blendet sich selbst wieder aus, siehe water-hint.tsx.
+  const showWaterHint = !activityStepActive && !breakDone;
+
   const stepDurationMs = activity ? (stepDurations[currentStepIndex] ?? 0) * 1000 : 0;
   const stepFraction =
     stepDurationMs > 0 && stepRemainingMs !== null
@@ -718,6 +727,8 @@ function BreakScreen({
 
   return (
     <div className="relative z-10 flex flex-col items-center gap-5 text-center">
+      {showWaterHint && <WaterHint />}
+
       {activityStepActive && activity ? (
         <div className="flex flex-col items-center gap-4">
           <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400 dark:border-white/15 dark:text-neutral-500">
