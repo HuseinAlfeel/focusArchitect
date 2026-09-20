@@ -162,8 +162,14 @@ const CHARACTERS: Record<
     const now = ctx.currentTime;
     const duration = 0.6 + intensity * 0.3;
     const gain = 0.02 + intensity * 0.1;
+    // Einsatz 50ms statt der 12ms Voreinstellung (20.09.): Drei gleichzeitige
+    // Toene summieren sich auf gut das Dreifache der Einzelamplitude, und mit
+    // dem harten Standardeinsatz beginnt das hoerbar schlagartig. Die
+    // Spezifikation [6] verlangt fuer die Stufentoene ausdruecklich einen
+    // weichen Einsatz (~50ms), CLAUDE.md Regel 8 "niemals aggressiv". Seit
+    // dieser Akkord der Ton von Stufe 3 ist, gilt das auch fuer ihn.
     [440, 550, 660].forEach((frequency) => {
-      playTone(ctx, now, { frequency, duration, peakGain: gain });
+      playTone(ctx, now, { frequency, duration, peakGain: gain, attack: 0.05 });
     });
   },
 
@@ -202,3 +208,29 @@ export function playNudgeSound(
   const clamped = Math.max(0, Math.min(1, intensity));
   CHARACTERS[character](ctx, clamped);
 }
+
+/**
+ * Welcher Ton bei welcher Stufe des abgestuften Hinweises spielt - die
+ * einzige Stelle, an der das steht. `useNudgeStageSound` spielt danach,
+ * `/admin/sound-check` zeigt danach an, welche drei Toene im Einsatz sind.
+ * Vorher stand die Zuordnung privat im Hook, die Vergleichsseite wusste
+ * nichts davon und konnte unbemerkt etwas anderes nahelegen als das, was
+ * Teilnehmende tatsaechlich hoeren.
+ *
+ * Stufe 0 fehlt hier absichtlich und bleibt tonlos (Betreuung 17.09.): der
+ * Sinn dieser Stufe ist ein kaum bewusst wahrnehmbarer visueller Uebergang,
+ * ein Ton wuerde eine hoerbare Vorwarnung daraus machen.
+ *
+ * Festgelegt am 20.09. nach dem Anhoeren aller Kandidaten in
+ * `/admin/sound-check`. Ab der ersten echten Sitzung nicht mehr
+ * aendern - der Ton ist Teil der Intervention, eine Aenderung mitten in der
+ * Erhebung macht die Sitzungen davor und danach unvergleichbar.
+ */
+export const NUDGE_STAGE_SOUND: Record<
+  1 | 2 | 3,
+  { intensity: number; character: NudgeSoundCharacter }
+> = {
+  1: { intensity: 0.7, character: "soft-sine" },
+  2: { intensity: 0.8, character: "soft-bell" },
+  3: { intensity: 0.9, character: "rich-chord" },
+};

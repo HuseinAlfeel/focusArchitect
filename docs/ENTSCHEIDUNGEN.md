@@ -1168,3 +1168,38 @@ Vergleich, den der Login macht. Ergebnis: 22 Accounts, alle 22 Prüfungen bestan
 der Rolle ADMIN. Zusätzlich geprüft, dass der Seed die zehn bestehenden Passwörter nicht verändert hat: Er
 läuft als `upsert` und hasht sie aus derselben Datei neu, die Klartexte von P01-P10, PILOT und ADMIN sind
 unangetastet.
+
+## 20.09.2026 Stufentöne festgelegt: Sinus 70, Glocke 80, voller Akkord 90
+
+**Entscheidung:** Die Töne des abgestuften Hinweises stehen endgültig fest. Stufe 1 (0:00) ein ruhiger
+Sinuston bei 70 Prozent, Stufe 2 (+2:00) ein Glockenton bei 80 Prozent, Stufe 3 (+5:00) ein voller Akkord
+bei 90 Prozent, einmalig. Stufe 0 bleibt wie bisher tonlos. Der bisherige Stufe-3-Ton, ein aufsteigender
+Sweep, ist raus.
+**Begründung:** Der Sweep kam beim Anhören schlicht nicht an. Die Messung bestätigt den Eindruck und
+erklärt ihn: Er erreichte eine Spitzenamplitude von 0,128 gegenüber 0,116 bei Stufe 2 - ein Anstieg von
+**0,8 dB**, das liegt an der Wahrnehmungsschwelle. Die letzte und wichtigste Eskalationsstufe war damit
+akustisch keine Steigerung, sondern eine Wiederholung auf gleichem Niveau. Dazu kam ein inhaltlicher Punkt:
+Ein Ton mit steigender Tonhöhe ist die Grammatik eines Alarms, und CLAUDE.md Regel 8 verlangt ausdrücklich
+das Gegenteil. Der volle Akkord wird deutlich durch Klangfülle statt durch Dringlichkeit - drei gleichzeitige
+harmonische Töne, keine steigende Linie.
+**Alternative:** Sweep lauter stellen. Verworfen - das hätte den Alarmcharakter verstärkt statt ihn zu
+vermeiden.
+**Nebenbefund, mitgeändert:** Der Akkord lief mit dem Standardeinsatz von 12 ms und begann damit deutlich
+schlagartiger als die beiden anderen Stufentöne (150 ms und 50 ms). Die Spezifikation [6] verlangt für alle
+Stufentöne einen weichen Einsatz von etwa 50 ms. Auf 50 ms gesetzt, damit ausgerechnet der lauteste Ton
+nicht als einziger hart einsetzt.
+**Aufräumen dabei:** Die Zuordnung Stufe zu Ton lag privat in `useNudgeStageSound.ts`, während
+`/admin/sound-check` seine eigene Liste führte - die Vergleichsseite konnte also etwas anderes nahelegen als
+das, was Teilnehmende tatsächlich hören. Jetzt steht sie als `NUDGE_STAGE_SOUND` in `src/lib/nudgeSound.ts`,
+Hook und Vergleichsseite lesen dieselbe Quelle. Die Seite zeigt die drei eingestellten Stufen oben zum
+direkten Anhören, mit der festen Lautstärke statt der des Reglers.
+**Folge:** Ab der ersten echten Sitzung nicht mehr anfassen. Der Ton ist Teil der Intervention; eine
+Änderung mitten in der Erhebung macht die Sitzungen davor und danach unvergleichbar.
+
+**Getestet:** Die tatsächliche Tonerzeugung gegen eine nachgebaute Web-Audio-Umgebung laufen lassen und die
+Spitzenamplituden gemessen - nicht die Formeln nachgerechnet, sondern derselbe Code ausgeführt, der im
+Browser läuft. Ergebnis: 0,068 / 0,139 / 0,330, also **+6,2 dB von Stufe 1 auf 2 und +7,5 dB von Stufe 2 auf
+3**. Gleichmäßig steigend statt der alten Kurve (+9,3 dB, dann +0,8 dB), lauteste Spitze 0,33 und damit weit
+unter der Übersteuerungsgrenze von 1,0. Einsatzzeiten geprüft: 150 / 50 / 50 ms, keiner beginnt schlagartig.
+`tsc --noEmit` und `eslint` ohne Befund. Der Klang selbst ist noch mit den Ohren zu prüfen, dafür liegen die
+drei Stufen jetzt auf `/admin/sound-check`.

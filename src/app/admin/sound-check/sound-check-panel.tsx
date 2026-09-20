@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { playNudgeSound, type NudgeSoundCharacter } from "@/lib/nudgeSound";
+import {
+  NUDGE_STAGE_SOUND,
+  playNudgeSound,
+  type NudgeSoundCharacter,
+} from "@/lib/nudgeSound";
 
 const GENTLE_CANDIDATES: { id: NudgeSoundCharacter; label: string; hint: string }[] = [
   { id: "soft-sine", label: "Sanfter Sinuston", hint: "so minimal wie möglich" },
-  { id: "soft-bell", label: "Weiche Glocke", hint: "dein Favorit von eben" },
+  { id: "soft-bell", label: "Weiche Glocke", hint: "Sinus mit leisem Oberton" },
   { id: "singing-bowl", label: "Klangschale", hint: "leichtes Schweben" },
   { id: "soft-mallet", label: "Weicher Mallet", hint: "kurz, klar gestimmt" },
   { id: "water-drop", label: "Wassertropfen", hint: "fallender Ton" },
@@ -21,6 +25,19 @@ const STRONG_CANDIDATES: { id: NudgeSoundCharacter; label: string; hint: string 
 
 const ALL_CANDIDATES = [...GENTLE_CANDIDATES, ...STRONG_CANDIDATES];
 
+// Die drei Stufen in der Reihenfolge, in der Teilnehmende sie hoeren.
+const STAGES = [
+  { stage: 1 as const, when: "bei 0:00" },
+  { stage: 2 as const, when: "+2:00" },
+  { stage: 3 as const, when: "+5:00" },
+];
+
+// Welche Klangfarbe steckt in welcher Stufe? Aus NUDGE_STAGE_SOUND abgeleitet,
+// nicht danebengeschrieben - so kann die Markierung unten nicht veralten.
+const STAGE_BY_CHARACTER = new Map<NudgeSoundCharacter, number>(
+  STAGES.map(({ stage }) => [NUDGE_STAGE_SOUND[stage].character, stage])
+);
+
 export function SoundCheckPanel() {
   const [selected, setSelected] = useState<NudgeSoundCharacter>("soft-bell");
   const [intensity, setIntensity] = useState(0.35);
@@ -34,6 +51,15 @@ export function SoundCheckPanel() {
     setSelected(id);
     playNudgeSound(intensity, id);
     setLastPlayed(`${label} (${Math.round(intensity * 100)}%)`);
+  }
+
+  // Spielt eine Stufe genau so, wie Teilnehmende sie hoeren - bewusst ohne
+  // den Regler oben, sonst prueft man etwas anderes als das Eingestellte.
+  function playStage(stage: 1 | 2 | 3) {
+    const { intensity: stageIntensity, character } = NUDGE_STAGE_SOUND[stage];
+    setSelected(character);
+    playNudgeSound(stageIntensity, character);
+    setLastPlayed(`Stufe ${stage} (${Math.round(stageIntensity * 100)}%)`);
   }
 
   return (
@@ -70,6 +96,36 @@ export function SoundCheckPanel() {
         >
           Ausgewählten Ton nochmal abspielen
         </button>
+      </div>
+
+      <div className="space-y-2 rounded border border-black/10 p-4 dark:border-white/15">
+        <p className="text-xs uppercase tracking-wide opacity-50">
+          Im Studienablauf eingestellt{" "}
+          <span className="normal-case opacity-70">
+            (feste Lautstärke, unabhängig vom Regler)
+          </span>
+        </p>
+        {STAGES.map(({ stage, when }) => {
+          const { intensity: stageIntensity, character } = NUDGE_STAGE_SOUND[stage];
+          const label =
+            ALL_CANDIDATES.find((c) => c.id === character)?.label ?? character;
+          return (
+            <button
+              key={stage}
+              type="button"
+              onClick={() => playStage(stage)}
+              className="w-full rounded border border-black/15 px-4 py-2.5 text-left text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+            >
+              <span className="font-medium">Stufe {stage}</span>
+              <span className="ml-2 text-xs opacity-50">
+                {when} · {label} · {Math.round(stageIntensity * 100)}%
+              </span>
+            </button>
+          );
+        })}
+        <p className="text-xs opacity-50">
+          Stufe 0 (T minus 2 Min) bleibt absichtlich tonlos.
+        </p>
       </div>
 
       <CandidateGroup
@@ -126,6 +182,11 @@ function CandidateGroup({
         >
           <span className="font-medium">{item.label}</span>
           <span className="ml-2 text-xs opacity-50">{item.hint}</span>
+          {STAGE_BY_CHARACTER.has(item.id) && (
+            <span className="ml-2 text-xs opacity-70">
+              · im Einsatz bei Stufe {STAGE_BY_CHARACTER.get(item.id)}
+            </span>
+          )}
         </button>
       ))}
     </div>

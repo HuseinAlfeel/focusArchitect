@@ -62,9 +62,9 @@ Wenn eine vorgeschlagene Funktion nichts misst und nicht Teil der Intervention i
 | Stufe | Zeitpunkt | Gestaltung |
 |---|---|---|
 | 0 | T minus 2 Min | Hintergrund wandert über CSS-Transition (60s) nach Beige, Zifferfarbe des Timers zieht mit |
-| 1 | 0:00 | Weiter Beige, kleine ruhige Karte unten rechts mit kurzer Einblendbewegung, ein leiser Ton |
-| 2 | +2 Min | Hintergrund wandert weiter zu gedämpftem Bernstein, Karte größer, rückt näher zur Mitte, sanftes Pulsieren |
-| 3 | +5 Min | Hintergrund wandert weiter zu gedämpftem Terrakotta, ruhiges zentriertes Fenster, drei Optionen (Pause starten / Noch 5 Minuten / Überspringen) |
+| 1 | 0:00 | Weiter Beige, kleine ruhige Karte unten rechts mit kurzer Einblendbewegung, dazu ein ruhiger Sinuston |
+| 2 | +2 Min | Hintergrund wandert weiter zu gedämpftem Bernstein, Karte größer, rückt näher zur Mitte, sanftes Pulsieren, dazu ein deutlicherer Glockenton |
+| 3 | +5 Min | Hintergrund wandert weiter zu gedämpftem Terrakotta, ruhiges zentriertes Fenster, drei Optionen (Pause starten / Noch 5 Minuten / Überspringen), dazu ein voller Akkord als letztes akustisches Signal |
 
 Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden. Das ist das wichtigste Ergebnis der Arbeit.
 

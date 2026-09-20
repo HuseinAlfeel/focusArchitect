@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { playNudgeSound, type NudgeSoundCharacter } from "@/lib/nudgeSound";
+import { NUDGE_STAGE_SOUND, playNudgeSound } from "@/lib/nudgeSound";
 import { enqueueEvent } from "@/lib/eventQueue";
 import type { NudgeStage } from "@/hooks/useNudgeStage";
 
@@ -12,11 +12,10 @@ import type { NudgeStage } from "@/hooks/useNudgeStage";
 // Stufe 0 bleibt bewusst tonlos - der Sinn dieser Stufe ist ein kaum
 // bewusst wahrnehmbarer visueller Uebergang, ein Ton wuerde daraus eine
 // hoerbare Vorwarnung machen, das ist etwas anderes als beabsichtigt.
-const STAGE_SOUND: Record<1 | 2 | 3, { intensity: number; character: NudgeSoundCharacter }> = {
-  1: { intensity: 0.35, character: "soft-sine" },
-  2: { intensity: 0.65, character: "soft-bell" },
-  3: { intensity: 0.9, character: "rising-sweep" },
-};
+//
+// Welcher Ton zu welcher Stufe gehoert und wie laut, steht in
+// NUDGE_STAGE_SOUND in lib/nudgeSound.ts - dort, damit /admin/sound-check
+// dieselbe Quelle anzeigen kann und beides nicht auseinanderlaufen kann.
 
 export function useNudgeStageSound(
   nudgeStage: NudgeStage,
@@ -34,7 +33,7 @@ export function useNudgeStageSound(
     if (firedRef.current.has(nudgeStage)) return;
     firedRef.current.add(nudgeStage);
 
-    const { intensity, character } = STAGE_SOUND[nudgeStage];
+    const { intensity, character } = NUDGE_STAGE_SOUND[nudgeStage];
     playNudgeSound(intensity, character);
     enqueueEvent(sessionId, "NUDGE_SOUND_PLAYED", {
       payload: { stage: nudgeStage, intensity, character },
