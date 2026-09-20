@@ -1,4 +1,4 @@
--- ACHTUNG: Loescht ALLE Aktivitaetsdaten. Die zwoelf Accounts bleiben stehen.
+-- ACHTUNG: Loescht ALLE Aktivitaetsdaten. Die Accounts selbst bleiben stehen.
 --
 -- Gedacht fuer genau zwei Momente:
 --   1. vor dem Probelauf, damit keine Testsitzungen mehr herumliegen
@@ -38,9 +38,12 @@ DELETE FROM "Session";
 
 COMMIT;
 
--- Kontrolle: Teilnehmer muessen 12 sein, alles andere 0.
+-- Kontrolle: Teilnehmer muessen 22 sein, alles andere 0.
+-- Die 22 ist die Anzahl der Eintraege in credentials.local.json (P01-P20,
+-- PILOT, ADMIN, Stand 20.09.). Kommen dort Accounts dazu, gehoert die Zahl
+-- hier mit angepasst - sonst schlaegt die Kontrolle faelschlich Alarm.
 SELECT
-  (SELECT count(*) FROM "Participant")    AS teilnehmer_muessen_12_sein,
+  (SELECT count(*) FROM "Participant")    AS teilnehmer_muessen_22_sein,
   (SELECT count(*) FROM "Session")        AS sitzungen,
   (SELECT count(*) FROM "Event")          AS ereignisse,
   (SELECT count(*) FROM "SurveyResponse") AS befragungen,
