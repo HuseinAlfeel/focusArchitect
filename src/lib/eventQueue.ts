@@ -12,12 +12,42 @@
 import type { EventType } from "@/lib/events";
 
 type QueuedEvent = {
+  /**
+   * Im Browser bei der Entstehung vergebene Kennung (22.09.). Diese
+   * Warteschlange liefert "mindestens einmal", nicht "genau einmal": geht die
+   * Antwort des Servers verloren, obwohl er den Stapel schon geschrieben hat,
+   * bleibt er hier liegen und wird erneut gesendet. Im Probelauf stand
+   * dadurch ein TAB_VISIBLE zweimal mit identischen Zeitstempeln im Export.
+   * Der Server erkennt die Wiederholung an dieser Kennung und ueberspringt
+   * sie. Sie wird genau einmal vergeben und ueberlebt localStorage, sonst
+   * bekaeme derselbe Versuch beim naechsten Mal eine neue Kennung und die
+   * Erkennung liefe ins Leere.
+   */
+  clientEventId: string;
   sessionId: string;
   type: EventType;
   clientAt: string;
   cycle?: number | null;
   payload?: Record<string, unknown>;
 };
+
+/**
+ * `crypto.randomUUID` gibt es nur in sicheren Kontexten (HTTPS und
+ * localhost) - beides trifft hier zu, Produktion laeuft auf Vercel per
+ * HTTPS. Der Rueckfall ist trotzdem da, weil ein Ereignis ohne Kennung
+ * sonst gar nicht erst entstehen koennte und die Absicherung aus Regel 3
+ * an genau der Stelle brechen wuerde, an der sie gebraucht wird.
+ */
+function neueEreignisKennung(): string {
+  try {
+    if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
+  } catch {
+    // faellt unten durch
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}-${Math.random()
+    .toString(36)
+    .slice(2, 10)}`;
+}
 
 const STORAGE_KEY = "focusarchitect:event-queue";
 const FLUSH_INTERVAL_MS = 10_000;
@@ -34,7 +64,16 @@ let flushing = false;
 function readStorage(): QueuedEvent[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as QueuedEvent[]) : [];
+    const gespeichert = raw ? (JSON.parse(raw) as QueuedEvent[]) : [];
+    // Eintraege aus der Zeit vor den Kennungen bekommen hier eine - sonst
+    // gingen sie beim Senden als ungueltig verloren. Sie koennen dadurch
+    // theoretisch doppelt ankommen, aber genau das war vorher der
+    // Normalzustand, es wird also nichts schlechter.
+    return gespeichert.map((ereignis) =>
+      ereignis.clientEventId
+        ? ereignis
+        : { ...ereignis, clientEventId: neueEreignisKennung() }
+    );
   } catch {
     return [];
   }
@@ -49,7 +88,8 @@ function writeStorage() {
 }
 
 function toWireEvents(events: QueuedEvent[]) {
-  return events.map(({ type, clientAt, cycle, payload }) => ({
+  return events.map(({ clientEventId, type, clientAt, cycle, payload }) => ({
+    clientEventId,
     type,
     clientAt,
     cycle,
@@ -186,6 +226,7 @@ export function enqueueEvent(
   startEventQueue();
 
   queue.push({
+    clientEventId: neueEreignisKennung(),
     sessionId,
     type,
     clientAt: new Date().toISOString(),
@@ -219,7 +260,12 @@ export async function sendEventNow(
 ): Promise<boolean> {
   startEventQueue();
 
+  // Dieselbe Kennung fuer den Direktversuch UND den Rueckfall in die
+  // Warteschlange weiter unten. Genau hier entstanden Doppelungen: der
+  // Server schreibt das Ereignis, die Antwort geht verloren, der Aufrufer
+  // landet im catch und reiht dasselbe Ereignis noch einmal ein.
   const event: QueuedEvent = {
+    clientEventId: neueEreignisKennung(),
     sessionId,
     type,
     clientAt: new Date().toISOString(),

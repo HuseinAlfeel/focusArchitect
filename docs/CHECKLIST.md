@@ -378,7 +378,10 @@ npm install -D @types/bcryptjs
 > **Selbst gestartete Pause (ergänzt 14.09., korrigiert 17.09.):** Auch bei `BREAK_SELF_INITIATED` (siehe F5)
 > kommt dieser Schritt jetzt genauso. Bis 17.09. entfiel er hier, weil es keinen Systemhinweis gab, den man
 > bewerten könnte, aber eine freiwillig früh beendete Runde kann genauso "Zu früh" sein und soll genauso die
-> nächste Rundenlänge beeinflussen können.
+> nächste Rundenlänge beeinflussen können. Eine selbst gestartete Pause deutet darauf hin, dass die aktuelle
+> Rundenlänge nicht passt - die daraufhin gewählte Anpassung ist deshalb besonders aussagekräftig. Bei der
+> Auswertung werden die Angaben zum Zeitpunkt getrennt nach `reactionType` betrachtet, weil "zu früh" nach
+> einem Systemhinweis etwas anderes bedeutet als nach einer eigenen Entscheidung.
 
 - [ ] Drei Knöpfe: zu früh / passend / zu spät
 - [ ] Bei zu früh oder zu spät: Zähler in 5-Minuten-Schritten, frei nach oben oder unten
@@ -515,6 +518,11 @@ bricht der Build bei Vercel mit "Cannot find module '@/generated/prisma'" ab). L
       npx prisma migrate deploy
       npx prisma db seed
       ```
+      **Offen seit 22.09.:** Die Migration `20260922090000_event_client_event_id` (eindeutige Kennung je
+      Ereignis gegen Doppelungen, siehe ENTSCHEIDUNGEN.md) ist noch nicht auf Neon angewendet. Sie fügt nur
+      eine Spalte und einen Index hinzu, bestehende Zeilen bleiben gültig. `npx prisma migrate deploy` muss
+      **vor** dem nächsten Deployment laufen: Der neue Prisma-Client fragt die Spalte ab, ohne die Migration
+      scheitert jeder Datenbankzugriff auf Ereignisse.
       Die gesetzte Variable übersteuert die lokale `.env` (geprüft), aber genau deshalb vorher einmal
       `migrate status` laufen lassen: die Ausgabe nennt den Host in Klartext. Steht dort `localhost`, ist die
       Variable nicht angekommen, und Migration und Seed würden in die lokale Testdatenbank laufen statt nach

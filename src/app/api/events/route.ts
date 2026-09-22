@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
 
   const rows = events.flatMap((raw) => {
     const event = raw as {
+      clientEventId?: unknown;
       type?: unknown;
       clientAt?: unknown;
       cycle?: unknown;
@@ -48,6 +49,15 @@ export async function POST(request: NextRequest) {
     if (!isEventType(event.type)) {
       return [];
     }
+
+    // Vom Browser vergebene Kennung (22.09.), siehe eventQueue.ts. Fehlt sie
+    // (Eintrag aus der Zeit davor), wird das Ereignis trotzdem gespeichert -
+    // dann eben ohne Doppelerkennung, so wie es vorher immer war. Lieber ein
+    // moeglicherweise doppeltes Ereignis als ein verlorenes (Regel 3).
+    const clientEventId =
+      typeof event.clientEventId === "string" && event.clientEventId.trim()
+        ? event.clientEventId.trim()
+        : null;
 
     const clientAt =
       typeof event.clientAt === "string" &&
@@ -61,7 +71,7 @@ export async function POST(request: NextRequest) {
         ? event.payload
         : undefined;
 
-    return [{ sessionId, type: event.type, cycle, clientAt, payload }];
+    return [{ clientEventId, sessionId, type: event.type, cycle, clientAt, payload }];
   });
 
   if (rows.length === 0) {
@@ -71,7 +81,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await prisma.event.createMany({ data: rows });
+  // skipDuplicates statt eines Fehlers: Die Warteschlange im Browser liefert
+  // "mindestens einmal". Geht die Antwort verloren, obwohl hier schon
+  // geschrieben wurde, kommt derselbe Stapel noch einmal - im Probelauf stand
+  // dadurch ein TAB_VISIBLE zweimal mit identischen Zeitstempeln im Export.
+  // Wichtig ist die Kombination aus beidem: Die Wiederholung wird uebersprungen,
+  // UND die Antwort bleibt erfolgreich. Ein Fehler (z.B. 409) wuerde die
+  // Warteschlange den Stapel behalten und endlos erneut senden lassen, womit
+  // alles dahinter blockiert waere.
+  const { count } = await prisma.event.createMany({
+    data: rows,
+    skipDuplicates: true,
+  });
 
-  return NextResponse.json({ count: rows.length });
+  return NextResponse.json({ count, skipped: rows.length - count });
 }

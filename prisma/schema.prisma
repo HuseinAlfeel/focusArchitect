@@ -60,6 +60,17 @@ model Event {
   type      String // siehe Ereignisliste in der Spezifikation
   cycle     Int? // Rundennummer, falls zutreffend
   payload   Json?
+  // Im Browser bei der Entstehung vergebene UUID (22.09.). Die Warteschlange
+  // liefert "mindestens einmal": kommt die Antwort des Servers nicht an,
+  // obwohl er schon geschrieben hat, sendet sie denselben Stapel erneut - im
+  // Probelauf stand dadurch ein TAB_VISIBLE zweimal mit identischen
+  // Zeitstempeln im Export. Ueber diese eindeutige Kennung erkennt der Server
+  // die Wiederholung und ueberspringt sie.
+  //
+  // Optional, damit die vor dieser Aenderung entstandenen Zeilen (Probelauf)
+  // gueltig bleiben. Postgres laesst beliebig viele NULL in einem UNIQUE-Index
+  // zu, die Altdaten stehen sich also nicht gegenseitig im Weg.
+  clientEventId String? @unique
 
   @@index([sessionId, at])
 }

@@ -1338,3 +1338,72 @@ angemeldet, alle drei Dateien gezogen. Ergebnis über die fünf Runden:
 - `tsc --noEmit` und `eslint` ohne Befund.
 Punkt 7 ließ sich so nicht prüfen, weil die Probelaufdaten vor der Änderung entstanden sind; dort bleibt die
 Spalte erwartungsgemäß leer. Das gehört in die nächste Testsitzung.
+
+## 22.09.2026 Doppelte Ereignisse ausgeschlossen, Codebuch erzeugt
+
+Vier weitere Punkte aus der Datenprüfung vor Studienstart, in der Reihenfolge der Prüfliste.
+
+**2. Doppelte Ereignisse.** Im Export stand ein `TAB_VISIBLE` zweimal mit identischen Zeitstempeln, obwohl
+nur ein `TAB_HIDDEN` dazu existierte. Ursache ist keine Panne, sondern Bauart: Die Warteschlange im Browser
+liefert **mindestens einmal**, nicht genau einmal. Geht die Antwort des Servers verloren, obwohl er den
+Stapel schon geschrieben hat, bleibt er liegen und wird erneut gesendet. Dieselbe Lücke steckt in
+`sendEventNow`: Server schreibt, Antwort kommt nicht an, der Aufrufer landet im `catch` und reiht dasselbe
+Ereignis noch einmal ein. Jedes Ereignis bekommt jetzt bei seiner Entstehung im Browser eine UUID
+(`clientEventId`), die Datenbank hat darauf eine Eindeutigkeitsbedingung, und der Server überspringt
+Wiederholungen per `skipDuplicates`. **Entscheidend ist die Kombination:** überspringen UND trotzdem mit
+Erfolg antworten. Ein Fehler wie 409 würde die Warteschlange den Stapel behalten und endlos erneut senden
+lassen, womit alles dahinter blockiert wäre. Das Feld ist optional, damit die Zeilen des Probelaufs gültig
+bleiben - Postgres lässt beliebig viele NULL in einem UNIQUE-Index zu.
+
+**3. Spaltenreihenfolge, jetzt als feste Liste.** Am 20.09. hatte ich die Reihenfolge aus den Inhaltsdateien
+abgeleitet und sortiert, mit dem Argument, eine handgepflegte Liste könne unbemerkt veralten und dann still
+eine erhobene Antwort nicht exportieren. Auf ausdrückliche Anweisung jetzt als feste Liste in
+`PRE_ID_ORDER`/`POST_ID_ORDER`. Mein Einwand ist damit nicht verschwunden, deshalb hängt eine Prüfung daran:
+`pruefeSpaltenlisten()` vergleicht bei jedem Export und bei jedem Erzeugen des Codebuchs die Listen gegen die
+tatsächlich vorhandenen Fragen und bricht mit einer Meldung ab, die die fehlende Kennung nennt - in beide
+Richtungen, denn eine überzählige Kennung erzeugt eine dauerhaft leere Spalte, die in der Auswertung wie
+eine unbeantwortete Frage aussieht. Lieber gar kein Export als ein stillschweigend unvollständiger.
+
+**9. Kurzfeedback nach selbst gestarteter Pause.** Geprüft: **Kein Dokument beschreibt das Gegenteil.**
+SPEZIFIKATION.md [7] und [11] sowie CHECKLIST.md F5/F6 beschreiben seit der Korrektur vom 17.09. alle
+zutreffend, dass das Kurzfeedback auch nach einer selbst gestarteten Pause kommt; CLAUDE.md erwähnt das
+Kurzfeedback überhaupt nicht. Zu ersetzen war also nichts. Neu aufgenommen wurde der Auswertungshinweis, der
+bisher nirgends stand: Eine selbst gestartete Pause deutet darauf hin, dass die aktuelle Rundenlänge nicht
+passt, die daraufhin gewählte Anpassung ist deshalb besonders aussagekräftig - und „zu früh" nach einem
+Systemhinweis bedeutet etwas anderes als „zu früh" nach einer eigenen Entscheidung, die Angaben zum
+Zeitpunkt werden also getrennt nach `reactionType` betrachtet.
+
+**4. Codebuch.** Neu: `docs/CODEBUCH.md`, ein Datenwörterbuch für alle 81 Spalten der drei Exportdateien mit
+Fragetext, Seite/Block, Format, Wertebereich, Bedingung und der Bedeutung einer leeren Zelle. **Erzeugt,
+nicht geschrieben** (`npm run codebuch`): Fragetexte, Formate und Bedingungen kommen aus `src/content/`, die
+Spaltenreihenfolge aus `src/lib/exportColumns.ts`. Dafür sind die Spaltenlisten aus der Export-Route in ein
+eigenes Modul gewandert - lägen sie weiter in der Route, hätte der Generator sie abschreiben müssen, und
+abgeschrieben heißt früher oder später auseinandergelaufen. Ein Codebuch, das nicht zur Datei passt, führt
+die Auswertung in die Irre, statt sie zu stützen. Die drei Bedeutungen einer leeren Zelle (*nicht gezeigt*,
+*nicht beantwortet*, *nicht anwendbar*) sind je Spalte einzeln benannt, die Zugehörigkeit zu den beiden
+Skalen ist aus dem Code abgeleitet und ergibt neun Aussagen für Überzeugungskraft und vier für
+Aufdringlichkeit.
+
+**Offen dabei:** Die **Quellenangabe der beiden Skalen fehlt im ganzen Projekt.** Weder SPEZIFIKATION.md noch
+die Inhaltsdateien nennen eine Veröffentlichung, es steht nur „etablierte Skala". Im Codebuch steht an dieser
+Stelle ein deutlich markierter Platzhalter. Das ist Studieninhalt und gehört mit der Betreuung geklärt, nicht
+geraten (CLAUDE.md, Arbeitsweise).
+
+**Getestet:**
+- Migration: Die SQL gegen die echte Datenbank in einer Transaktion ausgeführt und zurückgerollt. Spalte
+  `clientEventId` entsteht als nullable TEXT, Index `Event_clientEventId_key` wird angelegt, die 185
+  bestehenden Ereignisse bleiben gültig, nach dem Rollback ist nichts übrig.
+- Doppelerkennung: Derselbe Stapel zweimal durch dieselbe `createMany`-Aufrufform wie in `/api/events`
+  geschickt, ebenfalls in einer zurückgerollten Transaktion. Erster Versuch schreibt 1 Zeile, zweiter 0, in
+  der Datenbank steht 1. Gegenprobe ohne Kennung: zweimal geschrieben, wie beabsichtigt, NULL blockiert nicht.
+- Spaltenreihenfolge: Kopfzeile von `participants.csv` ausgegeben, 49 Spalten, `N1` bis `N20` streng
+  aufsteigend, `B2`/`B2_followUp` und `B3`/`B3_followUp` unmittelbar hintereinander.
+- Schutzprüfung: `C1` testweise aus `PRE_ID_ORDER` entfernt - Codebuch-Erzeugung bricht mit Exit-Code 1 und
+  der Meldung „Vorbefragung: C1 fehlt/fehlen in der Spaltenliste" ab. Danach zurückgesetzt.
+- `tsc --noEmit`, `eslint`, `npm run build` ohne Befund.
+
+**Noch nicht geprüft und offen:** Der vom Prüfbericht vorgesehene Netzwerktest (Verbindung während eines
+Sendevorgangs trennen und wiederherstellen, danach im Export auf Doppelungen sehen) braucht eine lokale
+Datenbank; Docker Desktop lief an diesem Tag nicht. Die Migration ist außerdem **noch nicht auf Neon
+angewendet** - das muss vor dem nächsten Deployment passieren, weil der neue Prisma-Client die Spalte
+abfragt.

@@ -3,72 +3,16 @@ import { getCurrentParticipant, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { toCsv } from "@/lib/csv";
 import { preSurveyItems } from "@/content/pre-survey";
+// Spaltenlisten und ihre Reihenfolge stehen in src/lib/exportColumns.ts -
+// dieselbe Quelle, aus der auch docs/CODEBUCH.md erzeugt wird.
 import {
-  postSurveyStateItems,
-  postSurveyPersuasivenessItems,
-  postSurveyIntrusivenessItems,
-  postSurveyComparisonItem,
-  postSurveyComparisonReasonItem,
-  postSurveyClosingTextItems,
-} from "@/content/post-survey";
-
-// Spaltenreihenfolge der Fragebogen-Antworten (20.09.).
-//
-// Die Reihenfolge im CSV folgt NICHT der Reihenfolge im Fragebogen, sondern
-// ist immer aufsteigend nach Kennung sortiert: A1..A6, B1..B4, C1, D1 und
-// N1..N20. Vorher wurde einfach die Reihenfolge der Inhaltsdateien
-// uebernommen, und die Nachbefragung stellt "Was hat am besten
-// funktioniert?" (N19) bewusst vor "Was hat dich am meisten gestoert?"
-// (N18) - im Export standen dadurch am Ende N17;N19;N18;N20. Wer Spalten
-// nach Position statt nach Ueberschrift zuordnet, vertauscht genau diese
-// beiden Freitextfragen.
-//
-// Die Reihenfolge im Fragebogen selbst bleibt unangetastet, die ist eine
-// bewusste Gestaltungsentscheidung. Sortiert wird nur die Ausgabe.
-//
-// Bewusst aus den Inhaltsdateien abgeleitet und sortiert statt als von Hand
-// gepflegte Liste: Eine feste Liste waere stabiler gegen Umsortieren, aber
-// wer spaeter ein Item ergaenzt und die Liste vergisst, erhebt die Antwort
-// und exportiert sie nie - stiller Datenverlust, das Schlimmste, was einem
-// Messinstrument passieren kann. So kann keine Spalte verloren gehen.
-function surveyIdSortKey(id: string): [string, number] {
-  const match = /^([A-Za-z]+)(\d+)$/.exec(id);
-  // Kennungen ohne das uebliche Muster wandern ans Ende, statt irgendwo
-  // dazwischen zu landen - dort fallen sie beim Draufschauen auf.
-  return match ? [match[1], Number(match[2])] : ["zzz", Number.MAX_SAFE_INTEGER];
-}
-
-function sortSurveyIds<T>(items: readonly T[], idOf: (item: T) => string): T[] {
-  return [...items].sort((a, b) => {
-    const [prefixA, numberA] = surveyIdSortKey(idOf(a));
-    const [prefixB, numberB] = surveyIdSortKey(idOf(b));
-    return prefixA === prefixB ? numberA - numberB : prefixA.localeCompare(prefixB);
-  });
-}
-
-// Erst sortieren, dann die Ja/Nein-Spalten aufklappen: so steht jede
-// Anschlussfrage unmittelbar hinter ihrer Ausgangsfrage (B2, B2_followUp,
-// B3, B3_followUp) und nicht am Ende des Blocks.
-const PRE_COLUMNS = sortSurveyIds(preSurveyItems, (item) => item.id).flatMap((item) =>
-  item.type === "yesno" ? [item.id, `${item.id}_followUp`] : [item.id]
-);
-
-const POST_IDS = sortSurveyIds(
-  [
-    ...postSurveyStateItems.map((item) => item.id),
-    ...postSurveyPersuasivenessItems.map((item) => item.id),
-    ...postSurveyIntrusivenessItems.map((item) => item.id),
-    postSurveyComparisonItem.id,
-    postSurveyComparisonReasonItem.id,
-    ...postSurveyClosingTextItems.map((item) => item.id),
-  ],
-  (id) => id
-);
-// Lesezeit je Nachbefragungs-Seite (14.09.): Differenz aus
-// page_load_timestamp/page_submit_timestamp, in `answers.pageTimings`
-// gespeichert (siehe /api/survey) - hier fuer die Auswertung als eigene
-// Sekunden-Spalten aufbereitet, um Blindklicker zu erkennen.
-const POST_PAGE_TIMING_COLUMNS = ["postPage1Seconds", "postPage2Seconds", "postPage3Seconds"];
+  CYCLES_COLUMNS,
+  EVENTS_COLUMNS,
+  PARTICIPANTS_COLUMNS,
+  POST_IDS,
+  POST_PAGE_TIMING_COLUMNS,
+  pruefeSpaltenlisten,
+} from "@/lib/exportColumns";
 
 export async function GET(request: NextRequest) {
   const participant = await getCurrentParticipant();
@@ -83,9 +27,20 @@ export async function GET(request: NextRequest) {
 
   const file = request.nextUrl.searchParams.get("file");
 
-  if (file === "participants") return csvResponse(await participantsCsv(), "participants.csv");
-  if (file === "cycles") return csvResponse(await cyclesCsv(), "cycles.csv");
-  if (file === "events") return csvResponse(await eventsCsv(), "events.csv");
+  // Die Pruefung der Spaltenliste wirft absichtlich. Ohne diesen Block
+  // bekaeme man eine nackte 500 ohne Hinweis, was zu tun ist - genau dann,
+  // wenn jemand gerade eine Frage ergaenzt hat und nicht weiss, warum der
+  // Export klemmt.
+  try {
+    if (file === "participants") return csvResponse(await participantsCsv(), "participants.csv");
+    if (file === "cycles") return csvResponse(await cyclesCsv(), "cycles.csv");
+    if (file === "events") return csvResponse(await eventsCsv(), "events.csv");
+  } catch (fehler) {
+    return NextResponse.json(
+      { error: fehler instanceof Error ? fehler.message : "Export fehlgeschlagen." },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json(
     { error: "Ungültiger Parameter 'file'. Erwartet: participants, cycles oder events." },
@@ -96,6 +51,12 @@ export async function GET(request: NextRequest) {
 // Eine Zeile je Sitzung (in der Praxis: je Teilnehmende), Vor- und
 // Nachbefragung nebeneinander (SPEZIFIKATION.md [7]).
 async function participantsCsv() {
+  const spaltenProblem = pruefeSpaltenlisten();
+  if (spaltenProblem) {
+    // Lieber gar kein Export als ein stillschweigend unvollstaendiger.
+    throw new Error(spaltenProblem);
+  }
+
   const sessions = await prisma.session.findMany({
     include: { participant: true, surveys: true },
     orderBy: { createdAt: "asc" },
@@ -169,25 +130,7 @@ async function participantsCsv() {
     return row;
   });
 
-  const columns = [
-    "code",
-    "sessionId",
-    "consentAt",
-    "startedAt",
-    "endedAt",
-    "durationMin",
-    "finalizedAt",
-    "initialWorkMin",
-    "initialBreakMin",
-    "taskDescription",
-    "restedAtStart",
-    "focusAtStart",
-    ...PRE_COLUMNS,
-    ...POST_IDS,
-    ...POST_PAGE_TIMING_COLUMNS,
-  ];
-
-  return toCsv(columns, rows);
+  return toCsv(PARTICIPANTS_COLUMNS, rows);
 }
 
 // Eine Zeile je Runde. CycleFeedback.activity wird vom Client nie befüllt
@@ -349,35 +292,7 @@ async function cyclesCsv() {
     }
   }
 
-  const columns = [
-    "code",
-    "sessionId",
-    "cycle",
-    "workMin",
-    "workStartedAt",
-    "reactionType",
-    "reactionStage",
-    "reactionSecondsAfterEnd",
-    "reactionSecondsIntoWork",
-    "reactionAt",
-    "nudgeStage1At",
-    "tabVisibleAtNudge",
-    "firstTabVisibleAfterNudge",
-    "latencyToTabReturnSeconds",
-    "snoozeCount",
-    "activity",
-    "breakStartedAt",
-    "breakEndedAt",
-    "breakPlannedMin",
-    "breakActualMin",
-    "timing",
-    "adjustmentMin",
-    "effectiveAdjustmentMin",
-    "newWorkMin",
-    "comment",
-  ];
-
-  return toCsv(columns, rows);
+  return toCsv(CYCLES_COLUMNS, rows);
 }
 
 // Eine Zeile je Ereignis - der vollständige Rohlog, für alles, was die
@@ -399,9 +314,7 @@ async function eventsCsv() {
     payload: event.payload,
   }));
 
-  const columns = ["code", "sessionId", "type", "cycle", "clientAt", "at", "payload"];
-
-  return toCsv(columns, rows);
+  return toCsv(EVENTS_COLUMNS, rows);
 }
 
 function csvResponse(csv: string, filename: string) {
