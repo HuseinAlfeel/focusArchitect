@@ -1407,3 +1407,66 @@ Sendevorgangs trennen und wiederherstellen, danach im Export auf Doppelungen seh
 Datenbank; Docker Desktop lief an diesem Tag nicht. Die Migration ist außerdem **noch nicht auf Neon
 angewendet** - das muss vor dem nächsten Deployment passieren, weil der neue Prisma-Client die Spalte
 abfragt.
+
+## 23.09.2026 Probelauf ausgewertet, drei Befunde behoben, vier Punkte geschlossen
+
+Grundlage: vollständiger Probelauf vom 22.09. auf der Live-URL (PILOT, 54 Minuten, 6 Runden, 130
+Ereignisse), inklusive Export aller drei Dateien.
+
+**Bestätigt durch echte Daten:**
+- `cycleCompleted` steht bei der übersprungenen Pause in Runde 5 auf `true`. Genau dafür wurde die
+  Definition am 22.09. von „BREAK_ENDED erreicht" auf „nächste Runde begonnen" geändert; mit der alten
+  Regel wäre diese Runde fälschlich als unvollständig aus der Auswertung gefallen.
+- `SESSION_ENDED` trägt `cycle: 6` und `{"phase":"work"}`.
+- `NUDGE_SOUND_PLAYED` trägt jetzt die Rundennummer. Das war am 22.09. nicht prüfbar, weil die damaligen
+  Daten älter als die Änderung waren.
+- Die drei Stufentöne sind live angekommen: `soft-sine` 0.7, `soft-bell` 0.8, `rich-chord` 0.9.
+- Keine doppelten Ereignisse. Die Tab-Wechsel stehen sauber abwechselnd, keine zwei identischen
+  Zeitstempel - genau das Muster, das am 20.09. den Fehler zeigte.
+- Ein Tab-Wechsel **während der Pause** (Runde 3) erzeugt keine Reaktionslatenz mehr.
+
+**Drei Befunde, alle behoben:**
+
+**1. Die Admin-Tabelle zeigte UTC statt deutscher Zeit.** Die Sitzung endete um 23:47 Ortszeit, in der
+Tabelle stand 21:47. Ursache: Die Seite ist eine Server-Komponente, und `toLocaleString("de-DE")` nimmt
+dort die Zeitzone des Servers - bei Vercel UTC. Jetzt mit `timeZone: "Europe/Berlin"`. Betrifft nur die
+Anzeige; in den CSV-Dateien stehen weiterhin ISO-8601-Zeitstempel in UTC, und das bleibt so - eindeutig
+und ohne Sommerzeitfallen.
+
+**2. Nach einem Snooze kam der Hinweis lautlos zurück.** In Runde 3 steht `NUDGE_STAGE_1` zweimal im Log,
+`NUDGE_SOUND_PLAYED` aber nur einmal. `useNudgeStageLogging` setzt seinen Merker zurück, wenn sich der
+Zielzeitpunkt ändert, `useNudgeStageSound` tat das nicht - die beiden liefen auseinander. Wer „Noch 5
+Minuten" wählt, bittet ausdrücklich um eine erneute Erinnerung; eine stumme wäre keine. Der Merker wird
+jetzt in beiden Hooks gleich zurückgesetzt.
+
+**3. Während eines Snooze fehlte der Timer.** Der Bildschirm zeigte nur „Nächster Hinweis in 5 Min". Beim
+Probelauf fiel auf, dass damit das Zeitgefühl verloren geht: Ein Countdown läuft, aber man sieht ihn
+nicht. Jetzt dieselbe große Ziffer wie sonst, mit der Restzeit bis zum nächsten Hinweis, darunter klein
+„bis zum nächsten Hinweis". Kein zusätzliches Element - der Bildschirm zeigt weiterhin genau eine Zahl
+(Regel 7), und die Farbe zieht bei Stufe 0 wie gewohnt mit.
+
+**Vier Punkte geschlossen:**
+- **Töne abgenommen.** Angehört, kein Änderungsbedarf.
+- **Quellen der Skalen eingetragen.** Überzeugungskraft (N3-N11): Perceived Persuasiveness Scale von
+  Thomas, Masthoff und Oren (2019), *Frontiers in Artificial Intelligence*, drei Unterskalen
+  (Effectiveness, Quality, Capability), deutsche Übersetzung aus Jung-Krenzer et al. (2024) mit
+  Bezugsgegenstand „Assistenzsystem" statt „message". Aufdringlichkeit (N12-N15): von Jung-Krenzer et al.
+  (2024) selbst entwickelt, kein etabliertes Instrument vorhanden. Steht im Codebuch und in der
+  Spezifikation.
+- **Einwilligungstext final.** In CLAUDE.md aus „noch nicht entschieden" herausgenommen.
+- **„Aufstehen und bewegen" neu geschrieben.** Ausschließlich Übungen im Stehen, keine Überschneidung
+  mehr mit „Nacken und Schultern": gehen, Beine ausschütteln, strecken, Zehenspitzen, ans Fenster gehen.
+  Dabei auf gesprochene Sprache geachtet - kurze Sätze und keine Aufzählung innerhalb eines Satzes, weil
+  eine vorgelesene Aufzählung wie eine abgehakte Liste klingt. Der Schlusssatz übergibt wie bei den
+  anderen beiden an die restliche Pause. Sekundenwerte unverändert.
+
+**Getestet:** Sekundenwerte der Bewegungsübungen maschinell gegen die alte Fassung verglichen
+(20/15/15/15/20/9, unverändert), Sprechdauer je Schritt gerechnet - längste Stille 12,8 Sekunden, also
+unter der 15-Sekunden-Regel, Schlusssatz 6,2 von 9 Sekunden. Die Zeitzonenumrechnung an genau dem
+Zeitstempel aus dem Probelauf nachgerechnet: 21:47:28 UTC ergibt 23:47:28 in Europe/Berlin. `tsc`,
+`eslint`, `npm run build` und `npm run codebuch` ohne Befund.
+
+**Nicht geprüft, offen:** `latencyToTabReturnSeconds` hat im Probelauf nie einen Wert erzeugt - der Tab
+war bei Stufe 1 jedes Mal sichtbar. Der Fall „Tab schon vor dem Rundenende weg, Rückkehr erst nach Stufe
+1" ist damit weiterhin nur rechnerisch belegt. Ebenso fehlt der zweite Lauf mit „Machst du bewusst
+Pausen? - nein", der die Bedeutung „nicht gezeigt" in den Fragebogenspalten zeigen würde.

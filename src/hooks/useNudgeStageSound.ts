@@ -21,9 +21,22 @@ export function useNudgeStageSound(
   nudgeStage: NudgeStage,
   sessionId: string,
   cycle: number,
+  nudgeEndsAt: number,
   active: boolean
 ) {
   const firedRef = useRef<Set<number>>(new Set());
+
+  // Nach einem Snooze beginnt die Eskalation von vorn, und dann darf auch
+  // der Ton wieder kommen (23.09., im Probelauf aufgefallen). Vorher wurde
+  // nur bei einem Rundenwechsel zurueckgesetzt: In Runde 3 stand deshalb
+  // NUDGE_STAGE_1 zweimal im Log, NUDGE_SOUND_PLAYED aber nur einmal - die
+  // Karte kam nach dem Snooze lautlos zurueck. Wer "Noch 5 Minuten" waehlt,
+  // bittet ausdruecklich um eine erneute Erinnerung; eine stumme waere keine.
+  // Dieselbe Zuruecksetzung macht useNudgeStageLogging seit jeher, die beiden
+  // liefen nur auseinander.
+  useEffect(() => {
+    firedRef.current = new Set();
+  }, [nudgeEndsAt]);
 
   useEffect(() => {
     if (!active) {

@@ -16,6 +16,17 @@ function statusLabel(session: {
   return "Ausstehend";
 }
 
+// Zeitstempel in deutscher Ortszeit anzeigen (23.09.). Diese Seite ist eine
+// Server-Komponente, `toLocaleString("de-DE")` hat also die Zeitzone des
+// Servers benutzt - bei Vercel ist das UTC. Im Probelauf stand deshalb
+// "21:47" in der Tabelle, obwohl die Sitzung um 23:47 deutscher Zeit endete.
+// Betrifft nur diese Anzeige: In den CSV-Dateien stehen ISO-8601-Zeitstempel
+// in UTC, und das bleibt auch so - eindeutig und ohne Sommerzeitfallen.
+function deutscheZeit(zeitpunkt: Date | null): string {
+  if (!zeitpunkt) return "–";
+  return zeitpunkt.toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
+}
+
 export default async function AdminPage() {
   const admin = await requireAdmin();
   if (!admin) {
@@ -56,12 +67,8 @@ export default async function AdminPage() {
                 <tr key={session.id} className="border-b border-black/5 last:border-0 dark:border-white/10">
                   <td className="px-3 py-2">{session.participant.code}</td>
                   <td className="px-3 py-2">{statusLabel(session)}</td>
-                  <td className="px-3 py-2">
-                    {session.startedAt?.toLocaleString("de-DE") ?? "–"}
-                  </td>
-                  <td className="px-3 py-2">
-                    {session.endedAt?.toLocaleString("de-DE") ?? "–"}
-                  </td>
+                  <td className="px-3 py-2">{deutscheZeit(session.startedAt)}</td>
+                  <td className="px-3 py-2">{deutscheZeit(session.endedAt)}</td>
                   <td className="px-3 py-2">{session._count.cycles}</td>
                   <td className="px-3 py-2">{session._count.events}</td>
                 </tr>

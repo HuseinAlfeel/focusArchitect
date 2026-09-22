@@ -65,6 +65,9 @@ export function formatRemaining(ms: number) {
  * M:SS wie die Pause (formatRemaining), siehe ENTSCHEIDUNGEN.md. Aufgerundet,
  * damit "1 Min" nicht schon bei 0:01 Restzeit zu "0 Min" wird.
  */
+// Seit 23.09. nicht mehr im Einsatz: Der Snooze-Bildschirm zeigt jetzt die
+// volle Ziffer per formatRemaining statt einer groben Minutenangabe. Bleibt
+// hier stehen, falls die alte Anzeige je zurueckgeholt werden soll.
 export function formatRemainingMinutes(ms: number) {
   const minutes = Math.ceil(ms / 60_000);
   return `${minutes} Min`;

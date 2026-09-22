@@ -79,9 +79,17 @@ Bei Reaktion protokollieren, **bei welcher Stufe** und nach wie vielen Sekunden.
 
 ---
 
+## Entschieden und festgeschrieben
+
+- **Einwilligung und Datenschutzerklärung:** Wortlaut steht fest (Stand 23.09.), einschließlich Löschadresse
+  und Speicherort. Text in `src/content/consent.ts`, nicht mehr ändern.
+- **Töne des Pausenhinweises:** angehört und abgenommen (23.09.). Stufe 1 Sinuston 70 %, Stufe 2 Glockenton
+  80 %, Stufe 3 voller Akkord 90 %, Stufe 0 tonlos. Festgelegt in `NUDGE_STAGE_SOUND`.
+- **Quellen der beiden Nachbefragungs-Skalen:** Thomas, Masthoff und Oren (2019) für die Überzeugungskraft,
+  Jung-Krenzer et al. (2024) für die Aufdringlichkeit. Siehe `docs/CODEBUCH.md`.
+
 ## Offen, noch nicht entschieden
 
-- Genauer Wortlaut von Einwilligung und Datenschutzerklärung
 - Endgültige Fragebogen-Items (eventuell zusätzlich NASA-TLX oder UEQ-S)
 - Ob die Durchführung ortsunabhängig oder begleitet stattfindet
 

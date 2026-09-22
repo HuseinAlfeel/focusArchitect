@@ -40,10 +40,16 @@ Beide Skalen sind siebenstufig (1 = „Stimme überhaupt nicht zu“ bis 7 = „
 und wortgleich aus der Vorlage übernommen, einschließlich des Tippfehlers in N4
 („diesem Assistenzsystems“) – bei validierten Skalen wird der Wortlaut nicht korrigiert.
 
-> **PLATZHALTER – Quellenangabe fehlt.** Im Projekt ist an keiner Stelle festgehalten, aus
-> welcher Veröffentlichung die beiden Skalen stammen; die Dateien sprechen nur von einer
-> „etablierten Skala“. Die genaue Quelle ist mit der Betreuung zu klären und hier einzutragen
-> (in `scripts/codebuch-erzeugen.ts`, nicht in dieser Datei).
+**Herkunft der Skalen.** Die neun Aussagen zur Überzeugungskraft (`N3` bis `N11`) stammen aus der
+Perceived Persuasiveness Scale von Thomas, Masthoff und Oren (2019), veröffentlicht in
+*Frontiers in Artificial Intelligence* unter dem Titel „Can I Influence You? Development of a
+Scale to Measure Perceived Persuasiveness and Two Studies Showing the Use of the Scale“. Die
+Skala besteht aus drei Unterskalen mit je drei Aussagen: Effectiveness, Quality und Capability.
+Verwendet wird die deutsche Übersetzung aus Jung-Krenzer et al. (2024), in der der
+Bezugsgegenstand von „message“ auf „Assistenzsystem“ angepasst wurde.
+
+Die vier Aussagen zur Aufdringlichkeit (`N12` bis `N15`) wurden von Jung-Krenzer et al. (2024)
+selbst entwickelt, da kein etabliertes Instrument vorlag.
 
 Über alle Personen hinweg werden Mittelwert, Standardabweichung, Minimum und Maximum beider
 Skalen berichtet.

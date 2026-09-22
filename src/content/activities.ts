@@ -48,8 +48,15 @@ export type Activity = {
 //     Anleitung.
 // (5) "Aufstehen und bewegen" bestand in der Mitte aus denselben
 //     Schulterkreisen wie "Nacken und Schultern". Wer die Bewegungspause
-//     wählt, bekommt jetzt auch Bewegung: Strecken, Drehen aus der Hüfte,
-//     Zehenspitzen für den Kreislauf.
+//     wählt, bekommt jetzt auch Bewegung.
+//
+// Nachgeschärft am 23.09. (Betreuung): Die Übungen sind ausschließlich im
+// Stehen und überschneiden sich an keiner Stelle mehr mit "Nacken und
+// Schultern" - gehen, Beine ausschütteln, strecken, Zehenspitzen, ans
+// Fenster gehen. Dabei zusätzlich auf gesprochene Sprache geachtet: kurze
+// Sätze, und keine Aufzählung innerhalb eines Satzes. Vorlesen betont eine
+// Aufzählung nicht, sie klingt dann wie eine abgehakte Liste ("Zum Fenster,
+// zur Tür, egal wohin" stand vorher so drin).
 //
 // Die Sekundenwerte sind dabei unverändert geblieben. Der Ablauf der Pause
 // ist Teil der Intervention; geändert wurde, was gesagt wird, nicht wie
@@ -133,27 +140,27 @@ export const activities: Activity[] = [
     steps: [
       {
         instruction:
-          "Steh auf und geh ein paar Schritte. Zum Fenster, zur Tür, egal wohin. 20 Sekunden.",
+          "Steh auf und geh ein paar Schritte durch den Raum. 20 Sekunden, ganz gemütlich.",
         durationSeconds: 20,
       },
       {
         instruction:
-          "Streck dich einmal richtig lang. Arme nach oben, 15 Sekunden, und atme dabei tief ein.",
+          "Stell dich hin und schüttel das rechte Bein locker aus. Dann das linke. 15 Sekunden.",
         durationSeconds: 15,
       },
       {
         instruction:
-          "Arme wieder fallen lassen. Dreh dich jetzt 15 Sekunden lang locker aus der Hüfte, einmal nach rechts, einmal nach links.",
+          "Jetzt streck dich. Arme nach oben, so weit es angenehm ist. 15 Sekunden, und atme dabei tief ein.",
         durationSeconds: 15,
       },
       {
         instruction:
-          "Stell dich hin und geh ein paar Mal auf die Zehenspitzen und wieder herunter. 15 Sekunden, das bringt den Kreislauf in Schwung.",
+          "Lass die Arme sinken. Geh 15 Sekunden lang ein paar Mal auf die Zehenspitzen und wieder herunter.",
         durationSeconds: 15,
       },
       {
         instruction:
-          "Geh noch einmal 20 Sekunden umher, ganz in deinem Tempo. Schau dabei ruhig aus dem Fenster, wenn eins da ist.",
+          "Geh noch ein paar Schritte, am besten Richtung Fenster. Schau 20 Sekunden lang nach draußen.",
         durationSeconds: 20,
       },
       {

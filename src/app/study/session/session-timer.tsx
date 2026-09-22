@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCountdown, formatRemaining, formatRemainingMinutes } from "@/hooks/useCountdown";
+import { useCountdown, formatRemaining } from "@/hooks/useCountdown";
 import { useRoundTimer } from "@/hooks/useRoundTimer";
 import { useTabVisibilityLogging } from "@/hooks/useTabVisibilityLogging";
 import { useNudgeStageSound } from "@/hooks/useNudgeStageSound";
@@ -88,7 +88,7 @@ export function SessionTimer({
 
   useTabVisibilityLogging(sessionId, cycle);
   useActivityTicks(sessionId, cycle);
-  useNudgeStageSound(nudgeStage, sessionId, cycle, state === "WORK" && !hasReacted);
+  useNudgeStageSound(nudgeStage, sessionId, cycle, nudgeEndsAt, state === "WORK" && !hasReacted);
   useNudgeStageLogging(sessionId, cycle, nudgeEndsAt, nudgeStage, state === "WORK" && !hasReacted);
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
@@ -303,10 +303,31 @@ export function SessionTimer({
               </span>
             </div>
           )}
+          {/* Waehrend eines Snooze lief bis 23.09. nur die Zeile "Naechster
+              Hinweis in 5 Min". Beim Probelauf fiel auf, dass der Bildschirm
+              damit sein Zeitgefuehl verliert: Die Runde ist vorbei, ein
+              Countdown laeuft, aber man sieht ihn nicht. Jetzt dieselbe
+              grosse Ziffer wie sonst, nur mit der Restzeit bis zum naechsten
+              Hinweis. Kein zusaetzliches Element - der Bildschirm zeigt
+              weiterhin genau eine Zahl (Regel 7). Die Farbe zieht wie gewohnt
+              mit, sobald Stufe 0 des neuen Anlaufs erreicht ist. */}
           {isSnoozeActive && !hasReacted && snoozeRemainingMs !== null && (
-            <p className="text-lg text-neutral-400 dark:text-neutral-600">
-              Nächster Hinweis in {formatRemainingMinutes(snoozeRemainingMs)}
-            </p>
+            <div className="flex flex-col items-center gap-2">
+              <div className="rounded-3xl border border-black/5 px-14 py-10 dark:border-white/10">
+                <span
+                  className="text-7xl font-extralight tabular-nums"
+                  style={{
+                    color: nudgeStage === 0 ? "var(--foreground-nudge)" : "var(--foreground-timer)",
+                    transition: "color 60s ease",
+                  }}
+                >
+                  {formatRemaining(snoozeRemainingMs)}
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 dark:text-neutral-600">
+                bis zum nächsten Hinweis
+              </p>
+            </div>
           )}
         </div>
       )}
