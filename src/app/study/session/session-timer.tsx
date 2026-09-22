@@ -16,7 +16,7 @@ import { useSpeech } from "@/hooks/useSpeech";
 import { playNudgeSound } from "@/lib/nudgeSound";
 import { activities, type ActivityId } from "@/content/activities";
 import { sendEventNow, enqueueEvent, startEventQueue } from "@/lib/eventQueue";
-import type { EventType } from "@/lib/events";
+import type { EventType, SessionEndPhase } from "@/lib/events";
 
 const MIN_WORK_MIN = 5;
 const ADJUSTMENT_STEP_MIN = 5;
@@ -92,6 +92,25 @@ export function SessionTimer({
   useNudgeStageLogging(sessionId, cycle, nudgeEndsAt, nudgeStage, state === "WORK" && !hasReacted);
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;
+
+  // In welcher Phase wurde die Sitzung beendet (22.09., Punkt 6 der
+  // Datenpruefung)? Geht als Payload an SESSION_ENDED, damit im Export
+  // erkennbar ist, wo eine Sitzung abbricht - eine Runde, die mitten in der
+  // Arbeitsphase endet, ist etwas anderes als eine, die nach der Pause endet.
+  //
+  // "nudge" zaehlt erst ab Stufe 1, also ab dem sichtbaren Hinweis. Stufe 0
+  // ist der kaum wahrnehmbare Farbuebergang VOR dem Rundenende, die Runde
+  // laeuft dort noch normal - das ist "work".
+  const endPhase: SessionEndPhase =
+    state === "BREAK"
+      ? "break"
+      : state === "ACTIVITY_CHOICE"
+        ? "activity"
+        : state === "FEEDBACK"
+          ? "feedback"
+          : !hasReacted && nudgeStage !== null && nudgeStage >= 1
+            ? "nudge"
+            : "work";
 
   // Wartet auf die Serverbestätigung, statt nur "abzufeuern": schließt man
   // den Tab (nicht nur Reload) sehr kurz nach einem Rundenwechsel, geht die
@@ -344,7 +363,7 @@ export function SessionTimer({
         />
       )}
 
-      <EndSessionButton sessionId={sessionId} />
+      <EndSessionButton sessionId={sessionId} cycle={cycle} phase={endPhase} />
     </main>
   );
 }
@@ -509,12 +528,24 @@ function FeedbackScreen({
     <div className="relative z-10 w-full max-w-sm space-y-5 rounded-3xl border border-black/5 px-8 py-8 text-center dark:border-white/10">
       <p className="text-sm font-medium">War der Zeitpunkt der Pause passend?</p>
 
-      <div className="flex justify-center gap-2">
+      {/* Untereinander statt nebeneinander (22.09.): Mit den Klammerzusaetzen
+          sind die Antworten zu lang fuer drei Knoepfe in einer Reihe, in der
+          schmalen Karte (max-w-sm) waere jeder Knopf mehrzeilig umgebrochen
+          und die Reihe unlesbar geworden. Untereinander bleibt jede Antwort
+          eine Zeile und alle drei sind gleich breit - "passend" darf nicht
+          allein dadurch auffallen, dass es kuerzer ist. */}
+      <div className="flex flex-col gap-2">
         {(
           [
-            ["TOO_EARLY", "Zu früh"],
-            ["OK", "Passend"],
-            ["TOO_LATE", "Zu spät"],
+            // Klammerzusaetze ergaenzt (22.09.): "Zu früh" allein liess zwei
+            // Lesarten zu - "die Pause kam zu früh" (dann will man laenger
+            // arbeiten) gegen "ich moechte frueher Pause machen" (dann
+            // kuerzer). Im Probelauf kam "Zu früh" zweimal zusammen mit einer
+            // Verkuerzung vor. Der Zusatz macht die gemeinte Richtung
+            // eindeutig, ohne die Bedienung einzuschraenken.
+            ["TOO_EARLY", "zu früh (ich hätte gern länger gearbeitet)"],
+            ["OK", "passend"],
+            ["TOO_LATE", "zu spät (ich hätte gern früher Pause gemacht)"],
           ] as const
         ).map(([value, label]) => (
           <button
@@ -524,7 +555,7 @@ function FeedbackScreen({
               setTiming(value);
               setAdjustmentMin(0);
             }}
-            className={`rounded border px-3 py-1.5 text-sm ${
+            className={`w-full rounded border px-3 py-2 text-left text-sm ${
               timing === value
                 ? "border-neutral-800 bg-neutral-800 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
                 : "border-black/15 dark:border-white/20"
@@ -816,7 +847,15 @@ function BreakScreen({
   );
 }
 
-function EndSessionButton({ sessionId }: { sessionId: string }) {
+function EndSessionButton({
+  sessionId,
+  cycle,
+  phase,
+}: {
+  sessionId: string;
+  cycle: number;
+  phase: SessionEndPhase;
+}) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [ending, setEnding] = useState(false);
@@ -824,10 +863,13 @@ function EndSessionButton({ sessionId }: { sessionId: string }) {
   async function handleEnd() {
     setEnding(true);
 
+    // Rundennummer und Phase mitschicken (22.09.): SESSION_ENDED entsteht
+    // serverseitig, der Server kennt den Bildschirmzustand des Browsers aber
+    // nicht - er muss ihn also mitgeteilt bekommen.
     await fetch(`/api/session/${sessionId}/end`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientAt: new Date().toISOString() }),
+      body: JSON.stringify({ clientAt: new Date().toISOString(), cycle, phase }),
     });
 
     router.push("/study");

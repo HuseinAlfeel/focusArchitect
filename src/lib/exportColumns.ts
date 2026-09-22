@@ -141,6 +141,7 @@ export const CYCLES_COLUMNS = [
   "code",
   "sessionId",
   "cycle",
+  "cycleCompleted",
   "workMin",
   "workStartedAt",
   "reactionType",

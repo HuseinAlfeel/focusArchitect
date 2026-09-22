@@ -43,3 +43,31 @@ const EVENT_TYPE_SET = new Set<string>(EVENT_TYPES);
 export function isEventType(value: unknown): value is EventType {
   return typeof value === "string" && EVENT_TYPE_SET.has(value);
 }
+
+/**
+ * Phase, in der eine Sitzung beendet wurde (22.09., Punkt 6 der
+ * Datenpruefung). Geht als Payload an SESSION_ENDED, zusammen mit der
+ * Rundennummer. Hintergrund: Die letzte Runde einer Sitzung ist fast immer
+ * unvollstaendig - im Probelauf wurde in Runde 5 die Pause angenommen und
+ * zwei Sekunden spaeter die Sitzung beendet. In cycles.csv stand trotzdem
+ * BREAK_ACCEPTED, ohne Hinweis darauf, dass die Runde nie zu Ende lief.
+ *
+ * "work" umfasst auch Stufe 0 des Hinweises: dort laeuft die Runde noch, der
+ * Farbuebergang ist bewusst kaum wahrnehmbar und es ist nichts zu sehen, auf
+ * das man reagieren koennte. Ab Stufe 1 steht die Karte, dann "nudge".
+ */
+export const SESSION_END_PHASES = [
+  "work",
+  "nudge",
+  "feedback",
+  "activity",
+  "break",
+] as const;
+
+export type SessionEndPhase = (typeof SESSION_END_PHASES)[number];
+
+const SESSION_END_PHASE_SET = new Set<string>(SESSION_END_PHASES);
+
+export function isSessionEndPhase(value: unknown): value is SessionEndPhase {
+  return typeof value === "string" && SESSION_END_PHASE_SET.has(value);
+}

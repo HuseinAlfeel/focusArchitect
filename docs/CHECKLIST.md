@@ -383,7 +383,7 @@ npm install -D @types/bcryptjs
 > Auswertung werden die Angaben zum Zeitpunkt getrennt nach `reactionType` betrachtet, weil "zu früh" nach
 > einem Systemhinweis etwas anderes bedeutet als nach einer eigenen Entscheidung.
 
-- [ ] Drei Knöpfe: zu früh / passend / zu spät
+- [ ] Drei Knöpfe untereinander: „zu früh (ich hätte gern länger gearbeitet)" / „passend" / „zu spät (ich hätte gern früher Pause gemacht)" (Klammerzusätze und Anordnung 22.09.)
 - [ ] Bei zu früh oder zu spät: Zähler in 5-Minuten-Schritten, frei nach oben oder unten
       (Änderung 11.08.: statt vier fester Knöpfe -10/-5/+5/+10, die Sprünge waren zu grob)
 - [ ] Optionales Freitextfeld

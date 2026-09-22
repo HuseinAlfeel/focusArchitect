@@ -245,10 +245,27 @@ async function cyclesCsv() {
 
       const snoozeCount = cycleEvents.filter((e) => e.type === "BREAK_SNOOZED").length;
 
+      // Unvollstaendige Runden kennzeichnen (22.09., Punkt 6 der
+      // Datenpruefung). Die letzte Runde einer Sitzung ist fast immer
+      // unvollstaendig: im Probelauf wurde in Runde 5 die Pause angenommen und
+      // zwei Sekunden spaeter die Sitzung beendet - in cycles.csv stand
+      // trotzdem BREAK_ACCEPTED, ohne Hinweis darauf, dass die Runde nie zu
+      // Ende lief.
+      //
+      // Definition wie vorgegeben: true nur, wenn die Runde bis BREAK_ENDED
+      // durchlaufen wurde. WICHTIG fuer die Auswertung: Eine uebersprungene
+      // Pause (BREAK_SKIPPED) erreicht nie ein BREAK_ENDED und steht damit
+      // ebenfalls auf false, obwohl die Runde regulaer zu Ende lief. Wer auf
+      // cycleCompleted = true filtert, laesst also alle uebersprungenen Pausen
+      // weg - bei einer Auswertung der Pausenannahme verschiebt das das
+      // Ergebnis nach oben. Im Codebuch ausdruecklich vermerkt.
+      const cycleCompleted = Boolean(breakEnded);
+
       rows.push({
         code: session.participant.code,
         sessionId: session.id,
         cycle,
+        cycleCompleted,
         workMin,
         workStartedAt: workStarted?.at ?? null,
         reactionType,

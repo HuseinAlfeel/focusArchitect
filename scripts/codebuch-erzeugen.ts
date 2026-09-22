@@ -46,7 +46,7 @@ const LEER_NICHT_ANWENDBAR = "nicht anwendbar";
 
 function zelle(text: string): string {
   // Senkrechte Striche wuerden die Markdown-Tabelle zerlegen.
-  return text.replace(/\|/g, "\|").replace(/\s+/g, " ").trim();
+  return text.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
 }
 
 function tabelle(eintraege: Eintrag[]): string {
@@ -263,6 +263,7 @@ const TECHNISCHE_SPALTEN: Record<string, Omit<Eintrag, "spalte">> = {
   postPage3Seconds: T("Bearbeitungsdauer Seite 3 der Nachbefragung", "Nachbefragung, abgeleitet", "Zahl (Sekunden)", "ganze Sekunden", "nur wenn Lade- und Absendezeitpunkt vorliegen", LEER_NICHT_ANWENDBAR),
 
   cycle: T("Rundennummer innerhalb der Sitzung", "Runde", "Zahl", "ab 1 aufsteigend", "immer", "Ereignis gehört zu keiner Runde (z. B. Einwilligung, Vorbefragung)"),
+  cycleCompleted: T("Ist die Runde bis zum Ende der Pause durchlaufen worden? **Achtung bei der Auswertung:** Eine übersprungene Pause erreicht nie ein BREAK_ENDED und steht deshalb ebenfalls auf `false`, obwohl die Runde regulär zu Ende lief. Wer auf `true` filtert, lässt alle übersprungenen Pausen weg und verschiebt damit eine Auswertung der Pausenannahme nach oben", "Runde", "Wahrheitswert", "`true` = bis BREAK_ENDED durchlaufen, `false` = vorher abgebrochen ODER Pause übersprungen", "immer", LEER_NICHT_ANWENDBAR),
   workMin: T("Rundenlänge dieser Runde", "Runde", "Zahl (Minuten)", "mindestens 5", "immer", LEER_NICHT_ANWENDBAR),
   workStartedAt: T("Beginn der Arbeitsphase dieser Runde", "Runde", "Zeitstempel", "ISO 8601, UTC", "immer", "kein WORK_STARTED protokolliert"),
   reactionType: T("Art der Reaktion, die die Runde beendet hat", "Runde", "Auswahl", "`BREAK_ACCEPTED`, `BREAK_SKIPPED`, `SELF_INITIATED`", "immer", "Runde wurde nicht beendet (letzte Runde bei Sitzungsende)"),
@@ -280,7 +281,7 @@ const TECHNISCHE_SPALTEN: Record<string, Omit<Eintrag, "spalte">> = {
   breakEndedAt: T("Ende der Pause – erst wenn „Sitzung starten“ gedrückt wird, nicht wenn der Timer abläuft", "Pause", "Zeitstempel", "ISO 8601, UTC", "nur wenn die Pause beendet wurde", nichtAnwendbar("Pause übersprungen oder Sitzung endete während der Pause")),
   breakPlannedMin: T("Geplante Pausenlänge (entspricht initialBreakMin)", "Pause", "Zahl (Minuten)", "Standard 5", "nur wenn eine Pause stattfand", nichtAnwendbar("Pause übersprungen")),
   breakActualMin: T("Tatsächliche Pausendauer, breakEndedAt minus breakStartedAt – kann die geplante Dauer deutlich überschreiten", "Pause", "Zahl (Minuten)", "ganze Minuten", "nur wenn Beginn und Ende vorliegen", LEER_NICHT_ANWENDBAR),
-  timing: T("Kurzfeedback: „War der Zeitpunkt der Pause passend?“ – getrennt nach reactionType auswerten", "Kurzfeedback", "Auswahl", "`TOO_EARLY`, `OK`, `TOO_LATE`", "nach jeder Runde, auch nach selbst gestarteter Pause", "kein Kurzfeedback abgegeben (Runde nicht beendet)"),
+  timing: T("Kurzfeedback: „War der Zeitpunkt der Pause passend?“ – getrennt nach reactionType auswerten", "Kurzfeedback", "Auswahl", "`TOO_EARLY` = „zu früh (ich hätte gern länger gearbeitet)“, `OK` = „passend“, `TOO_LATE` = „zu spät (ich hätte gern früher Pause gemacht)“", "nach jeder Runde, auch nach selbst gestarteter Pause", "kein Kurzfeedback abgegeben (Runde nicht beendet)"),
   adjustmentMin: T("GEWÜNSCHTE Änderung der Rundenlänge in Minuten", "Kurzfeedback", "Zahl (Minuten)", "Vielfaches von 5, positiv oder negativ", "nur bei „zu früh“ oder „zu spät“", "kein Kurzfeedback abgegeben"),
   effectiveAdjustmentMin: T("WIRKSAME Änderung: newWorkMin minus workMin. Weicht von adjustmentMin ab, wenn die Untergrenze von 5 Minuten greift", "Kurzfeedback", "Zahl (Minuten)", "Vielfaches von 5", "nur wenn ein Kurzfeedback vorliegt", "kein Kurzfeedback abgegeben"),
   newWorkMin: T("Rundenlänge der nächsten Runde", "Kurzfeedback", "Zahl (Minuten)", "mindestens 5", "nur wenn ein Kurzfeedback vorliegt", "kein Kurzfeedback abgegeben"),
@@ -426,6 +427,12 @@ Diese Punkte betreffen nicht einzelne Spalten, sondern den Umgang mit den Dateie
 - **Stufe 0 und selbst gestartete Pausen:** Selbst gestartete Pausen, die in die letzten zwei
   Minuten vor Rundenende fallen, liegen im Zeitfenster von Stufe 0. Eine Häufung dort wäre ein
   Hinweis darauf, dass der Farbverlauf wahrgenommen wurde.
+- **Unvollständige Runden ausschließen:** Bei Zählungen zu Pausenannahme und Intervallanpassung nur
+  Runden mit \`cycleCompleted = true\` einbeziehen – **aber** die Einschränkung in der Spaltenbeschreibung
+  beachten: übersprungene Pausen stehen ebenfalls auf \`false\`. Für eine Auswertung der Pausenannahme ist
+  stattdessen \`reactionType\` zusammen mit dem Ereignis \`SESSION_ENDED\` heranzuziehen, dessen Payload seit
+  dem 22.09. Rundennummer und Phase (\`work\`, \`nudge\`, \`feedback\`, \`activity\`, \`break\`) enthält – damit
+  lässt sich die abgebrochene letzte Runde genau bestimmen.
 - **\`ACTIVITY_TICK\` gewichten:** Diese Ereignisse machen etwa zwei Drittel aller Zeilen in
   \`events.csv\` aus, erfassen aber nur Aktivität innerhalb des Anwendungsfensters, nicht die
   eigentliche Arbeitsaktivität. In der Auswertung als Nebeninformation behandeln.
