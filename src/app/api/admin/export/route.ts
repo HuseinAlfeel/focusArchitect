@@ -12,18 +12,58 @@ import {
   postSurveyClosingTextItems,
 } from "@/content/post-survey";
 
-// Ja/Nein-Fragen bekommen zwei Spalten (siehe Aufbau der Zeilen unten).
-const PRE_COLUMNS = preSurveyItems.flatMap((item) =>
+// Spaltenreihenfolge der Fragebogen-Antworten (20.09.).
+//
+// Die Reihenfolge im CSV folgt NICHT der Reihenfolge im Fragebogen, sondern
+// ist immer aufsteigend nach Kennung sortiert: A1..A6, B1..B4, C1, D1 und
+// N1..N20. Vorher wurde einfach die Reihenfolge der Inhaltsdateien
+// uebernommen, und die Nachbefragung stellt "Was hat am besten
+// funktioniert?" (N19) bewusst vor "Was hat dich am meisten gestoert?"
+// (N18) - im Export standen dadurch am Ende N17;N19;N18;N20. Wer Spalten
+// nach Position statt nach Ueberschrift zuordnet, vertauscht genau diese
+// beiden Freitextfragen.
+//
+// Die Reihenfolge im Fragebogen selbst bleibt unangetastet, die ist eine
+// bewusste Gestaltungsentscheidung. Sortiert wird nur die Ausgabe.
+//
+// Bewusst aus den Inhaltsdateien abgeleitet und sortiert statt als von Hand
+// gepflegte Liste: Eine feste Liste waere stabiler gegen Umsortieren, aber
+// wer spaeter ein Item ergaenzt und die Liste vergisst, erhebt die Antwort
+// und exportiert sie nie - stiller Datenverlust, das Schlimmste, was einem
+// Messinstrument passieren kann. So kann keine Spalte verloren gehen.
+function surveyIdSortKey(id: string): [string, number] {
+  const match = /^([A-Za-z]+)(\d+)$/.exec(id);
+  // Kennungen ohne das uebliche Muster wandern ans Ende, statt irgendwo
+  // dazwischen zu landen - dort fallen sie beim Draufschauen auf.
+  return match ? [match[1], Number(match[2])] : ["zzz", Number.MAX_SAFE_INTEGER];
+}
+
+function sortSurveyIds<T>(items: readonly T[], idOf: (item: T) => string): T[] {
+  return [...items].sort((a, b) => {
+    const [prefixA, numberA] = surveyIdSortKey(idOf(a));
+    const [prefixB, numberB] = surveyIdSortKey(idOf(b));
+    return prefixA === prefixB ? numberA - numberB : prefixA.localeCompare(prefixB);
+  });
+}
+
+// Erst sortieren, dann die Ja/Nein-Spalten aufklappen: so steht jede
+// Anschlussfrage unmittelbar hinter ihrer Ausgangsfrage (B2, B2_followUp,
+// B3, B3_followUp) und nicht am Ende des Blocks.
+const PRE_COLUMNS = sortSurveyIds(preSurveyItems, (item) => item.id).flatMap((item) =>
   item.type === "yesno" ? [item.id, `${item.id}_followUp`] : [item.id]
 );
-const POST_IDS = [
-  ...postSurveyStateItems.map((item) => item.id),
-  ...postSurveyPersuasivenessItems.map((item) => item.id),
-  ...postSurveyIntrusivenessItems.map((item) => item.id),
-  postSurveyComparisonItem.id,
-  postSurveyComparisonReasonItem.id,
-  ...postSurveyClosingTextItems.map((item) => item.id),
-];
+
+const POST_IDS = sortSurveyIds(
+  [
+    ...postSurveyStateItems.map((item) => item.id),
+    ...postSurveyPersuasivenessItems.map((item) => item.id),
+    ...postSurveyIntrusivenessItems.map((item) => item.id),
+    postSurveyComparisonItem.id,
+    postSurveyComparisonReasonItem.id,
+    ...postSurveyClosingTextItems.map((item) => item.id),
+  ],
+  (id) => id
+);
 // Lesezeit je Nachbefragungs-Seite (14.09.): Differenz aus
 // page_load_timestamp/page_submit_timestamp, in `answers.pageTimings`
 // gespeichert (siehe /api/survey) - hier fuer die Auswertung als eigene
@@ -207,21 +247,57 @@ async function cyclesCsv() {
         | null;
       const activityPayload = activitySelected?.payload as { activity?: string } | null;
 
-      // Reaktionslatenz: wie lange, bis die Person nach Stufe 1 überhaupt
-      // wieder zum Tab zurückkommt - unabhängig davon, wann/ob sie dann auf
-      // den Hinweis reagiert. Kein TAB_VISIBLE danach gefunden heißt: Tab war
-      // durchgehend sichtbar, es gab nichts zum Zurückkommen (25.08.).
+      // Reaktionslatenz: wie lange, bis die Person nach Stufe 1 ueberhaupt
+      // wieder zum Tab zurueckkommt. Zwei Bedingungen, beide korrigiert am
+      // 20.09. nach dem Probelauf:
+      //
+      // (1) Der Tab muss beim Hinweis tatsaechlich unsichtbar gewesen sein.
+      //     Die Spezifikation [11] beschreibt das schon so ("leer, wenn der
+      //     Tab durchgehend sichtbar war und es also nichts zum Zurueckkommen
+      //     gab"), der Code hat es nur nie geprueft. `tabVisibleAtNudge`
+      //     steht seit dem 25.08. im Payload jedes NUDGE_STAGE_*.
+      // (2) Das Suchfenster endet bei der Reaktion. Vorher wurde das erste
+      //     TAB_VISIBLE der ganzen Runde genommen - und weil auch die Pause
+      //     zur selben Runde gehoert, konnte ein Tabwechsel mitten in der
+      //     Pause als "Reaktionslatenz" erscheinen. Im Probelauf ergab das
+      //     in Runde 4 einen Wert von 2697 Sekunden, obwohl der Tab beim
+      //     Hinweis sichtbar war und nach 42 Sekunden reagiert wurde.
+      //
+      // Ohne Reaktion bleibt das Feld leer: dann hat das Fenster keine
+      // Obergrenze, und genau daran ist die alte Rechnung gescheitert.
       const nudgeStage1 = cycleEvents.find((e) => e.type === "NUDGE_STAGE_1");
-      const firstTabVisibleAfterNudge = nudgeStage1
-        ? cycleEvents.find(
-            (e) => e.type === "TAB_VISIBLE" && e.at > nudgeStage1.at
-          )
-        : undefined;
+      const nudgeStage1Payload = nudgeStage1?.payload as
+        | { tabVisibleAtNudge?: boolean }
+        | null;
+      const tabVisibleAtNudge = nudgeStage1Payload?.tabVisibleAtNudge ?? null;
+
+      const firstTabVisibleAfterNudge =
+        nudgeStage1 && tabVisibleAtNudge === false && reaction
+          ? cycleEvents.find(
+              (e) =>
+                e.type === "TAB_VISIBLE" &&
+                e.at > nudgeStage1.at &&
+                e.at <= reaction.at
+            )
+          : undefined;
       const latencyToTabReturnSeconds =
         nudgeStage1 && firstTabVisibleAfterNudge
           ? Math.round(
               (firstTabVisibleAfterNudge.at.getTime() - nudgeStage1.at.getTime()) / 1000
             )
+          : null;
+
+      // Tatsaechliche Pausendauer (20.09.). Die Pause endet nicht, wenn der
+      // Pausen-Timer ablaeuft, sondern erst wenn die Person "Sitzung starten"
+      // drueckt - im Probelauf waren aus geplanten 5 Minuten einmal 23 und
+      // einmal 44 Minuten. Das stand bisher nur als Rohereignis in
+      // events.csv. Runden ohne Pause (uebersprungen) bleiben leer, ebenso
+      // eine Pause, die beim Sitzungsende noch lief: dann fehlt BREAK_ENDED.
+      const breakStarted = cycleEvents.find((e) => e.type === "BREAK_STARTED");
+      const breakEnded = cycleEvents.find((e) => e.type === "BREAK_ENDED");
+      const breakActualMin =
+        breakStarted && breakEnded
+          ? Math.round((breakEnded.at.getTime() - breakStarted.at.getTime()) / 60_000)
           : null;
 
       const snoozeCount = cycleEvents.filter((e) => e.type === "BREAK_SNOOZED").length;
@@ -238,6 +314,11 @@ async function cyclesCsv() {
         reactionSecondsIntoWork: reactionPayload?.secondsIntoWork ?? null,
         reactionAt: reaction?.at ?? null,
         nudgeStage1At: nudgeStage1?.at ?? null,
+        // Macht lesbar, WARUM die Latenz leer ist: war der Tab beim Hinweis
+        // sichtbar, gab es nichts zum Zurueckkommen. Ohne diese Spalte sieht
+        // eine leere Latenz wie ein fehlender Wert aus statt wie ein
+        // begruendet nicht vorhandener.
+        tabVisibleAtNudge,
         firstTabVisibleAfterNudge: firstTabVisibleAfterNudge?.at ?? null,
         latencyToTabReturnSeconds,
         snoozeCount,
@@ -246,8 +327,22 @@ async function cyclesCsv() {
           : activitySkipped
             ? "keine"
             : null,
+        breakStartedAt: breakStarted?.at ?? null,
+        breakEndedAt: breakEnded?.at ?? null,
+        breakPlannedMin: breakStarted ? session.initialBreakMin : null,
+        breakActualMin,
         timing: feedback?.timing ?? null,
         adjustmentMin: feedback?.adjustmentMin ?? null,
+        // Gewuenscht gegen wirksam (20.09.): Die Rundenlaenge hat eine
+        // Untergrenze von 5 Minuten (MIN_WORK_MIN in /api/cycle-feedback).
+        // Wer bei 5 Minuten noch einmal "5 Minuten weniger" waehlt, bekommt
+        // adjustmentMin = -5, die Rundenlaenge bleibt aber bei 5. Genau so
+        // im Probelauf passiert. adjustmentMin ist damit der Wunsch,
+        // effectiveAdjustmentMin die tatsaechliche Aenderung - fuer die
+        // Auswertung sind beide interessant, aber sie duerfen nicht
+        // verwechselt werden.
+        effectiveAdjustmentMin:
+          feedback?.newWorkMin != null ? feedback.newWorkMin - workMin : null,
         newWorkMin: feedback?.newWorkMin ?? null,
         comment: feedback?.comment ?? null,
       });
@@ -266,12 +361,18 @@ async function cyclesCsv() {
     "reactionSecondsIntoWork",
     "reactionAt",
     "nudgeStage1At",
+    "tabVisibleAtNudge",
     "firstTabVisibleAfterNudge",
     "latencyToTabReturnSeconds",
     "snoozeCount",
     "activity",
+    "breakStartedAt",
+    "breakEndedAt",
+    "breakPlannedMin",
+    "breakActualMin",
     "timing",
     "adjustmentMin",
+    "effectiveAdjustmentMin",
     "newWorkMin",
     "comment",
   ];

@@ -88,7 +88,7 @@ export function SessionTimer({
 
   useTabVisibilityLogging(sessionId, cycle);
   useActivityTicks(sessionId, cycle);
-  useNudgeStageSound(nudgeStage, sessionId, state === "WORK" && !hasReacted);
+  useNudgeStageSound(nudgeStage, sessionId, cycle, state === "WORK" && !hasReacted);
   useNudgeStageLogging(sessionId, cycle, nudgeEndsAt, nudgeStage, state === "WORK" && !hasReacted);
 
   const isNudging = state === "WORK" && !hasReacted && nudgeStage !== null;

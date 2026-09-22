@@ -1274,3 +1274,67 @@ weiterhin ein und aus, nur ohne Verschiebung - wichtig, weil das Ausblenden die 
 (`forwards`): hätte man die Animation dort einfach abgeschaltet, wäre der Hinweis für den Rest der Pause
 stehen geblieben. Das Aussehen selbst ist noch mit den Augen zu prüfen, dafür reicht eine Testsitzung mit
 kurzer Rundenlänge.
+
+## 22.09.2026 Fünf Befunde aus der Datenprüfung vor Studienstart behoben
+
+Grundlage: Export des Probelaufs vom 20.09. (PILOT, 124 Minuten, 5 Runden), geprüft vor dem Versand der
+Zugangsdaten. Fünf Punkte, in der Reihenfolge der Prüfliste.
+
+**1. Reaktionslatenz falsch berechnet.** `latencyToTabReturnSeconds` nahm das erste `TAB_VISIBLE` nach dem
+Hinweis, ohne zu prüfen, ob der Tab beim Hinweis überhaupt unsichtbar war, und ohne Obergrenze. Weil die
+Pause zur selben Runde gehört, konnte ein Tabwechsel mitten in der Pause als Latenz erscheinen: Runde 4
+zeigte 2697 Sekunden, obwohl der Tab beim Hinweis sichtbar war und nach 42 Sekunden reagiert wurde.
+Bemerkenswert daran: SPEZIFIKATION.md beschrieb das Feld schon vorher korrekt („leer, wenn der Tab
+durchgehend sichtbar war und es also nichts zum Zurückkommen gab") - der Code hat diese Bedingung nur nie
+umgesetzt. Jetzt zwei Bedingungen: `tabVisibleAtNudge === false`, und das Suchfenster endet bei
+`reactionAt`. Ohne Reaktion bleibt das Feld leer, weil das Fenster sonst wieder unbegrenzt wäre.
+Zusätzlich neue Spalte `tabVisibleAtNudge`, damit lesbar ist, warum ein Feld leer ist - ein begründet
+fehlender Wert sieht sonst aus wie ein verlorener.
+
+**3. Spaltenreihenfolge in participants.csv.** Der Export übernahm die Reihenfolge der Inhaltsdateien, und
+die Nachbefragung stellt `N19` bewusst vor `N18`. Am Dateiende stand dadurch `N17;N19;N18;N20` - wer
+Spalten nach Position zuordnet, vertauscht zwei Freitextfragen. Die Fragebogenreihenfolge bleibt
+unangetastet, sortiert wird nur die Ausgabe: aufsteigend nach Kennung, Anschlussfragen unmittelbar hinter
+ihrer Ausgangsfrage. **Bewusst abgeleitet und sortiert statt als feste Liste gepflegt:** Eine Liste von Hand
+wäre stabiler gegen Umsortieren, aber wer später ein Item ergänzt und die Liste vergisst, erhebt die Antwort
+und exportiert sie nie. Stiller Datenverlust ist das Schlimmste, was einem Messinstrument passieren kann.
+
+**5. Tatsächliche Pausendauer fehlte.** Die Pause endet erst, wenn „Sitzung starten" gedrückt wird, nicht
+wenn der Timer abläuft. Im Probelauf wurden aus geplanten 5 Minuten einmal 23 und einmal 44 Minuten. Vier
+neue Spalten in `cycles.csv`: `breakStartedAt`, `breakEndedAt`, `breakPlannedMin`, `breakActualMin`. Leer
+bei übersprungener Pause und bei einer Pause, die beim Sitzungsende noch lief.
+
+**7. Rundennummer bei `NUDGE_SOUND_PLAYED`.** Die Spalte war leer, beim zugehörigen `NUDGE_STAGE_x`
+gefüllt - `useNudgeStageSound` bekam die Rundennummer schlicht nicht übergeben. Nachgereicht. Wirkt nur für
+neu aufgezeichnete Sitzungen; in den Daten des Probelaufs bleibt die Spalte leer.
+
+**8. Gewünschte gegen wirksame Anpassung.** Die Rundenlänge hat eine Untergrenze von 5 Minuten. Wer bei 5
+Minuten noch einmal verkürzt, erzeugt `adjustmentMin = -5`, während die Länge bei 5 bleibt - im Probelauf in
+Runde 2 genau so passiert. Neue Spalte `effectiveAdjustmentMin` als Differenz zwischen neuer und bisheriger
+Rundenlänge. `adjustmentMin` bleibt der Wunsch, beide sind für die Auswertung interessant.
+
+**Zur Nachfrage bei Punkt 8, ob widersprüchliche Angaben möglich sind: ja.** Die Richtung der
+Minutenanpassung ist nicht an die Antwort auf „War der Zeitpunkt der Pause passend?" gekoppelt. Im Probelauf
+kam „Zu früh" zweimal zusammen mit einer Verkürzung vor. Das kann Testverhalten sein - die Runden wurden
+absichtlich auf 5 Minuten heruntergezogen -, aber es kann auch daran liegen, dass die Frage zwei Lesarten
+zulässt: „die Pause kam zu früh" (dann will man länger arbeiten) gegen „ich möchte früher Pause machen"
+(dann kürzer). **Nicht selbst geändert.** Die Formulierung eines Fragebogen-Items und die Kopplung der
+Richtung sind Studieninhalt und gehören mit der Betreuung abgestimmt (CLAUDE.md, Arbeitsweise). Bis dahin
+ist im Codebuch dokumentiert, dass `timing` und das Vorzeichen von `effectiveAdjustmentMin` getrennt zu
+betrachten sind. Die Anzeige „Nächste Runde: X Minuten" im Formular zeigt die Folge der Eingabe unmittelbar
+an und bleibt die einzige Rückmeldung.
+
+**Getestet:** Nicht am Modell nachgerechnet, sondern der Export gegen die echten Probelaufdaten neu erzeugt.
+Entwicklungsserver gegen die Neon-Datenbank gestartet (der Export liest ausschließlich), als ADMIN
+angemeldet, alle drei Dateien gezogen. Ergebnis über die fünf Runden:
+- `latencyToTabReturnSeconds` ist in allen fünf Runden leer, `tabVisibleAtNudge` steht überall auf `true`.
+  Der Wert 2697 aus Runde 4 ist weg.
+- `breakActualMin` zeigt 23, 5, 5, 44 bei durchgehend `breakPlannedMin` 5. Runde 5 leer, dort endete die
+  Sitzung ohne Pause.
+- `effectiveAdjustmentMin` zeigt in Runde 1 `-20` (25 auf 5, Wunsch erfüllt) und in Runde 2 `0` bei
+  `adjustmentMin = -5` - genau der Unterschied, um den es geht.
+- Die Kopfzeile von `participants.csv` endet auf `N16;N17;N18;N19;N20`, `B2;B2_followUp;B3;B3_followUp`
+  stehen beieinander.
+- `tsc --noEmit` und `eslint` ohne Befund.
+Punkt 7 ließ sich so nicht prüfen, weil die Probelaufdaten vor der Änderung entstanden sind; dort bleibt die
+Spalte erwartungsgemäß leer. Das gehört in die nächste Testsitzung.

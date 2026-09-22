@@ -20,6 +20,7 @@ import type { NudgeStage } from "@/hooks/useNudgeStage";
 export function useNudgeStageSound(
   nudgeStage: NudgeStage,
   sessionId: string,
+  cycle: number,
   active: boolean
 ) {
   const firedRef = useRef<Set<number>>(new Set());
@@ -35,8 +36,13 @@ export function useNudgeStageSound(
 
     const { intensity, character } = NUDGE_STAGE_SOUND[nudgeStage];
     playNudgeSound(intensity, character);
+    // Rundennummer mitgeben (20.09.): Beim Probelauf stand sie bei
+    // NUDGE_SOUND_PLAYED leer, beim zugehoerigen NUDGE_STAGE_x dagegen
+    // gefuellt. Damit liess sich der Ton nur ueber den Zeitstempel der
+    // Runde zuordnen statt direkt.
     enqueueEvent(sessionId, "NUDGE_SOUND_PLAYED", {
+      cycle,
       payload: { stage: nudgeStage, intensity, character },
     });
-  }, [active, nudgeStage, sessionId]);
+  }, [active, nudgeStage, sessionId, cycle]);
 }
