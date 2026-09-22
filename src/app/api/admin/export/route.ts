@@ -155,6 +155,17 @@ async function cyclesCsv() {
       if (event.cycle !== null) cycleNumbers.add(event.cycle);
     }
 
+    // Welche Runden wurden tatsaechlich begonnen? Grundlage fuer
+    // cycleCompleted weiter unten. CYCLE_STARTED ist dafuer verlaesslich:
+    // Runde 1 protokolliert der Server beim Sitzungsstart, jede weitere der
+    // Timer beim Rundenwechsel.
+    const begonneneRunden = new Set<number>();
+    for (const event of session.events) {
+      if (event.type === "CYCLE_STARTED" && event.cycle !== null) {
+        begonneneRunden.add(event.cycle);
+      }
+    }
+
     // Wird sequenziell mitgefuehrt statt je Runde aus der vorherigen
     // CycleFeedback abgeleitet: falls doch einmal eine Runde ohne
     // CycleFeedback endet, laeuft die naechste Runde trotzdem mit dem
@@ -252,14 +263,15 @@ async function cyclesCsv() {
       // trotzdem BREAK_ACCEPTED, ohne Hinweis darauf, dass die Runde nie zu
       // Ende lief.
       //
-      // Definition wie vorgegeben: true nur, wenn die Runde bis BREAK_ENDED
-      // durchlaufen wurde. WICHTIG fuer die Auswertung: Eine uebersprungene
-      // Pause (BREAK_SKIPPED) erreicht nie ein BREAK_ENDED und steht damit
-      // ebenfalls auf false, obwohl die Runde regulaer zu Ende lief. Wer auf
-      // cycleCompleted = true filtert, laesst also alle uebersprungenen Pausen
-      // weg - bei einer Auswertung der Pausenannahme verschiebt das das
-      // Ergebnis nach oben. Im Codebuch ausdruecklich vermerkt.
-      const cycleCompleted = Boolean(breakEnded);
+      // Definition: die naechste Runde hat begonnen. Die erste Fassung fragte
+      // stattdessen nach BREAK_ENDED - das haette jede uebersprungene Pause
+      // als unvollstaendig markiert, obwohl die Runde regulaer zu Ende lief.
+      // Wer dann, wie fuer die Auswertung vorgesehen, auf cycleCompleted =
+      // true filtert, laesst ausgerechnet alle uebersprungenen Pausen weg und
+      // bekommt eine zu hohe Pausenannahmequote. "Die naechste Runde laeuft"
+      // erfasst beide Wege - Pause genommen wie Pause uebersprungen - und
+      // schliesst genau das aus, worum es geht: die abgebrochene letzte Runde.
+      const cycleCompleted = begonneneRunden.has(cycle + 1);
 
       rows.push({
         code: session.participant.code,

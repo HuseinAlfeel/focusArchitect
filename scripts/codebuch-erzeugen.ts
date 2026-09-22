@@ -263,7 +263,7 @@ const TECHNISCHE_SPALTEN: Record<string, Omit<Eintrag, "spalte">> = {
   postPage3Seconds: T("Bearbeitungsdauer Seite 3 der Nachbefragung", "Nachbefragung, abgeleitet", "Zahl (Sekunden)", "ganze Sekunden", "nur wenn Lade- und Absendezeitpunkt vorliegen", LEER_NICHT_ANWENDBAR),
 
   cycle: T("Rundennummer innerhalb der Sitzung", "Runde", "Zahl", "ab 1 aufsteigend", "immer", "Ereignis gehört zu keiner Runde (z. B. Einwilligung, Vorbefragung)"),
-  cycleCompleted: T("Ist die Runde bis zum Ende der Pause durchlaufen worden? **Achtung bei der Auswertung:** Eine übersprungene Pause erreicht nie ein BREAK_ENDED und steht deshalb ebenfalls auf `false`, obwohl die Runde regulär zu Ende lief. Wer auf `true` filtert, lässt alle übersprungenen Pausen weg und verschiebt damit eine Auswertung der Pausenannahme nach oben", "Runde", "Wahrheitswert", "`true` = bis BREAK_ENDED durchlaufen, `false` = vorher abgebrochen ODER Pause übersprungen", "immer", LEER_NICHT_ANWENDBAR),
+  cycleCompleted: T("Ist die Runde vollständig durchlaufen worden? `true`, sobald die **nächste** Runde begonnen hat (`CYCLE_STARTED`). Das erfasst beide Wege – Pause genommen wie Pause übersprungen – und ist `false` genau für die abgebrochene letzte Runde einer Sitzung. Bei Zählungen zu Pausenannahme und Intervallanpassung nur Runden mit `true` einbeziehen", "Runde", "Wahrheitswert", "`true` = nächste Runde hat begonnen, `false` = Sitzung endete in dieser Runde", "immer", LEER_NICHT_ANWENDBAR),
   workMin: T("Rundenlänge dieser Runde", "Runde", "Zahl (Minuten)", "mindestens 5", "immer", LEER_NICHT_ANWENDBAR),
   workStartedAt: T("Beginn der Arbeitsphase dieser Runde", "Runde", "Zeitstempel", "ISO 8601, UTC", "immer", "kein WORK_STARTED protokolliert"),
   reactionType: T("Art der Reaktion, die die Runde beendet hat", "Runde", "Auswahl", "`BREAK_ACCEPTED`, `BREAK_SKIPPED`, `SELF_INITIATED`", "immer", "Runde wurde nicht beendet (letzte Runde bei Sitzungsende)"),
@@ -428,11 +428,10 @@ Diese Punkte betreffen nicht einzelne Spalten, sondern den Umgang mit den Dateie
   Minuten vor Rundenende fallen, liegen im Zeitfenster von Stufe 0. Eine Häufung dort wäre ein
   Hinweis darauf, dass der Farbverlauf wahrgenommen wurde.
 - **Unvollständige Runden ausschließen:** Bei Zählungen zu Pausenannahme und Intervallanpassung nur
-  Runden mit \`cycleCompleted = true\` einbeziehen – **aber** die Einschränkung in der Spaltenbeschreibung
-  beachten: übersprungene Pausen stehen ebenfalls auf \`false\`. Für eine Auswertung der Pausenannahme ist
-  stattdessen \`reactionType\` zusammen mit dem Ereignis \`SESSION_ENDED\` heranzuziehen, dessen Payload seit
-  dem 22.09. Rundennummer und Phase (\`work\`, \`nudge\`, \`feedback\`, \`activity\`, \`break\`) enthält – damit
-  lässt sich die abgebrochene letzte Runde genau bestimmen.
+  Runden mit \`cycleCompleted = true\` einbeziehen. Die Spalte ist \`true\`, sobald die nächste Runde begonnen
+  hat – also sowohl bei genommener als auch bei übersprungener Pause – und \`false\` genau für die
+  abgebrochene letzte Runde. Wo genau abgebrochen wurde, steht im Ereignis \`SESSION_ENDED\`: seine
+  Rundennummer und im Payload die Phase (\`work\`, \`nudge\`, \`feedback\`, \`activity\`, \`break\`).
 - **\`ACTIVITY_TICK\` gewichten:** Diese Ereignisse machen etwa zwei Drittel aller Zeilen in
   \`events.csv\` aus, erfassen aber nur Aktivität innerhalb des Anwendungsfensters, nicht die
   eigentliche Arbeitsaktivität. In der Auswertung als Nebeninformation behandeln.
