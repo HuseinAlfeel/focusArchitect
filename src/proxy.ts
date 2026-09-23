@@ -15,5 +15,9 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // API-Routen prüfen ihre Anmeldung selbst und antworten mit 401 statt
   // Redirect, damit fetch()-Aufrufe kein HTML statt JSON zurückbekommen.
-  matcher: ["/((?!login|api|_next/static|_next/image|favicon.ico).*)"],
+  // Die Symboldateien müssen ebenfalls offen bleiben: sie werden schon auf
+  // dem Anmeldebildschirm geladen, also ohne Sitzung.
+  matcher: [
+    "/((?!login|api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png).*)",
+  ],
 };

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Premium UI Hintergründe & Verläufe -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8f4ef" />
+    </linearGradient>
+    <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dd9b6c" />
+      <stop offset="100%" stop-color="#f0cd94" />
+    </linearGradient>
+    <linearGradient id="ring2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c98251" />
+      <stop offset="100%" stop-color="#e8b87d" />
+    </linearGradient>
+    
+    <!-- Spatial UI Drop Shadow -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="25" stdDeviation="30" flood-color="#dd9b6c" flood-opacity="0.25" />
+    </filter>
+    
+    <!-- Lebendiges Glühen für den Fokus-Kern -->
+    <filter id="coreGlow">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- App Icon Base (Weicher, heller Spatial-Look) -->
+  <rect x="40" y="40" width="432" height="432" rx="110" fill="url(#bgGrad)" filter="url(#shadow)" />
+
+  <!-- Hinterer Orbit (Die stützende Architektur) -->
+  <circle cx="256" cy="256" r="110" fill="none" stroke="url(#ring2)" stroke-width="36" opacity="0.4">
+    <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="24s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- Vorderer, gebrochener Orbit (Dynamik & Bewegung) -->
+  <path d="M 256 126 A 130 130 0 1 1 126 256" fill="none" stroke="url(#ring1)" stroke-width="36" stroke-linecap="round" opacity="0.9">
+     <animateTransform attributeName="transform" type="rotate" from="360 256 256" to="0 256 256" dur="16s" repeatCount="indefinite" />
+  </path>
+  <path d="M 126 256 A 130 130 0 0 1 256 126" fill="none" stroke="url(#ring1)" stroke-width="36" stroke-linecap="round" opacity="0.2">
+     <animateTransform attributeName="transform" type="rotate" from="360 256 256" to="0 256 256" dur="16s" repeatCount="indefinite" />
+  </path>
+
+  <!-- Der Fokus-Kern (Das unerschütterliche Zentrum) -->
+  <circle cx="256" cy="256" r="32" fill="#ffffff" filter="url(#coreGlow)" />
+  <circle cx="256" cy="256" r="26" fill="url(#ring1)" />
+</svg>
