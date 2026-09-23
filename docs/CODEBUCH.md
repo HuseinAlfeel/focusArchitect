@@ -13,7 +13,7 @@ unter welcher Bedingung sie überhaupt erscheint und was eine leere Zelle bedeut
 > npm run codebuch
 > ```
 >
-> Zuletzt erzeugt am 2026-09-22.
+> Zuletzt erzeugt am 2026-09-23.
 
 ## Was eine leere Zelle bedeutet
 
@@ -127,10 +127,10 @@ Eine Zeile je Runde. Hier stehen die Kernkennzahlen der Arbeit: bei welcher Stuf
 | `reactionSecondsAfterEnd` | Sekunden zwischen Rundenende und Reaktion. **Achtung bei `snoozeCount` über 0:** Der Wert zählt weiter ab dem ursprünglichen Rundenende, die Eskalation beginnt nach einem Snooze aber von vorn. Eine Zeile mit `reactionStage` = 1 und über 300 Sekunden ist deshalb kein Widerspruch, sondern eine Reaktion auf den **zweiten** Anlauf – immer zusammen mit `snoozeCount` lesen | Runde | Zahl (Sekunden) | kann negativ sein, wenn vor 0:00 reagiert wurde | nur bei Reaktion auf einen Systemhinweis | nicht anwendbar |
 | `reactionSecondsIntoWork` | Sekunden seit Beginn der Arbeitsphase bei selbst gestarteter Pause | Runde | Zahl (Sekunden) | ab 0 | nur bei `SELF_INITIATED` | nicht anwendbar |
 | `reactionAt` | Zeitpunkt der Reaktion | Runde | Zeitstempel | ISO 8601, UTC | immer bei Reaktion | Runde wurde nicht beendet |
-| `nudgeStage1At` | Zeitpunkt, zu dem Stufe 1 erreicht wurde (Rundenende, 0:00) | Runde | Zeitstempel | ISO 8601, UTC | nur wenn der Hinweis Stufe 1 erreicht hat | nicht anwendbar (Pause vorher selbst gestartet) |
+| `nudgeStage1At` | Zeitpunkt, zu dem Stufe 1 erreicht wurde. **Browserzeit** (`clientAt`), nicht Serverzeit – passend zur Latenz weiter unten | Runde | Zeitstempel | ISO 8601, UTC, Browserzeit | nur wenn der Hinweis Stufe 1 erreicht hat | nicht anwendbar (Pause vorher selbst gestartet) |
 | `tabVisibleAtNudge` | War der Browser-Tab sichtbar, als Stufe 1 ausgelöst wurde? | Runde | Wahrheitswert | `true`, `false` | nur wenn Stufe 1 erreicht wurde | nicht anwendbar |
-| `firstTabVisibleAfterNudge` | Erste Rückkehr zum Tab nach Stufe 1, gesucht nur bis zur Reaktion | Runde | Zeitstempel | ISO 8601, UTC | nur wenn der Tab bei Stufe 1 unsichtbar war UND eine Reaktion erfolgte | nicht anwendbar (Tab war sichtbar, es gab nichts zum Zurückkommen) |
-| `latencyToTabReturnSeconds` | Reaktionslatenz: Sekunden von Stufe 1 bis zur Rückkehr zum Tab | Runde | Zahl (Sekunden) | ab 0 | nur wenn der Tab bei Stufe 1 unsichtbar war UND eine Reaktion erfolgte | nicht anwendbar (siehe tabVisibleAtNudge – bei `true` gab es nichts zum Zurückkommen) |
+| `firstTabVisibleAfterNudge` | Erste Rückkehr zum Tab nach Stufe 1, gesucht nur bis zur Reaktion. **Browserzeit** (`clientAt`) | Runde | Zeitstempel | ISO 8601, UTC, Browserzeit | nur wenn der Tab bei Stufe 1 unsichtbar war UND eine Reaktion erfolgte | nicht anwendbar (Tab war sichtbar, es gab nichts zum Zurückkommen) |
+| `latencyToTabReturnSeconds` | Reaktionslatenz: Sekunden von Stufe 1 bis zur Rückkehr zum Tab. Gerechnet aus **Browserzeit**, also genau die Differenz der beiden Spalten links – eine erlebte Dauer darf nicht aus Serverzeitstempeln stammen, die hängen am Stapelversand. **Achtung:** Lag der Tab im Hintergrund, kann Stufe 1 selbst verspätet ausgelöst worden sein (siehe Hinweis unten), die Latenz zählt dann ab dem verspäteten Zeitpunkt | Runde | Zahl (Sekunden) | ab 0 | nur wenn der Tab bei Stufe 1 unsichtbar war UND eine Reaktion erfolgte | nicht anwendbar (siehe tabVisibleAtNudge – bei `true` gab es nichts zum Zurückkommen) |
 | `snoozeCount` | Wie oft in dieser Runde „Noch 5 Minuten“ gewählt wurde | Runde | Zahl | ab 0, keine Obergrenze | immer | nicht anwendbar |
 | `activity` | Gewählte Pausenaktivität | Pause | Auswahl | `eyes`, `neck`, `move`, `keine` | nur wenn eine Pause stattfand | nicht anwendbar (Pause übersprungen) |
 | `breakStartedAt` | Beginn der Pause | Pause | Zeitstempel | ISO 8601, UTC | nur wenn eine Pause stattfand | nicht anwendbar (Pause übersprungen) |
@@ -154,7 +154,7 @@ Eine Zeile je Ereignis, der vollständige Rohlog. Für alles, was die beiden and
 | `type` | Ereignistyp | Ereignis | Auswahl | siehe Ereignisliste in SPEZIFIKATION.md, Abschnitt [11] | immer | nicht anwendbar |
 | `cycle` | Rundennummer innerhalb der Sitzung | Runde | Zahl | ab 1 aufsteigend | immer | Ereignis gehört zu keiner Runde (z. B. Einwilligung, Vorbefragung) |
 | `clientAt` | Zeitpunkt im Browser – **für die zeitliche Sortierung diese Spalte verwenden** | Ereignis | Zeitstempel | ISO 8601, UTC | immer | nicht anwendbar |
-| `at` | Zeitpunkt des Eintreffens auf dem Server – kann durch Stapelversand deutlich später liegen | Ereignis | Zeitstempel | ISO 8601, UTC | immer | nicht anwendbar |
+| `at` | Zeitpunkt des Eintreffens auf dem Server – kann durch Stapelversand deutlich später liegen, durch Uhrenversatz zwischen Browser und Server aber auch etwas **früher** als `clientAt` (im zweiten Probelauf rund 0,75 Sekunden). Für Dauern und Reihenfolgen immer `clientAt` verwenden | Ereignis | Zeitstempel | ISO 8601, UTC | immer | nicht anwendbar |
 | `payload` | Zusatzangaben des Ereignisses als JSON | Ereignis | JSON | je nach Ereignistyp, siehe SPEZIFIKATION.md [11] | je nach Ereignistyp | dieser Ereignistyp führt keine Zusatzangaben |
 
 ## Hinweise für die Auswertung
@@ -182,6 +182,15 @@ Diese Punkte betreffen nicht einzelne Spalten, sondern den Umgang mit den Dateie
   hat – also sowohl bei genommener als auch bei übersprungener Pause – und `false` genau für die
   abgebrochene letzte Runde. Wo genau abgebrochen wurde, steht im Ereignis `SESSION_ENDED`: seine
   Rundennummer und im Payload die Phase (`work`, `nudge`, `feedback`, `activity`, `break`).
+- **Verspäteter Hinweis im Hintergrund-Tab (Limitation):** Browser drosseln Zeitgeber in nicht
+  sichtbaren Tabs auf etwa einen Aufruf pro Minute. Liegt der Tab im Hintergrund, wird der Übergang
+  auf eine neue Hinweisstufe deshalb erst beim nächsten erlaubten Tick bemerkt – im zweiten Probelauf
+  **46 Sekunden** nach dem rechnerischen Rundenende. Der Ton erklingt entsprechend später.
+  **Nicht betroffen sind die Kernkennzahlen:** `reactionSecondsAfterEnd` und
+  `reactionSecondsIntoWork` werden im Moment der Reaktion gegen den gespeicherten Zielzeitpunkt
+  gerechnet und stimmen auf die Sekunde (im Probelauf nachgerechnet: 515 von 515). Betroffen sind nur
+  der Zeitstempel `nudgeStage1At` und die daraus abgeleitete Latenz. Gehört in die Limitationen der
+  Arbeit.
 - **`ACTIVITY_TICK` gewichten:** Diese Ereignisse machen etwa zwei Drittel aller Zeilen in
   `events.csv` aus, erfassen aber nur Aktivität innerhalb des Anwendungsfensters, nicht die
   eigentliche Arbeitsaktivität. In der Auswertung als Nebeninformation behandeln.

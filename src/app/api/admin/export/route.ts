@@ -225,19 +225,39 @@ async function cyclesCsv() {
         | null;
       const tabVisibleAtNudge = nudgeStage1Payload?.tabVisibleAtNudge ?? null;
 
-      const firstTabVisibleAfterNudge =
+      // Ab hier wird mit clientAt gerechnet, nicht mit at (23.09.). Die Latenz
+      // ist eine im Browser erlebte Dauer, und at ist der Zeitpunkt, zu dem das
+      // Ereignis beim Server ankam - das haengt am Stapelversand. Im zweiten
+      // Probelauf lag NUDGE_STAGE_1 sechs Sekunden gestapelt, TAB_VISIBLE ging
+      // sofort raus: aus Serverzeit ergaben sich 82 Sekunden, aus Browserzeit
+      // 89. Eine Dauer darf nicht aus zwei verschiedenen Uhren stammen. Die
+      // Uhren laufen tatsaechlich auseinander, im zweiten Lauf ging der
+      // Browser rund 0,75 Sekunden vor, at lag also sogar VOR clientAt.
+      //
+      // Gesucht wird deshalb ueber clientAt, und weil die Liste nach at
+      // sortiert ist, reicht hier kein find(): es wird gefiltert und der
+      // frueheste Treffer genommen.
+      const tabRueckkehrKandidaten =
         nudgeStage1 && tabVisibleAtNudge === false && reaction
-          ? cycleEvents.find(
+          ? cycleEvents.filter(
               (e) =>
                 e.type === "TAB_VISIBLE" &&
-                e.at > nudgeStage1.at &&
-                e.at <= reaction.at
+                e.clientAt > nudgeStage1.clientAt &&
+                e.clientAt <= reaction.clientAt
+            )
+          : [];
+      const firstTabVisibleAfterNudge =
+        tabRueckkehrKandidaten.length > 0
+          ? tabRueckkehrKandidaten.reduce((frueheste, kandidat) =>
+              kandidat.clientAt < frueheste.clientAt ? kandidat : frueheste
             )
           : undefined;
       const latencyToTabReturnSeconds =
         nudgeStage1 && firstTabVisibleAfterNudge
           ? Math.round(
-              (firstTabVisibleAfterNudge.at.getTime() - nudgeStage1.at.getTime()) / 1000
+              (firstTabVisibleAfterNudge.clientAt.getTime() -
+                nudgeStage1.clientAt.getTime()) /
+                1000
             )
           : null;
 
@@ -285,13 +305,15 @@ async function cyclesCsv() {
         reactionSecondsAfterEnd: reactionPayload?.secondsAfterEnd ?? null,
         reactionSecondsIntoWork: reactionPayload?.secondsIntoWork ?? null,
         reactionAt: reaction?.at ?? null,
-        nudgeStage1At: nudgeStage1?.at ?? null,
+        // Browserzeit, passend zur Latenz darunter - so ergibt die Differenz
+        // der beiden angezeigten Spalten wirklich den Wert in der dritten.
+        nudgeStage1At: nudgeStage1?.clientAt ?? null,
         // Macht lesbar, WARUM die Latenz leer ist: war der Tab beim Hinweis
         // sichtbar, gab es nichts zum Zurueckkommen. Ohne diese Spalte sieht
         // eine leere Latenz wie ein fehlender Wert aus statt wie ein
         // begruendet nicht vorhandener.
         tabVisibleAtNudge,
-        firstTabVisibleAfterNudge: firstTabVisibleAfterNudge?.at ?? null,
+        firstTabVisibleAfterNudge: firstTabVisibleAfterNudge?.clientAt ?? null,
         latencyToTabReturnSeconds,
         snoozeCount,
         activity: activitySelected
