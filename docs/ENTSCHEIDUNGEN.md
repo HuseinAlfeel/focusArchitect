@@ -1470,3 +1470,36 @@ Zeitstempel aus dem Probelauf nachgerechnet: 21:47:28 UTC ergibt 23:47:28 in Eur
 war bei Stufe 1 jedes Mal sichtbar. Der Fall „Tab schon vor dem Rundenende weg, Rückkehr erst nach Stufe
 1" ist damit weiterhin nur rechnerisch belegt. Ebenso fehlt der zweite Lauf mit „Machst du bewusst
 Pausen? - nein", der die Bedeutung „nicht gezeigt" in den Fragebogenspalten zeigen würde.
+
+## 23.09.2026 Klopftöne am Pausenende endlich hörbar - der Fehler saß zweimal woanders
+
+**Befund:** Die neun Klopftöne vor dem Pausenende waren im Probelauf nicht zu hören. Das ist das dritte
+Mal (26.08., 17.09., 22.09.).
+
+**Warum die beiden früheren Anläufe nicht geholfen haben:** Am 17.09. wurde die übergebene Intensität von
+0.4 auf 0.9 angehoben, mit dem Schluss, Klopfton und Endsignal lägen damit "auf derselben
+Lautstärkeebene". Das stimmte nur für die Zahl. Gemessen war das Endsignal trotzdem **9,9 dB lauter**,
+weil es aus zwei gleichzeitigen Tönen besteht und mit einem größeren Faktor rechnet: 0,330 gegen 0,105.
+Exakt derselbe Irrtum wie beim `rising-sweep` am 20.09. - die übergebene Zahl verglichen statt des
+tatsächlichen Pegels.
+
+**Zweite Ursache, bisher übersehen:** Der Klopfton lag bei **330 Hz**. Laptop-Lautsprecher strahlen
+unterhalb von etwa 500 Hz kaum noch ab, der Grundton fällt also weg. Übrig bleiben die Obertöne des
+Dreiecks mit rund einem Neuntel der Amplitude. Die drei Stufentöne des Pausenhinweises liegen bei 560 bis
+680 Hz und kamen deshalb an - genau der Vergleich, der den Verdacht bestätigt.
+
+**Behoben:** 600 Hz statt 330, Pegel 0,169 statt 0,105, Dauer 0,25 statt 0,49 Sekunden. Der Klopfton liegt
+damit 7,9 dB über dem Stufe-1-Ton, der nachweislich gehört wurde, und 5,8 dB unter dem Endsignal - hörbar
+als Vorlauf, aber nicht als Schlusspunkt. Kürzer, damit neun Töne in neun Sekunden als Ticken wirken und
+nicht als Lärm.
+
+**Bleibt als Einschränkung:** Liegt der Tab im Hintergrund, drosselt der Browser den 200ms-Takt auf etwa
+einen Aufruf pro Minute, dann gehen die neun Ein-Sekunden-Fenster verloren. Das Endsignal kommt trotzdem
+an, weil seine Bedingung bei jedem späteren Tick erneut zutrifft und der `visibilitychange`-Listener beim
+Zurückkommen sofort nachprüft. Dieselbe Browser-Eigenschaft wie bei den Hinweisstufen, siehe Eintrag vom
+selben Tag.
+
+**Getestet:** Die tatsächliche Tonerzeugung gegen eine nachgebaute Web-Audio-Umgebung laufen lassen und
+die Spitzenamplituden gemessen, wie schon bei den Stufentönen. Vorher 0,105 gegen 0,330 (9,9 dB), jetzt
+0,169 gegen 0,330 (5,8 dB). `tsc`, `eslint` und `npm run build` ohne Befund. Der Klang selbst ist mit den
+Ohren zu prüfen - dafür reicht eine Testsitzung mit kurzer Pausenlänge.

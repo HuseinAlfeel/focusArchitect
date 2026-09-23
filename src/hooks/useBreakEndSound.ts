@@ -7,12 +7,25 @@ const COUNTDOWN_SECONDS = 9;
 
 /**
  * Kündigt das Ende der Pause akustisch an: bei 9, 8, 7 ... 1 je ein
- * deutlich hörbarer Klopf-Ton ("soft-mallet"), bei 0 ein klares, lautes
- * Signal ("double-chime") - vorher gab es hier gar keinen Ton, das Ende der
- * Pause ging komplett unbemerkt vorbei. Der Klopf-Ton war zuerst deutlich
- * leiser als das Endsignal (Intensität 0.4 statt 0.9). Beim Testen kam er
- * zweimal (26.08. und 17.09.) gar nicht an, gehört habe ich nur das laute
- * Endsignal. Jetzt beide auf derselben Lautstärkeebene.
+ * hörbarer Klopf-Ton ("soft-mallet"), bei 0 ein klares Signal
+ * ("double-chime") - vorher gab es hier gar keinen Ton, das Ende der Pause
+ * ging komplett unbemerkt vorbei.
+ *
+ * Der Klopf-Ton war dreimal nicht zu hören (26.08., 17.09., 22.09.). Die
+ * ersten beiden Male wurde die übergebene Intensität von 0.4 auf 0.9
+ * angehoben und damit angenommen, er läge jetzt "auf derselben
+ * Lautstärkeebene" wie das Endsignal. Das stimmte nur für die Zahl:
+ * gemessen war das Endsignal trotzdem 9,9 dB lauter, weil es aus zwei Tönen
+ * besteht und mit einem größeren Faktor rechnet. Dazu kam die Tonhöhe von
+ * 330 Hz, die Laptop-Lautsprecher kaum noch abstrahlen. Beides am 23.09. in
+ * nudgeSound.ts behoben, Pegel und Frequenz diesmal gemessen statt
+ * geschätzt.
+ *
+ * Bleibt als Einschränkung: Liegt der Tab im Hintergrund, drosselt der
+ * Browser diesen 200ms-Takt auf etwa einen Aufruf pro Minute, dann gehen
+ * die neun Ein-Sekunden-Fenster verloren. Das Endsignal kommt trotzdem an,
+ * weil `remainingMs <= 0` bei jedem späteren Tick erneut zutrifft und der
+ * visibilitychange-Listener beim Zurückkommen sofort nachprüft.
  *
  * Der 200ms-Takt reicht im Vordergrund locker, um jede einzelne Sekunde zu
  * treffen, aber ein gedrosselter Hintergrund-Tab (während der Pause bin ich

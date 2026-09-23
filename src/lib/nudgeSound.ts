@@ -123,11 +123,28 @@ const CHARACTERS: Record<
 
   "soft-mallet": (ctx, intensity) => {
     const now = ctx.currentTime;
+    // Zwei Korrekturen am 23.09., nachdem die Klopftoene des Pausenende-
+    // Countdowns im Probelauf schlicht nicht zu hoeren waren:
+    //
+    // (1) Tonhoehe von 330 auf 600 Hz. 330 Hz liegt unterhalb dessen, was
+    //     Laptop-Lautsprecher noch abstrahlen - der Grundton faellt weg, uebrig
+    //     bleiben die Obertoene des Dreiecks mit einem Neuntel der Amplitude.
+    //     Die Stufentoene liegen bei 560 bis 680 Hz und kamen deshalb an.
+    // (2) Pegel von 0.105 auf 0.169 bei intensity 0.9. Der Kommentar im Hook
+    //     sagte, Klopfton und Endsignal laegen "auf derselben
+    //     Lautstaerkeebene" - das stimmte nur fuer die uebergebene Zahl 0.9.
+    //     Gemessen war das Endsignal 9,9 dB lauter, weil es aus zwei Toenen
+    //     besteht und mit einem groesseren Faktor rechnet. Derselbe Irrtum wie
+    //     beim rising-sweep am 20.09.: die Zahl verglichen statt des Klangs.
+    //
+    // Jetzt liegt der Klopfton rund 6 dB unter dem Endsignal - hoerbar, aber
+    // erkennbar als Vorlauf und nicht als Schlusspunkt. Kuerzer ist er
+    // ausserdem, damit neun Toene in neun Sekunden als Ticken wirken.
     playTone(ctx, now, {
-      frequency: 330,
+      frequency: 600,
       type: "triangle",
-      duration: 0.35 + intensity * 0.15,
-      peakGain: 0.015 + intensity * 0.1,
+      duration: 0.18 + intensity * 0.08,
+      peakGain: 0.02 + intensity * 0.165,
       attack: 0.005,
     });
   },
